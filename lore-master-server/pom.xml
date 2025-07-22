@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.6</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <groupId>com.lore.master</groupId>
+    <artifactId>lore-master-server</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>lore-master-api</module>
+        <module>lore-master-service</module>
+        <module>lore-master-web</module>
+        <module>lore-master-data</module>
+        <module>lore-master-common</module>
+        <module>lore-master-integration</module>
+    </modules>
+    <properties>
+        <java.version>17</java.version>
+        <langchain4j.version>0.26.0</langchain4j.version>
+        <mybatis-plus.version>3.5.5</mybatis-plus.version>
+    </properties>
+    <dependencyManagement>
+        <dependencies>
+            <!-- 在这里可以管理子模块间共享的依赖版本 -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project> 
