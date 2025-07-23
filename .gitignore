@@ -1,3 +1,4 @@
 /untitled.iml
 /.idea/
 /lore-master-server/lore-master-*/target/
+/lore-master-commands/docker/mysql-data/

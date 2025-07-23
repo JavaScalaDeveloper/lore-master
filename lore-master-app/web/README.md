@@ -1,46 +1,74 @@
-# Getting Started with Create React App
+# 管理端前端项目（React + Ant Design + TypeScript）
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+本项目基于 [Create React App](https://github.com/facebook/create-react-app) 脚手架，使用 React + TypeScript + Ant Design 技术栈，适用于管理后台系统。
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 目录结构
 
-### `npm start`
+```
+lore-master-app/web/
+├── node_modules/           # 依赖包
+├── public/                 # 静态资源
+├── src/                    # 源码目录
+│   └── pages/Login/        # 登录页（含RSA加密示例）
+├── package.json            # 项目依赖配置
+├── tsconfig.json           # TypeScript 配置
+└── README.md               # 项目说明
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+---
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## 启动与开发
 
-### `npm test`
+1. 安装依赖（首次或依赖变动后）：
+   ```shell
+   npm install
+   ```
+2. 启动开发服务器：
+   ```shell
+   npm start
+   ```
+   启动后访问 [http://localhost:3000](http://localhost:3000)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## 依赖安装与修复
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+如遇到依赖缺失、无法启动等问题，请依次执行：
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```shell
+# 1. 清理依赖和锁文件（在 web 目录下执行）
+Remove-Item -Recurse -Force node_modules,package-lock.json
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+# 2. 重新安装依赖
+npm install
 
-### `npm run eject`
+# 3. 安装必要依赖（Ant Design、axios、js-sha256、lodash、jsencrypt）
+npm install antd axios@1 js-sha256 lodash jsencrypt --save
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+# 4. 启动项目
+npm start
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## 登录页密码加密说明（RSA）
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+- 登录页已集成 RSA 加密，使用 [jsencrypt](https://github.com/travist/jsencrypt) 实现：
+  - 前端用后端提供的公钥加密密码，后端用私钥解密。
+  - 公钥请在 `src/pages/Login/index.tsx` 中替换为实际后端公钥。
+- 推荐全站使用 HTTPS，保障传输安全。
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 常见问题
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- **依赖报错/缺包**：请严格按“依赖安装与修复”部分命令操作。
+- **端口被占用**：修改 `package.json` 里的 `start` 脚本或关闭占用端口的进程。
+- **登录接口地址**：如需调整，修改 `src/pages/Login/index.tsx` 里的 axios 请求地址。
+- **RSA 公钥获取**：如需动态获取公钥，可在登录页组件中通过接口请求获取。
+
+---
+
+如有其他问题，请联系开发者或在 README 中补充说明。
