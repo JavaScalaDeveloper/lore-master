@@ -33,31 +33,29 @@ lore-master-app/web/
 
 ---
 
-## 依赖安装与修复
+## 主要依赖
 
-如遇到依赖缺失、无法启动等问题，请依次执行：
+- antd
+- axios
+- js-sha256
+- lodash
+- jsencrypt
+- **react-router-dom**（页面跳转与路由）
+- **@types/react-router-dom**（TypeScript 路由类型声明）
 
+如需手动安装：
 ```shell
-# 1. 清理依赖和锁文件（在 web 目录下执行）
-Remove-Item -Recurse -Force node_modules,package-lock.json
-
-# 2. 重新安装依赖
-npm install
-
-# 3. 安装必要依赖（Ant Design、axios、js-sha256、lodash、jsencrypt）
-npm install antd axios@1 js-sha256 lodash jsencrypt --save
-
-# 4. 启动项目
-npm start
+npm install antd axios@1 js-sha256 lodash jsencrypt react-router-dom@6 @types/react-router-dom --save
 ```
 
 ---
 
-## 登录页密码加密说明（RSA）
+## 登录页密码加密与登录态说明
 
 - 登录页已集成 RSA 加密，使用 [jsencrypt](https://github.com/travist/jsencrypt) 实现：
   - 前端用后端提供的公钥加密密码，后端用私钥解密。
   - 公钥请在 `src/pages/Login/index.tsx` 中替换为实际后端公钥。
+- 登录成功后，前端会将后端返回的 token 信息保存到 localStorage，实现持久化登录态。
 - 推荐全站使用 HTTPS，保障传输安全。
 
 ---

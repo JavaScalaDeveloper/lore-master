@@ -1,34 +1,36 @@
+// @ts-ignore
+const sha1 = require('js-sha1');
+// @ts-ignore
+const md5 = require('blueimp-md5');
 import React, { useState } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import axios from 'axios';
-import JSEncrypt from 'jsencrypt';
+import { sha256 } from 'js-sha256';
+import { useNavigate } from 'react-router-dom';
 
-// 示例公钥，实际请替换为后端提供的公钥
-const PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn1Qw...你的公钥...IDAQAB\n-----END PUBLIC KEY-----`;
+// 多重 hash
+const multiHash = (pwd: string) => md5(sha1(sha256(pwd)));
 
 const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const onFinish = async (values: { username: string; password: string }) => {
     setLoading(true);
     try {
-      // 用RSA公钥加密密码
-      const encrypt = new JSEncrypt();
-      encrypt.setPublicKey(PUBLIC_KEY);
-      const encryptedPassword = encrypt.encrypt(values.password);
-      if (!encryptedPassword) {
-        message.error('密码加密失败，请重试');
-        setLoading(false);
-        return;
-      }
-      // 调用后端登录接口
+      // 多重 hash
+      const hashedPassword = multiHash(values.password);
       const response = await axios.post('/api/admin/login', {
         username: values.username,
-        password: encryptedPassword,
-      });
+        password: hashedPassword,
+      }, { withCredentials: true });
       if (response.data && response.data.success) {
+        if (response.data.token) {
+          localStorage.setItem('adminToken', response.data.token);
+        }
+        localStorage.setItem('adminUser', JSON.stringify({ username: values.username }));
         message.success('登录成功！');
-        // TODO: 跳转到管理后台首页
+        navigate('/home', { replace: true });
       } else {
         message.error(response.data.message || '登录失败');
       }

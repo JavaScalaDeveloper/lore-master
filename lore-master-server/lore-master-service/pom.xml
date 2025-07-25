@@ -14,17 +14,8 @@
     <dependencies>
         <dependency>
             <groupId>com.lore.master</groupId>
-            <artifactId>lore-master-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.lore.master</groupId>
             <artifactId>lore-master-data</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
         </dependency>
     </dependencies>
 
