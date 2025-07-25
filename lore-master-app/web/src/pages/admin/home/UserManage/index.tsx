@@ -17,7 +17,7 @@ const UserManage: React.FC = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await axios.post('http://localhost:8081/api/admin/users/page', {
+      const res = await axios.post('/api/admin/users/page', {
         page,
         pageSize,
       }, {

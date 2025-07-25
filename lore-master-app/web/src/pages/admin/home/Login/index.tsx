@@ -1,12 +1,13 @@
-// @ts-ignore
-const sha1 = require('js-sha1');
-// @ts-ignore
-const md5 = require('blueimp-md5');
 import React, { useState } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import axios from 'axios';
 import { sha256 } from 'js-sha256';
 import { useNavigate } from 'react-router-dom';
+
+// @ts-ignore
+const sha1 = require('js-sha1');
+// @ts-ignore
+const md5 = require('blueimp-md5');
 
 // 多重 hash
 const multiHash = (pwd: string) => md5(sha1(sha256(pwd)));
@@ -25,8 +26,9 @@ const Login: React.FC = () => {
         password: hashedPassword,
       }, { withCredentials: true });
       if (response.data && response.data.success) {
-        if (response.data.token) {
-          localStorage.setItem('adminToken', response.data.token);
+        // 后端返回的token在data.data.token中
+        if (response.data.data && response.data.data.token) {
+          localStorage.setItem('adminToken', response.data.data.token);
         }
         localStorage.setItem('adminUser', JSON.stringify({ username: values.username }));
         message.success('登录成功！');
