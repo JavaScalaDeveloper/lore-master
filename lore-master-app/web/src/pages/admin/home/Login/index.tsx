@@ -1,16 +1,8 @@
 import React, { useState } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import axios from 'axios';
-import { sha256 } from 'js-sha256';
 import { useNavigate } from 'react-router-dom';
-
-// @ts-ignore
-const sha1 = require('js-sha1');
-// @ts-ignore
-const md5 = require('blueimp-md5');
-
-// 多重 hash
-const multiHash = (pwd: string) => md5(sha1(sha256(pwd)));
+import { encryptPasswordForTransmission } from '../../../../utils/crypto';
 
 const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -19,25 +11,43 @@ const Login: React.FC = () => {
   const onFinish = async (values: { username: string; password: string }) => {
     setLoading(true);
     try {
-      // 多重 hash
-      const hashedPassword = multiHash(values.password);
-      const response = await axios.post('/api/admin/login', {
+      // 加密密码后传输到后端
+      const encryptedPassword = encryptPasswordForTransmission(values.password);
+      console.log('原始密码:', values.password);
+      console.log('加密后密码:', encryptedPassword);
+
+      const response = await axios.post('/api/admin/auth/login', {
         username: values.username,
-        password: hashedPassword,
-      }, { withCredentials: true });
-      if (response.data && response.data.success) {
-        // 后端返回的token在data.data.token中
-        if (response.data.data && response.data.data.token) {
-          localStorage.setItem('adminToken', response.data.data.token);
+        password: encryptedPassword, // 传输加密后的密码
+      });
+
+      // 检查响应格式：{ code: 200, message: "登录成功", data: {...}, timestamp: ... }
+      if (response.data && response.data.code === 200) {
+        const { data } = response.data;
+
+        // 保存token和用户信息
+        if (data && data.token) {
+          localStorage.setItem('adminToken', data.token);
+          localStorage.setItem('tokenType', data.tokenType || 'Bearer');
         }
-        localStorage.setItem('adminUser', JSON.stringify({ username: values.username }));
-        message.success('登录成功！');
+
+        // 保存用户信息
+        if (data && data.userInfo) {
+          localStorage.setItem('adminUser', JSON.stringify(data.userInfo));
+        }
+
+        message.success(response.data.message || '登录成功！');
         navigate('/home', { replace: true });
       } else {
         message.error(response.data.message || '登录失败');
       }
     } catch (error: any) {
-      message.error(error?.response?.data?.message || '网络错误');
+      console.error('登录错误:', error);
+      if (error.response && error.response.data) {
+        message.error(error.response.data.message || '登录失败');
+      } else {
+        message.error('网络错误，请检查网络连接');
+      }
     } finally {
       setLoading(false);
     }

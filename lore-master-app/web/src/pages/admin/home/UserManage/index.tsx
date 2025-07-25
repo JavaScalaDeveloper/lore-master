@@ -17,25 +17,34 @@ const UserManage: React.FC = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('adminToken');
+      const tokenType = localStorage.getItem('tokenType') || 'Bearer';
+
       const res = await axios.post('/api/admin/users/page', {
-        page,
-        pageSize,
+        current: page,
+        size: pageSize,
       }, {
-        withCredentials: true,
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers: token ? { Authorization: `${tokenType} ${token}` } : {},
       });
-      if (res.data && res.data.success) {
-        setUsers(res.data.data.content || res.data.data.records || res.data.data);
+
+      // 检查新的响应格式：{ code: 200, message: "success", data: {...} }
+      if (res.data && res.data.code === 200) {
+        const responseData = res.data.data;
+        setUsers(responseData.records || responseData.content || []);
         setPagination({
           current: page,
           pageSize,
-          total: res.data.total || res.data.data.totalElements || res.data.data.total || 0,
+          total: responseData.total || responseData.totalElements || 0,
         });
       } else {
         message.error(res.data.message || '获取用户列表失败');
       }
-    } catch (e) {
-      message.error('网络错误');
+    } catch (error: any) {
+      console.error('获取用户列表错误:', error);
+      if (error.response && error.response.data) {
+        message.error(error.response.data.message || '获取用户列表失败');
+      } else {
+        message.error('网络错误，请检查网络连接');
+      }
     } finally {
       setLoading(false);
     }

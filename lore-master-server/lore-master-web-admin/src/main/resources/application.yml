@@ -1,10 +1,88 @@
 server:
-  port: 8081
+  port: 8080
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
 spring:
   application:
-    name: lore-master-web-admin
+    name: lore-master-admin
+
+  # 数据源配置
   datasource:
-    url: jdbc:mysql://localhost:3306/lore_admin?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/lore_admin?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root
     password: 123456
-    driver-class-name: com.mysql.cj.jdbc.Driver 
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+      pool-name: LoreMasterAdminHikariCP
+
+  # Jackson配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
+
+# JPA配置
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+
+# LangChain4j配置 - 暂时注释，等基本功能稳定后再启用
+# langchain4j:
+#   open-ai:
+#     chat-model:
+#       api-key: ${OPENAI_API_KEY:your-api-key-here}
+#       model-name: gpt-3.5-turbo
+#       temperature: 0.7
+#       max-tokens: 1000
+
+# 日志配置
+logging:
+  level:
+    com.lore.master: INFO
+    org.springframework.web: INFO
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n'
+
+# 管理端配置
+lore:
+  admin:
+    # 跨域配置
+    cors:
+      allowed-origins:
+        - http://localhost:3001
+        - http://127.0.0.1:3001
+      allowed-methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+      allowed-headers:
+        - "*"
+      allow-credentials: true
