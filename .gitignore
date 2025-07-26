@@ -2,3 +2,6 @@
 /.idea/
 /lore-master-server/lore-master-*/target/
 /lore-master-commands/docker/mysql-data/
+/lore-master-server/lore-master-web-business/logs/
+/lore-master-server/lore-master-web-admin/logs/
+/logs/

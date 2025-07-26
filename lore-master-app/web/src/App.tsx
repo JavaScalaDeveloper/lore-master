@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/admin/home/Login';
 import Home from './pages/admin/home';
+import BusinessHomePage from './pages/business';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -40,9 +41,20 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={!isLoggedIn ? <Login /> : <Navigate to="/home" replace />} />
-        <Route path="/home" element={isLoggedIn ? <Home /> : <Navigate to="/login" replace />} />
-        <Route path="*" element={<Navigate to={isLoggedIn ? "/home" : "/login"} replace />} />
+        {/* 业务端路由 */}
+        <Route path="/" element={<BusinessHomePage />} />
+        <Route path="/business" element={<BusinessHomePage />} />
+
+        {/* 管理端路由 */}
+        <Route path="/admin/login" element={!isLoggedIn ? <Login /> : <Navigate to="/admin/home" replace />} />
+        <Route path="/admin/home" element={isLoggedIn ? <Home /> : <Navigate to="/admin/login" replace />} />
+
+        {/* 兼容旧路由 */}
+        <Route path="/login" element={<Navigate to="/admin/login" replace />} />
+        <Route path="/home" element={<Navigate to="/admin/home" replace />} />
+
+        {/* 默认路由 */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );
