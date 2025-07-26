@@ -1,7 +1,7 @@
 package com.lore.master.service.admin.impl;
 
-import com.lore.master.data.entity.CareerTarget;
-import com.lore.master.data.repository.CareerTargetRepository;
+import com.lore.master.data.entity.admin.CareerTarget;
+import com.lore.master.data.repository.admin.CareerTargetRepository;
 import com.lore.master.service.admin.CareerTargetService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

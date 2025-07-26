@@ -1,6 +1,7 @@
 package com.lore.master.service.business.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.lore.master.common.util.UserIdGenerator;
 import com.lore.master.data.dto.UserRegisterRequest;
 import com.lore.master.data.entity.business.User;
 import com.lore.master.data.entity.business.UserAuthMethod;
@@ -28,6 +29,7 @@ public class UserRegisterServiceImpl implements UserRegisterService {
     private final UserRepository userRepository;
     private final UserAuthMethodRepository userAuthMethodRepository;
     private final UserRegisterStrategyFactory strategyFactory;
+    private final UserIdGenerator userIdGenerator;
     
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -131,7 +133,7 @@ public class UserRegisterServiceImpl implements UserRegisterService {
      */
     private User createUser(UserRegisterStrategy strategy, UserRegisterRequest request) {
         User user = new User();
-        user.setUserId(userRepository.generateUserId());
+        user.setUserId(userIdGenerator.generateUniqueUserId());
         user.setNickname(strategy.getDefaultNickname(request));
         
         // 设置性别

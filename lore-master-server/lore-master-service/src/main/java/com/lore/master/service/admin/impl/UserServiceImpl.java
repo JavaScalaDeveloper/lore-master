@@ -2,8 +2,8 @@ package com.lore.master.service.admin.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.lore.master.common.util.CryptoUtil;
-import com.lore.master.data.entity.User;
-import com.lore.master.data.repository.UserRepository;
+import com.lore.master.data.entity.admin.User;
+import com.lore.master.data.repository.admin.UserRepository;
 import com.lore.master.service.admin.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

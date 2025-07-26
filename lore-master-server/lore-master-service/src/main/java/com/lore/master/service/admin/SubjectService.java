@@ -1,6 +1,6 @@
 package com.lore.master.service.admin;
 
-import com.lore.master.data.entity.Subject;
+import com.lore.master.data.entity.admin.Subject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

@@ -28,7 +28,7 @@ public class UserAuthMethod {
     /**
      * 用户ID
      */
-    @Column(name = "user_id", nullable = false, length = 32)
+    @Column(name = "user_id", nullable = false, length = 12)
     private String userId;
     
     /**

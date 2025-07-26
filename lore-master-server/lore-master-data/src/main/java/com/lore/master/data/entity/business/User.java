@@ -29,7 +29,7 @@ public class User {
     /**
      * 用户唯一ID（对外展示，类似QQ号）
      */
-    @Column(name = "user_id", nullable = false, unique = true, length = 32)
+    @Column(name = "user_id", nullable = false, unique = true, length = 12)
     private String userId;
     
     /**

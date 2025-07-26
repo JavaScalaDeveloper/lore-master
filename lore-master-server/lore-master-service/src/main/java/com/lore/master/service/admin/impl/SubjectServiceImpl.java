@@ -1,7 +1,7 @@
 package com.lore.master.service.admin.impl;
 
-import com.lore.master.data.entity.Subject;
-import com.lore.master.data.repository.SubjectRepository;
+import com.lore.master.data.entity.admin.Subject;
+import com.lore.master.data.repository.admin.SubjectRepository;
 import com.lore.master.service.admin.SubjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

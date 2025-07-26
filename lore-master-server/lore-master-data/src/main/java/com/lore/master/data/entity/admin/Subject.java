@@ -1,4 +1,4 @@
-package com.lore.master.data.entity;
+package com.lore.master.data.entity.admin;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -9,13 +9,13 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 /**
- * 职业目标实体类
+ * 学科实体类
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@Table(name = "career_targets")
-public class CareerTarget {
+@Table(name = "subjects")
+public class Subject {
     
     /**
      * 主键ID
@@ -26,58 +26,46 @@ public class CareerTarget {
     private Long id;
     
     /**
-     * 职业目标名称
+     * 学科名称
      */
     @Column(name = "name", nullable = false, length = 100)
     private String name;
     
     /**
-     * 职业目标编码
+     * 学科编码
      */
     @Column(name = "code", nullable = false, unique = true, length = 50)
     private String code;
     
     /**
-     * 描述
+     * 学科描述
      */
     @Column(name = "description", length = 1000)
     private String description;
     
     /**
-     * 分类
+     * 学科图标
      */
-    @Column(name = "category", length = 50)
-    private String category;
+    @Column(name = "icon", length = 200)
+    private String icon;
     
     /**
-     * 难度等级：1-入门，2-初级，3-中级，4-高级，5-专家
+     * 学科颜色
      */
-    @Column(name = "difficulty_level")
-    private Integer difficultyLevel;
+    @Column(name = "color", length = 20)
+    private String color;
     
     /**
-     * 预计学习时长（小时）
+     * 父级学科ID
      */
-    @Column(name = "estimated_hours")
-    private Integer estimatedHours;
+    @Column(name = "parent_id")
+    private Long parentId;
     
     /**
-     * 所需技能标签（JSON格式）
+     * 学科层级
      */
-    @Column(name = "required_skills", length = 1000)
-    private String requiredSkills;
-    
-    /**
-     * 学习路径（JSON格式）
-     */
-    @Column(name = "learning_path", columnDefinition = "TEXT")
-    private String learningPath;
-    
-    /**
-     * 推荐资源（JSON格式）
-     */
-    @Column(name = "recommended_resources", columnDefinition = "TEXT")
-    private String recommendedResources;
+    @Column(name = "level")
+    private Integer level;
     
     /**
      * 排序权重

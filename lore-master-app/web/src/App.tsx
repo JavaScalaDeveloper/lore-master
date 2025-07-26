@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/admin/home/Login';
 import Home from './pages/admin/home';
 import BusinessHomePage from './pages/business';
+import ConsumerPage from './pages/consumer';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -41,8 +42,11 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* C端用户路由 */}
+        <Route path="/" element={<ConsumerPage />} />
+        <Route path="/consumer" element={<ConsumerPage />} />
+
         {/* 业务端路由 */}
-        <Route path="/" element={<BusinessHomePage />} />
         <Route path="/business" element={<BusinessHomePage />} />
 
         {/* 管理端路由 */}

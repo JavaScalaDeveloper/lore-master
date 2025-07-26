@@ -1,4 +1,4 @@
-package com.lore.master.data.entity;
+package com.lore.master.data.entity.admin;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -9,13 +9,13 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 /**
- * 管理员用户实体类
+ * 用户实体类
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@Table(name = "admin_users")
-public class AdminUser {
+@Table(name = "users")
+public class User {
     
     /**
      * 主键ID
@@ -32,7 +32,7 @@ public class AdminUser {
     private String username;
     
     /**
-     * 密码（BCrypt加密）
+     * 密码（明文存储）
      */
     @Column(name = "password", nullable = false, length = 255)
     private String password;
@@ -62,13 +62,43 @@ public class AdminUser {
     private String avatarUrl;
     
     /**
-     * 角色：super_admin-超级管理员，admin-管理员，operator-操作员，viewer-查看者
+     * 性别：1-男，2-女，0-未知
      */
-    @Column(name = "role", nullable = false, length = 20)
-    private String role;
+    @Column(name = "gender")
+    private Integer gender;
     
     /**
-     * 状态：1-启用，0-禁用
+     * 年龄
+     */
+    @Column(name = "age")
+    private Integer age;
+    
+    /**
+     * 学历：1-小学，2-初中，3-高中，4-大专，5-本科，6-硕士，7-博士
+     */
+    @Column(name = "education")
+    private Integer education;
+    
+    /**
+     * 职业
+     */
+    @Column(name = "profession", length = 100)
+    private String profession;
+    
+    /**
+     * 当前等级
+     */
+    @Column(name = "current_level")
+    private Integer currentLevel;
+    
+    /**
+     * 总积分
+     */
+    @Column(name = "total_score")
+    private Integer totalScore;
+    
+    /**
+     * 状态：1-正常，0-禁用
      */
     @Column(name = "status", nullable = false)
     private Integer status;

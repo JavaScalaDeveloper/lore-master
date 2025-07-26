@@ -1,7 +1,7 @@
 package com.lore.master.web.admin.controller;
 
 import com.lore.master.common.result.Result;
-import com.lore.master.data.entity.User;
+import com.lore.master.data.entity.admin.User;
 import com.lore.master.service.admin.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

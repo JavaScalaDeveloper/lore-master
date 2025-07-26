@@ -39,7 +39,7 @@ const UserRegisterModal: React.FC<UserRegisterModalProps> = ({
 
       setSendingCode(true);
       
-      const response = await fetch('http://localhost:8081/api/user/register/send-code', {
+      const response = await fetch('http://localhost:8082/api/user/register/send-code', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -83,7 +83,7 @@ const UserRegisterModal: React.FC<UserRegisterModalProps> = ({
       setLoading(true);
 
       // 构建请求数据
-      const requestData = {
+      const requestData: any = {
         registerType: activeTab,
         registerKey: values.registerKey,
         nickname: values.nickname,
@@ -101,7 +101,7 @@ const UserRegisterModal: React.FC<UserRegisterModalProps> = ({
 
       console.log('注册请求数据:', requestData);
 
-      const response = await fetch('http://localhost:8081/api/user/register', {
+      const response = await fetch('http://localhost:8082/api/user/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +135,7 @@ const UserRegisterModal: React.FC<UserRegisterModalProps> = ({
 
     try {
       const response = await fetch(
-        `http://localhost:8081/api/user/register/check?registerType=${activeTab}&registerKey=${encodeURIComponent(registerKey)}`,
+        `http://localhost:8082/api/user/register/check?registerType=${activeTab}&registerKey=${encodeURIComponent(registerKey)}`,
         {
           method: 'GET',
           headers: {

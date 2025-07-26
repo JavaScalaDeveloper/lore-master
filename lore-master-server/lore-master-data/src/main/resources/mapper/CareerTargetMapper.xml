@@ -3,7 +3,7 @@
 <mapper namespace="com.lore.master.data.mapper.CareerTargetMapper">
 
     <!-- 分页查询职业目标 -->
-    <select id="selectCareerTargetPage" resultType="com.lore.master.data.entity.CareerTarget">
+    <select id="selectCareerTargetPage" resultType="com.lore.master.data.entity.admin.CareerTarget">
         SELECT 
             id,
             name,

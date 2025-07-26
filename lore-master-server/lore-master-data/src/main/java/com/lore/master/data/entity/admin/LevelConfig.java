@@ -1,4 +1,4 @@
-package com.lore.master.data.entity;
+package com.lore.master.data.entity.admin;
 
 import jakarta.persistence.*;
 import lombok.Data;

@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import com.lore.master.common.result.Result;
-import com.lore.master.data.entity.AdminUser;
+import com.lore.master.data.entity.admin.AdminUser;
 import com.lore.master.service.admin.AdminUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

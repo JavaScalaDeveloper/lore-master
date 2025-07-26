@@ -3,7 +3,7 @@
 <mapper namespace="com.lore.master.data.mapper.KnowledgePointMapper">
 
     <!-- 分页查询知识点 -->
-    <select id="selectKnowledgePointPage" resultType="com.lore.master.data.entity.KnowledgePoint">
+    <select id="selectKnowledgePointPage" resultType="com.lore.master.data.entity.admin.KnowledgePoint">
         SELECT 
             kp.id,
             kp.learning_path_id,

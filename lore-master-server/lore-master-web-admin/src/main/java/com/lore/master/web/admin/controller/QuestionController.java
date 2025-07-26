@@ -1,7 +1,7 @@
 package com.lore.master.web.admin.controller;
 
 import com.lore.master.common.result.Result;
-import com.lore.master.data.entity.Question;
+import com.lore.master.data.entity.admin.Question;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

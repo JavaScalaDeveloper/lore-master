@@ -1,7 +1,7 @@
 package com.lore.master.service.admin;
 
 import com.lore.master.data.dto.LoginRequest;
-import com.lore.master.data.entity.AdminUser;
+import com.lore.master.data.entity.admin.AdminUser;
 import com.lore.master.data.vo.LoginResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

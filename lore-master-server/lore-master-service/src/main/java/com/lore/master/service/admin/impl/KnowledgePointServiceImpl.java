@@ -1,7 +1,7 @@
 package com.lore.master.service.admin.impl;
 
-import com.lore.master.data.entity.KnowledgePoint;
-import com.lore.master.data.repository.KnowledgePointRepository;
+import com.lore.master.data.entity.admin.KnowledgePoint;
+import com.lore.master.data.repository.admin.KnowledgePointRepository;
 import com.lore.master.service.admin.KnowledgePointService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

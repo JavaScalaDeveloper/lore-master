@@ -1,4 +1,4 @@
-package com.lore.master.data.entity;
+package com.lore.master.data.entity.admin;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -9,13 +9,13 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 /**
- * 知识点实体类
+ * 题目实体类
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@Table(name = "knowledge_points")
-public class KnowledgePoint {
+@Table(name = "questions")
+public class Question {
     
     /**
      * 主键ID
@@ -26,28 +26,22 @@ public class KnowledgePoint {
     private Long id;
     
     /**
-     * 知识点标题
+     * 题目标题
      */
-    @Column(name = "title", nullable = false, length = 200)
+    @Column(name = "title", nullable = false, length = 500)
     private String title;
     
     /**
-     * 知识点编码
-     */
-    @Column(name = "code", nullable = false, unique = true, length = 50)
-    private String code;
-    
-    /**
-     * 知识点内容
+     * 题目内容
      */
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
     
     /**
-     * 知识点摘要
+     * 题目类型：1-单选，2-多选，3-判断，4-填空，5-简答，6-编程
      */
-    @Column(name = "summary", length = 500)
-    private String summary;
+    @Column(name = "type", nullable = false)
+    private Integer type;
     
     /**
      * 所属学科ID
@@ -62,16 +56,16 @@ public class KnowledgePoint {
     private String subjectName;
     
     /**
-     * 父级知识点ID
+     * 关联知识点ID
      */
-    @Column(name = "parent_id")
-    private Long parentId;
+    @Column(name = "knowledge_point_id")
+    private Long knowledgePointId;
     
     /**
-     * 知识点层级
+     * 关联知识点名称
      */
-    @Column(name = "level")
-    private Integer level;
+    @Column(name = "knowledge_point_name", length = 200)
+    private String knowledgePointName;
     
     /**
      * 难度等级：1-入门，2-初级，3-中级，4-高级，5-专家
@@ -80,10 +74,22 @@ public class KnowledgePoint {
     private Integer difficultyLevel;
     
     /**
-     * 重要程度：1-一般，2-重要，3-非常重要
+     * 题目选项（JSON格式）
      */
-    @Column(name = "importance")
-    private Integer importance;
+    @Column(name = "options", columnDefinition = "TEXT")
+    private String options;
+    
+    /**
+     * 正确答案
+     */
+    @Column(name = "correct_answer", length = 1000)
+    private String correctAnswer;
+    
+    /**
+     * 答案解析
+     */
+    @Column(name = "explanation", columnDefinition = "TEXT")
+    private String explanation;
     
     /**
      * 标签（JSON格式）
@@ -92,34 +98,34 @@ public class KnowledgePoint {
     private String tags;
     
     /**
-     * 关键词（用于搜索）
+     * 分值
      */
-    @Column(name = "keywords", length = 500)
-    private String keywords;
+    @Column(name = "score")
+    private Integer score;
     
     /**
-     * 相关链接（JSON格式）
+     * 预计用时（秒）
      */
-    @Column(name = "related_links", columnDefinition = "TEXT")
-    private String relatedLinks;
+    @Column(name = "estimated_time")
+    private Integer estimatedTime;
     
     /**
-     * 排序权重
+     * 使用次数
      */
-    @Column(name = "sort_order")
-    private Integer sortOrder;
+    @Column(name = "usage_count")
+    private Integer usageCount;
+    
+    /**
+     * 正确率（百分比）
+     */
+    @Column(name = "accuracy_rate")
+    private Double accuracyRate;
     
     /**
      * 状态：1-发布，2-草稿，0-禁用
      */
     @Column(name = "status", nullable = false)
     private Integer status;
-    
-    /**
-     * 浏览次数
-     */
-    @Column(name = "view_count")
-    private Integer viewCount;
     
     /**
      * 创建人ID

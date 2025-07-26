@@ -41,8 +41,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countByStatus(@Param("status") Integer status);
     
     /**
-     * 获取下一个可用的用户ID（用于生成唯一ID）
+     * 检查用户ID是否已存在（用于生成唯一ID时检查）
      */
-    @Query(value = "SELECT generate_user_id()", nativeQuery = true)
-    String generateUserId();
+    @Query("SELECT COUNT(u) > 0 FROM User u WHERE u.userId = :userId")
+    boolean existsByUserIdForGeneration(@Param("userId") String userId);
 }

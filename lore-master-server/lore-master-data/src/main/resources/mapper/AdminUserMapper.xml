@@ -3,7 +3,7 @@
 <mapper namespace="com.lore.master.data.mapper.AdminUserMapper">
 
     <!-- 分页查询管理员用户 -->
-    <select id="selectAdminUserPage" resultType="com.lore.master.data.entity.AdminUser">
+    <select id="selectAdminUserPage" resultType="com.lore.master.data.entity.admin.AdminUser">
         SELECT 
             id,
             username,
