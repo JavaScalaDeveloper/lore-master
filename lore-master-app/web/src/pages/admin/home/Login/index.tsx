@@ -37,7 +37,11 @@ const Login: React.FC = () => {
         }
 
         message.success(response.data.message || '登录成功！');
-        navigate('/home', { replace: true });
+
+        // 延迟跳转，确保localStorage已保存
+        setTimeout(() => {
+          navigate('/home', { replace: true });
+        }, 300);
       } else {
         message.error(response.data.message || '登录失败');
       }

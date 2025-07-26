@@ -20,7 +20,7 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/admin/users")
+@RequestMapping("/api/admin/admin-users")
 @RequiredArgsConstructor
 public class AdminUserController {
     

@@ -236,7 +236,7 @@ const LevelManage: React.FC = () => {
     {
       title: '分数范围',
       key: 'scoreRange',
-      render: (_, record: LevelConfig) => (
+      render: (_: any, record: LevelConfig) => (
         <span>{record.minScore} - {record.maxScore}分</span>
       ),
     },
@@ -285,7 +285,7 @@ const LevelManage: React.FC = () => {
     {
       title: '操作',
       key: 'action',
-      render: (_, record: LevelConfig) => (
+      render: (_: any, record: LevelConfig) => (
         <Space size="middle">
           <Button
             type="link"

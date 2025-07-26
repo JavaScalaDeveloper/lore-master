@@ -3,16 +3,26 @@ import { Layout, Menu, Avatar, Dropdown, Button, Space, Typography } from 'antd'
 import {
   UserOutlined,
   BookOutlined,
-  DatabaseOutlined,
   BarChartOutlined,
-  SettingOutlined,
   LogoutOutlined,
   BellOutlined,
   MenuFoldOutlined,
-  MenuUnfoldOutlined
+  MenuUnfoldOutlined,
+  DatabaseOutlined,
+  SettingOutlined,
+  QuestionCircleOutlined,
+  TrophyOutlined,
+  FileTextOutlined,
+  ExperimentOutlined
 } from '@ant-design/icons';
+import Overview from './Overview/index';
 import UserManage from './UserManage';
 import CareerTargetManage from './CareerTargetManage/index';
+import KnowledgeManage from './KnowledgeManage/index';
+import QuestionManage from './QuestionManage/index';
+import SubjectManage from './SubjectManage/index';
+import LevelManage from './LevelManage/index';
+import CryptoTest from './CryptoTest/index';
 
 const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
@@ -32,6 +42,36 @@ const menuItems = [
     key: 'career',
     icon: <BookOutlined />,
     label: '职业目标管理',
+  },
+  {
+    key: 'knowledge',
+    icon: <DatabaseOutlined />,
+    label: '知识点管理',
+  },
+  {
+    key: 'question',
+    icon: <QuestionCircleOutlined />,
+    label: '题库管理',
+  },
+  {
+    key: 'subject',
+    icon: <FileTextOutlined />,
+    label: '学科管理',
+  },
+  {
+    key: 'level',
+    icon: <TrophyOutlined />,
+    label: '等级管理',
+  },
+  {
+    key: 'crypto-test',
+    icon: <ExperimentOutlined />,
+    label: '加密测试',
+  },
+  {
+    key: 'settings',
+    icon: <SettingOutlined />,
+    label: '系统设置',
   },
 ];
 
@@ -62,13 +102,30 @@ const Home: React.FC = () => {
   const renderContent = () => {
     switch (selectedKey) {
       case 'overview':
-        return <div style={{ padding: 24 }}>数据概览功能开发中...</div>;
+        return <Overview />;
       case 'user':
         return <UserManage />;
       case 'career':
         return <CareerTargetManage />;
+      case 'knowledge':
+        return <KnowledgeManage />;
+      case 'question':
+        return <QuestionManage />;
+      case 'subject':
+        return <SubjectManage />;
+      case 'level':
+        return <LevelManage />;
+      case 'crypto-test':
+        return <CryptoTest />;
+      case 'settings':
+        return (
+          <div style={{ padding: 24 }}>
+            <h2>⚙️ 系统设置</h2>
+            <p>系统配置和参数设置功能开发中...</p>
+          </div>
+        );
       default:
-        return <div style={{ padding: 24 }}>数据概览功能开发中...</div>;
+        return <Overview />;
     }
   };
 

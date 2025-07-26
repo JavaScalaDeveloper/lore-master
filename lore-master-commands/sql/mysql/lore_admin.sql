@@ -214,9 +214,9 @@ INSERT INTO career_targets (name, code, description, category, difficulty_level,
 ('大数据平台开发工程师', 'BIGDATA_ENGINEER', '大数据处理、分布式系统、数据仓库等技术', 'BigData', 4, 18),
 ('中间件开发工程师', 'MIDDLEWARE_ENGINEER', '中间件原理、源码分析、系统架构设计', 'Infrastructure', 5, 24);
 
--- 插入默认管理员账号（密码：123456）
+-- 插入默认管理员账号（密码：admin123，需要在应用中加密）
 INSERT INTO admin_users (username, password, real_name, role) VALUES
-('admin', '123456', '系统管理员', 'super_admin');
+('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIgBZdO5jO8S5V8jDgmKYeQ3Eq', '系统管理员', 'super_admin');
 
 -- 插入系统配置
 INSERT INTO system_configs (config_key, config_value, config_type, description, category) VALUES

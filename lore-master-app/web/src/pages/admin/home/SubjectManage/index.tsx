@@ -230,7 +230,7 @@ const SubjectManage: React.FC = () => {
     {
       title: '操作',
       key: 'action',
-      render: (_, record: Subject) => (
+      render: (_: any, record: Subject) => (
         <Space size="middle">
           <Button
             type="link"

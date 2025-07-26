@@ -24,7 +24,6 @@ import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
-  EyeOutlined,
   RobotOutlined,
   BranchesOutlined,
   UserOutlined
@@ -61,6 +60,7 @@ const CareerTargetManage: React.FC = () => {
   const [generatingPath, setGeneratingPath] = useState(false);
 
   // 模拟数据
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const mockTargets: CareerTarget[] = [
     {
       id: '1',
@@ -135,15 +135,23 @@ const CareerTargetManage: React.FC = () => {
       });
 
       const result = await response.json();
+      console.log('API响应数据:', result); // 调试日志
+
       // 检查新的响应格式：{ code: 200, message: "success", data: {...} }
       if (result.code === 200) {
-        setTargets(result.data.records || result.data || []);
+        // Spring Data Page对象结构：{ content: [...], totalElements: ..., ... }
+        const pageData = result.data;
+        const targetList = pageData.content || pageData.records || pageData || [];
+        console.log('解析的目标列表:', targetList); // 调试日志
+        setTargets(Array.isArray(targetList) ? targetList : []);
       } else {
         message.error(result.message || '获取职业目标列表失败');
+        setTargets([]); // 确保设置为空数组
       }
     } catch (error) {
       console.error('获取职业目标列表错误:', error);
       message.error('获取职业目标列表失败');
+      setTargets([]); // 确保在错误时设置为空数组
     } finally {
       setLoading(false);
     }
@@ -333,7 +341,7 @@ const CareerTargetManage: React.FC = () => {
     {
       title: '操作',
       key: 'action',
-      render: (_, record: CareerTarget) => (
+      render: (_: any, record: CareerTarget) => (
         <Space size="middle">
           <Tooltip title="查看学习路径">
             <Button
@@ -380,11 +388,14 @@ const CareerTargetManage: React.FC = () => {
     },
   ];
 
-  // 统计数据
-  const totalTargets = targets.length;
-  const activeTargets = targets.filter(t => t.status).length;
-  const totalUsers = targets.reduce((sum, t) => sum + t.enrolledUsers, 0);
-  const avgCompletionRate = targets.reduce((sum, t) => sum + t.completionRate, 0) / targets.length;
+  // 统计数据 - 添加安全检查
+  const safeTargets = Array.isArray(targets) ? targets : [];
+  const totalTargets = safeTargets.length;
+  const activeTargets = safeTargets.filter(t => t && t.status).length;
+  const totalUsers = safeTargets.reduce((sum, t) => sum + (t?.enrolledUsers || 0), 0);
+  const avgCompletionRate = totalTargets > 0
+    ? safeTargets.reduce((sum, t) => sum + (t?.completionRate || 0), 0) / totalTargets
+    : 0;
 
   return (
     <div>

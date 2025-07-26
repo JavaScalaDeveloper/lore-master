@@ -273,7 +273,7 @@ const KnowledgeManage: React.FC = () => {
       render: (tags: string[]) => (
         <Space wrap>
           {tags.map(tag => (
-            <Tag key={tag} size="small">{tag}</Tag>
+            <Tag key={tag}>{tag}</Tag>
           ))}
         </Space>
       ),
@@ -298,7 +298,7 @@ const KnowledgeManage: React.FC = () => {
     {
       title: '操作',
       key: 'action',
-      render: (_, record: KnowledgeItem) => (
+      render: (_: any, record: KnowledgeItem) => (
         <Space size="middle">
           <Button
             type="link"

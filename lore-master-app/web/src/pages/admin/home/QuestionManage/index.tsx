@@ -287,7 +287,7 @@ const QuestionManage: React.FC = () => {
     {
       title: '操作',
       key: 'action',
-      render: (_, record: Question) => (
+      render: (_: any, record: Question) => (
         <Space size="middle">
           <Button
             type="link"
@@ -595,7 +595,7 @@ const QuestionManage: React.FC = () => {
                 <Text strong>标签：</Text>
                 <Space wrap style={{ marginTop: 4 }}>
                   {previewQuestion.tags.map(tag => (
-                    <Tag key={tag} size="small">{tag}</Tag>
+                    <Tag key={tag}>{tag}</Tag>
                   ))}
                 </Space>
               </div>
