@@ -27,8 +27,11 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
                 .allowedOrigins(
-                    "http://localhost:3000",   // 开发环境备用端口
-                    "http://localhost:3001",   // 开发环境主端口
+                    "http://localhost:3000",   // 默认端口
+                    "http://localhost:3001",   // 管理端
+                    "http://localhost:3002",   // B端
+                    "http://localhost:3003",   // C端
+                    "http://localhost:3004",   // 小程序
                     "https://www.loremaster.com", // 生产环境
                     "https://test.loremaster.com"  // 测试环境
                 )

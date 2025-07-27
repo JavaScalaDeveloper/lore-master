@@ -171,4 +171,55 @@ public class JwtUtil {
         }
         return expireTime.before(new Date());
     }
+
+    /**
+     * 生成刷新令牌
+     *
+     * @param userId 用户ID
+     * @param username 用户名
+     * @return 刷新令牌
+     */
+    public static String generateRefreshToken(Long userId, String username) {
+        // 刷新令牌有效期为7天
+        long refreshExpireTime = 7 * 24 * 60 * 60 * 1000L;
+        return generateToken(userId, username, DEFAULT_SECRET, refreshExpireTime);
+    }
+
+    /**
+     * 验证令牌（别名方法，兼容性）
+     *
+     * @param token token
+     * @return 是否有效
+     */
+    public static boolean validateToken(String token) {
+        return verifyToken(token);
+    }
+
+    /**
+     * 从令牌中获取用户ID（字符串格式）
+     *
+     * @param token token
+     * @return 用户ID字符串
+     */
+    public static String getUserIdFromToken(String token) {
+        try {
+            if (StrUtil.isBlank(token)) {
+                return null;
+            }
+
+            DecodedJWT jwt = JWT.decode(token);
+            // 先尝试获取字符串格式的用户ID
+            String userIdStr = jwt.getClaim("username").asString();
+            if (StrUtil.isNotBlank(userIdStr)) {
+                return userIdStr;
+            }
+
+            // 如果没有，则获取Long格式的用户ID并转换为字符串
+            Long userId = jwt.getClaim("userId").asLong();
+            return userId != null ? userId.toString() : null;
+        } catch (JWTDecodeException e) {
+            log.warn("解析JWT token失败: {}", e.getMessage());
+            return null;
+        }
+    }
 }

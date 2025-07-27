@@ -12,23 +12,32 @@ const BASE_DOMAINS = {
   // 开发环境
   development: {
     ADMIN_API: 'http://localhost:8080',      // 管理端API
-    BUSINESS_API: 'http://localhost:8081',   // 业务端API  
+    BUSINESS_API: 'http://localhost:8081',   // 业务端API
     CONSUMER_API: 'http://localhost:8082',   // C端用户API
-    WEB_FRONTEND: 'http://localhost:3001',   // 前端页面
+    WEB_ADMIN: 'http://localhost:3001',      // 管理端前端
+    WEB_BUSINESS: 'http://localhost:3002',   // B端前端
+    WEB_CONSUMER: 'http://localhost:3003',   // C端前端
+    WEB_MINIAPP: 'http://localhost:3004',    // 小程序前端
   },
   // 生产环境
   production: {
     ADMIN_API: process.env.REACT_APP_ADMIN_API || 'https://admin-api.loremaster.com',
     BUSINESS_API: process.env.REACT_APP_BUSINESS_API || 'https://business-api.loremaster.com',
     CONSUMER_API: process.env.REACT_APP_CONSUMER_API || 'https://consumer-api.loremaster.com',
-    WEB_FRONTEND: process.env.REACT_APP_WEB_FRONTEND || 'https://www.loremaster.com',
+    WEB_ADMIN: process.env.REACT_APP_WEB_ADMIN || 'https://admin.loremaster.com',
+    WEB_BUSINESS: process.env.REACT_APP_WEB_BUSINESS || 'https://business.loremaster.com',
+    WEB_CONSUMER: process.env.REACT_APP_WEB_CONSUMER || 'https://www.loremaster.com',
+    WEB_MINIAPP: process.env.REACT_APP_WEB_MINIAPP || 'https://miniapp.loremaster.com',
   },
   // 测试环境
   test: {
     ADMIN_API: process.env.REACT_APP_ADMIN_API || 'http://test-admin-api.loremaster.com',
     BUSINESS_API: process.env.REACT_APP_BUSINESS_API || 'http://test-business-api.loremaster.com',
     CONSUMER_API: process.env.REACT_APP_CONSUMER_API || 'http://test-consumer-api.loremaster.com',
-    WEB_FRONTEND: process.env.REACT_APP_WEB_FRONTEND || 'http://test.loremaster.com',
+    WEB_ADMIN: process.env.REACT_APP_WEB_ADMIN || 'http://test-admin.loremaster.com',
+    WEB_BUSINESS: process.env.REACT_APP_WEB_BUSINESS || 'http://test-business.loremaster.com',
+    WEB_CONSUMER: process.env.REACT_APP_WEB_CONSUMER || 'http://test.loremaster.com',
+    WEB_MINIAPP: process.env.REACT_APP_WEB_MINIAPP || 'http://test-miniapp.loremaster.com',
   }
 };
 
@@ -135,9 +144,11 @@ export const API_URLS = {
 export const CORS_CONFIG = {
   // 允许的前端域名
   ALLOWED_ORIGINS: [
-    DOMAINS.WEB_FRONTEND,
+    DOMAINS.WEB_ADMIN,
+    DOMAINS.WEB_BUSINESS,
+    DOMAINS.WEB_CONSUMER,
+    DOMAINS.WEB_MINIAPP,
     'http://localhost:3000',  // 开发环境备用端口
-    'http://localhost:3001',  // 开发环境主端口
   ],
   // 允许的请求方法
   ALLOWED_METHODS: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
