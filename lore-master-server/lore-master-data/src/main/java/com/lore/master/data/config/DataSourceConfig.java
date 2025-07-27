@@ -1,4 +1,4 @@
-package com.lore.master.web.consumer.config;
+package com.lore.master.data.config;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,6 +20,7 @@ import javax.sql.DataSource;
 
 /**
  * 多数据源配置
+ * 通用数据源配置，可被所有Web模块使用
  */
 @Configuration
 @EnableTransactionManagement
@@ -29,9 +30,9 @@ public class DataSourceConfig {
      * 主数据源（C端用户数据库 - lore_consumer）
      */
     @Primary
-    @Bean(name = "primaryDataSource")
-    @ConfigurationProperties(prefix = "spring.datasource.primary")
-    public DataSource primaryDataSource() {
+    @Bean(name = "consumerDataSource")
+    @ConfigurationProperties(prefix = "spring.datasource.consumer")
+    public DataSource consumerDataSource() {
         return DataSourceBuilder.create()
                 .type(HikariDataSource.class)
                 .build();
@@ -52,10 +53,10 @@ public class DataSourceConfig {
      * 主数据源的EntityManagerFactory
      */
     @Primary
-    @Bean(name = "primaryEntityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean primaryEntityManagerFactory(
+    @Bean(name = "consumerEntityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean consumerEntityManagerFactory(
             EntityManagerFactoryBuilder builder,
-            @Qualifier("primaryDataSource") DataSource dataSource) {
+            @Qualifier("consumerDataSource") DataSource dataSource) {
         return builder
                 .dataSource(dataSource)
                 .packages("com.lore.master.data.entity.consumer")
@@ -81,17 +82,17 @@ public class DataSourceConfig {
      * 主数据源的事务管理器
      */
     @Primary
-    @Bean(name = "primaryTransactionManager")
-    public PlatformTransactionManager primaryTransactionManager(
-            @Qualifier("primaryEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+    @Bean(name = "consumerTransactionManager")
+    public PlatformTransactionManager consumerTransactionManager(
+            @Qualifier("consumerEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
     }
 
     /**
      * 主数据源的EntityManager
      */
-    @Bean(name = "primaryEntityManager")
-    public EntityManager primaryEntityManager(@Qualifier("primaryEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+    @Bean(name = "consumerEntityManager")
+    public EntityManager consumerEntityManager(@Qualifier("consumerEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
         return entityManagerFactory.createEntityManager();
     }
 
@@ -113,26 +114,3 @@ public class DataSourceConfig {
     }
 }
 
-/**
- * 主数据源Repository配置
- */
-@Configuration
-@EnableJpaRepositories(
-    basePackages = "com.lore.master.data.repository.consumer",
-    entityManagerFactoryRef = "primaryEntityManagerFactory",
-    transactionManagerRef = "primaryTransactionManager"
-)
-class PrimaryRepositoryConfig {
-}
-
-/**
- * 存储数据源Repository配置
- */
-@Configuration
-@EnableJpaRepositories(
-    basePackages = "com.lore.master.data.repository.storage",
-    entityManagerFactoryRef = "storageEntityManagerFactory",
-    transactionManagerRef = "storageTransactionManager"
-)
-class StorageRepositoryConfig {
-}

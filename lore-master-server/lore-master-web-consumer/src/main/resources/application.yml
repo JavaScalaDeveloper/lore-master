@@ -15,7 +15,7 @@ spring:
   # 数据源配置
   datasource:
     # 主数据源（C端用户数据库）
-    primary:
+    consumer:
       driver-class-name: com.mysql.cj.jdbc.Driver
       jdbc-url: jdbc:mysql://localhost:3306/lore_consumer?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
       username: root
