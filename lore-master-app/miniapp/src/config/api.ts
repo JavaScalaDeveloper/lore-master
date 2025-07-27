@@ -48,6 +48,26 @@ export const API_PATHS = {
     PROFILE: {
       GET: '/api/user/profile',
     },
+    AVATAR: {
+      UPLOAD: '/api/user/avatar/upload',
+      INFO: '/api/user/avatar/info',
+      DELETE: '/api/user/avatar/delete',
+      HISTORY: '/api/user/avatar/history',
+      URL: '/api/user/avatar/url',
+    },
+    FILE: {
+      UPLOAD: '/api/file/upload',
+      UPLOAD_SIMPLE: '/api/file/upload/simple',
+      INFO: '/api/file/info',
+      VIEW: '/api/file/view',
+      DOWNLOAD: '/api/file/download',
+      DELETE: '/api/file',
+      BATCH_DELETE: '/api/file/batch',
+      LIST: '/api/file/list',
+      STATISTICS: '/api/file/statistics',
+      EXISTS: '/api/file/exists',
+      MD5: '/api/file/md5',
+    },
   },
   BUSINESS: {
     AUTH: {

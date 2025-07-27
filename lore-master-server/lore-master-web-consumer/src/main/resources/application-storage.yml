@@ -1,0 +1,105 @@
+# 文件存储配置示例
+file-storage:
+  # 存储策略类型: mysql, aliyun-oss, local-file, minio
+  strategy: mysql
+  
+  # 最大文件大小（字节）
+  max-file-size: 104857600  # 100MB
+  
+  # 允许的文件类型
+  allowed-types:
+    - image/*
+    - video/*
+    - audio/*
+    - application/pdf
+    - application/msword
+    - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+    - application/vnd.ms-excel
+    - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+    - application/vnd.ms-powerpoint
+    - application/vnd.openxmlformats-officedocument.presentationml.presentation
+    - text/plain
+  
+  # 临时文件过期时间（小时）
+  temp-file-expire-hours: 24
+  
+  # 是否启用文件去重
+  enable-deduplication: true
+  
+  # 是否启用访问日志
+  enable-access-log: true
+  
+  # 默认存储桶名称
+  default-bucket-name: default
+  
+  # URL签名过期时间（分钟）
+  url-expire-minutes: 60
+  
+  # MySQL存储配置
+  mysql:
+    # 是否压缩存储
+    enable-compression: false
+    # 压缩阈值（字节）
+    compression-threshold: 1048576  # 1MB
+  
+  # 阿里云OSS存储配置
+  aliyun-oss:
+    # 访问密钥ID
+    access-key-id: ${ALIYUN_OSS_ACCESS_KEY_ID:}
+    # 访问密钥Secret
+    access-key-secret: ${ALIYUN_OSS_ACCESS_KEY_SECRET:}
+    # 端点地址
+    endpoint: ${ALIYUN_OSS_ENDPOINT:oss-cn-hangzhou.aliyuncs.com}
+    # 存储桶名称
+    bucket-name: ${ALIYUN_OSS_BUCKET_NAME:lore-master-files}
+    # 自定义域名
+    custom-domain: ${ALIYUN_OSS_CUSTOM_DOMAIN:}
+    # 是否使用HTTPS
+    use-https: true
+    # 连接超时时间（毫秒）
+    connection-timeout: 10000
+    # Socket超时时间（毫秒）
+    socket-timeout: 50000
+    # 最大连接数
+    max-connections: 1024
+    # 是否启用CNAME
+    enable-cname: false
+  
+  # 本地文件存储配置
+  local-file:
+    # 存储根目录
+    root-path: ${FILE_STORAGE_ROOT_PATH:/data/files}
+    # 是否按日期分目录
+    enable-date-path: true
+    # 访问URL前缀
+    url-prefix: /files
+
+---
+# MySQL存储策略配置
+spring:
+  profiles: mysql-storage
+file-storage:
+  strategy: mysql
+
+---
+# 阿里云OSS存储策略配置
+spring:
+  profiles: aliyun-oss-storage
+file-storage:
+  strategy: aliyun-oss
+  aliyun-oss:
+    access-key-id: your-access-key-id
+    access-key-secret: your-access-key-secret
+    endpoint: oss-cn-hangzhou.aliyuncs.com
+    bucket-name: your-bucket-name
+
+---
+# 本地文件存储策略配置
+spring:
+  profiles: local-file-storage
+file-storage:
+  strategy: local-file
+  local-file:
+    root-path: /data/files
+    enable-date-path: true
+    url-prefix: /files

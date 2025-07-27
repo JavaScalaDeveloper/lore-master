@@ -48,6 +48,12 @@ public class ConsumerUser {
     private String avatarUrl;
 
     /**
+     * 头像文件ID（关联file_storage表）
+     */
+    @Column(name = "avatar_file_id", length = 64)
+    private String avatarFileId;
+
+    /**
      * 性别：1男 2女 0未知
      */
     @Column(name = "gender")

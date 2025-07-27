@@ -12,13 +12,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @SpringBootApplication(scanBasePackages = {
     "com.lore.master.web.consumer",
     "com.lore.master.service.consumer",
+    "com.lore.master.service.middleware.storage",
     "com.lore.master.common"
-})
-@EntityScan(basePackages = {
-    "com.lore.master.data.entity.consumer"
-})
-@EnableJpaRepositories(basePackages = {
-    "com.lore.master.data.repository.consumer"
 })
 @EnableJpaAuditing
 public class WebConsumerApplication {

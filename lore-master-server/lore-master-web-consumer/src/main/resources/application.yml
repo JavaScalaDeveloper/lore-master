@@ -14,19 +14,36 @@ spring:
   
   # 数据源配置
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/lore_consumer?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
-    username: root
-    password: 123456
-    hikari:
-      minimum-idle: 5
-      maximum-pool-size: 20
-      auto-commit: true
-      idle-timeout: 30000
-      pool-name: ConsumerHikariCP
-      max-lifetime: 1800000
-      connection-timeout: 30000
-      connection-test-query: SELECT 1
+    # 主数据源（C端用户数据库）
+    primary:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      jdbc-url: jdbc:mysql://localhost:3306/lore_consumer?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
+      username: root
+      password: 123456
+      hikari:
+        minimum-idle: 5
+        maximum-pool-size: 20
+        auto-commit: true
+        idle-timeout: 30000
+        pool-name: ConsumerHikariCP
+        max-lifetime: 1800000
+        connection-timeout: 30000
+        connection-test-query: SELECT 1
+    # 存储数据源（文件存储数据库 - lore_middleware）
+    storage:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      jdbc-url: jdbc:mysql://localhost:3306/lore_middleware?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
+      username: root
+      password: 123456
+      hikari:
+        minimum-idle: 3
+        maximum-pool-size: 10
+        auto-commit: true
+        idle-timeout: 30000
+        pool-name: StorageHikariCP
+        max-lifetime: 1800000
+        connection-timeout: 30000
+        connection-test-query: SELECT 1
   
   # JPA配置
   jpa:
@@ -109,3 +126,41 @@ lore:
     study:
       daily-goal: 30 # 每日学习目标（分钟）
       level-up-score: 100 # 升级所需积分
+
+# 文件存储配置
+file-storage:
+  # 存储策略：mysql（存储到数据库）
+  strategy: mysql
+
+  # 最大文件大小（字节）- 10MB
+  max-file-size: 10485760
+
+  # 允许的文件类型
+  allowed-types:
+    - image/jpeg
+    - image/jpg
+    - image/png
+    - image/gif
+    - image/webp
+
+  # 临时文件过期时间（小时）
+  temp-file-expire-hours: 24
+
+  # 是否启用文件去重
+  enable-deduplication: true
+
+  # 是否启用访问日志
+  enable-access-log: true
+
+  # 默认存储桶名称
+  default-bucket-name: avatars
+
+  # URL签名过期时间（分钟）
+  url-expire-minutes: 60
+
+  # MySQL存储配置
+  mysql:
+    # 是否压缩存储
+    enable-compression: false
+    # 压缩阈值（字节）
+    compression-threshold: 1048576  # 1MB

@@ -64,8 +64,32 @@
 .user-info {
   display: flex;
   align-items: center;
+  gap: 15px;
 }
 
+.avatar-section {
+  flex-shrink: 0;
+}
+
+.user-avatar-upload {
+  /* 头像上传组件的自定义样式 */
+}
+
+.user-avatar-upload .avatar-container {
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-avatar-upload .avatar-container:hover {
+  border-color: #4A90E2;
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
+
+.user-avatar-upload .avatar-tips {
+  display: none; /* 在个人中心页面隐藏提示文字 */
+}
+
+/* 保留原有的头像样式作为备用 */
 .user-avatar {
   width: 60px;
   height: 60px;

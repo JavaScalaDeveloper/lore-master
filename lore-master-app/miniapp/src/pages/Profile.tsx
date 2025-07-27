@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import './Profile.css';
 import { consumerApi } from '../utils/request';
 import { API_PATHS } from '../config/api';
+import AvatarUpload from '../components/AvatarUpload';
 
 interface UserInfo {
   id: string;
   nickname: string;
   avatar: string;
+  avatarFileId?: string; // 头像文件ID
   phone?: string;
   email?: string;
   studyDays: number;
@@ -208,6 +210,37 @@ const Profile: React.FC = () => {
     }
   };
 
+  /**
+   * 处理头像上传成功
+   */
+  const handleAvatarUploadSuccess = (avatarInfo: any) => {
+    console.log('🎉 头像上传成功:', avatarInfo);
+
+    if (userInfo) {
+      // 更新用户信息中的头像
+      const updatedUserInfo = {
+        ...userInfo,
+        avatar: avatarInfo.accessUrl,
+        avatarFileId: avatarInfo.fileId
+      };
+
+      setUserInfo(updatedUserInfo);
+
+      // 更新本地存储
+      localStorage.setItem('userInfo', JSON.stringify(updatedUserInfo));
+
+      console.log('✅ 用户头像信息已更新');
+    }
+  };
+
+  /**
+   * 处理头像上传失败
+   */
+  const handleAvatarUploadError = (error: string) => {
+    console.error('❌ 头像上传失败:', error);
+    // 这里可以添加更多的错误处理逻辑
+  };
+
   const menuItems = [
     { icon: '📚', title: '我的课程', desc: '查看学习进度' },
     { icon: '📊', title: '学习统计', desc: '详细数据分析' },
@@ -227,7 +260,16 @@ const Profile: React.FC = () => {
           {/* 用户信息卡片 */}
           <div className="user-card">
             <div className="user-info">
-              <img src={userInfo.avatar} alt="头像" className="user-avatar" />
+              <div className="avatar-section">
+                <AvatarUpload
+                  currentAvatar={userInfo.avatar}
+                  userId={userInfo.id}
+                  onUploadSuccess={handleAvatarUploadSuccess}
+                  onUploadError={handleAvatarUploadError}
+                  size={80}
+                  className="user-avatar-upload"
+                />
+              </div>
               <div className="user-details">
                 <h3 className="user-name">{userInfo.nickname}</h3>
                 <p className="user-id">ID: {userInfo.id}</p>

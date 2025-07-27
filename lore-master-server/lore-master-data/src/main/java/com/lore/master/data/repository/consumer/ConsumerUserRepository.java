@@ -84,4 +84,12 @@ public interface ConsumerUserRepository extends JpaRepository<ConsumerUser, Long
     @org.springframework.data.jpa.repository.Modifying
     @org.springframework.transaction.annotation.Transactional
     void updateScoreAndLevel(@Param("userId") String userId, @Param("score") Integer score, @Param("level") Integer level);
+
+    /**
+     * 更新用户头像信息
+     */
+    @Query("UPDATE ConsumerUser u SET u.avatarUrl = :avatarUrl, u.avatarFileId = :avatarFileId WHERE u.userId = :userId")
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    void updateAvatarInfo(@Param("userId") String userId, @Param("avatarUrl") String avatarUrl, @Param("avatarFileId") String avatarFileId);
 }
