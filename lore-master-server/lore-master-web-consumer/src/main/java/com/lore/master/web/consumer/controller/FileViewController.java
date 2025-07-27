@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,8 +30,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class FileViewController {
 
-    @Autowired
-    @Qualifier("storageEntityManager")
+    @PersistenceContext(unitName = "storage")
     private EntityManager storageEntityManager;
 
     /**
@@ -65,10 +65,10 @@ public class FileViewController {
             Long fileSize = ((Number) fileData[2]).longValue();
             String fileType = (String) fileData[3];
             byte[] binaryData = (byte[]) fileData[4];
-            Integer status = ((Number) fileData[5]).intValue();
+            Boolean status = (Boolean) fileData[5];
 
             // 检查文件状态
-            if (status != 1) {
+            if (status == null || !status) {
                 log.warn("文件已被删除: fileId={}, status={}", fileId, status);
                 handleFileError(response, "File has been deleted: " + fileId, HttpServletResponse.SC_NOT_FOUND);
                 return;
@@ -137,10 +137,10 @@ public class FileViewController {
             Long fileSize = ((Number) fileData[2]).longValue();
             String fileType = (String) fileData[3];
             byte[] binaryData = (byte[]) fileData[4];
-            Integer status = ((Number) fileData[5]).intValue();
+            Boolean status = (Boolean) fileData[5];
 
             // 检查文件状态
-            if (status != 1) {
+            if (status == null || !status) {
                 log.warn("文件已被删除: fileId={}, status={}", fileId, status);
                 handleFileError(response, "File has been deleted: " + fileId, HttpServletResponse.SC_NOT_FOUND);
                 return;
@@ -181,7 +181,7 @@ public class FileViewController {
     @GetMapping("/exists")
     public Result<Boolean> fileExists(@RequestParam("fileId") String fileId) {
         try {
-            String sql = "SELECT COUNT(*) FROM file_storage WHERE file_id = ? AND status = 1";
+            String sql = "SELECT COUNT(*) FROM file_storage WHERE file_id = ? AND status = true";
             Query query = storageEntityManager.createNativeQuery(sql);
             query.setParameter(1, fileId);
 
@@ -216,9 +216,9 @@ public class FileViewController {
             }
 
             Object[] data = results.get(0);
-            Integer status = ((Number) data[10]).intValue();
+            Boolean status = (Boolean) data[10];
 
-            if (status != 1) {
+            if (status == null || !status) {
                 return Result.error("文件已被删除: " + fileId);
             }
 
