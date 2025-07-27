@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+
 import javax.sql.DataSource;
 
 /**
@@ -33,6 +34,25 @@ public class DataSourceConfig {
     @Bean(name = "consumerDataSource")
     @ConfigurationProperties(prefix = "spring.datasource.consumer")
     public DataSource consumerDataSource() {
+        return DataSourceBuilder.create()
+                .type(HikariDataSource.class)
+                .build();
+    }
+
+    @Bean(name = "adminDataSource")
+    @ConfigurationProperties(prefix = "spring.datasource.admin")
+    public DataSource adminDataSource() {
+        return DataSourceBuilder.create()
+                .type(HikariDataSource.class)
+                .build();
+    }
+
+    /**
+     * B端数据源（B端业务数据库 - lore_business）
+     */
+    @Bean(name = "businessDataSource")
+    @ConfigurationProperties(prefix = "spring.datasource.business")
+    public DataSource businessDataSource() {
         return DataSourceBuilder.create()
                 .type(HikariDataSource.class)
                 .build();
@@ -60,7 +80,35 @@ public class DataSourceConfig {
         return builder
                 .dataSource(dataSource)
                 .packages("com.lore.master.data.entity.consumer")
-                .persistenceUnit("primary")
+                .persistenceUnit("consumer")
+                .build();
+    }
+
+    /**
+     * 管理端数据源的EntityManagerFactory
+     */
+    @Bean(name = "adminEntityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean adminEntityManagerFactory(
+            EntityManagerFactoryBuilder builder,
+            @Qualifier("adminDataSource") DataSource dataSource) {
+        return builder
+                .dataSource(dataSource)
+                .packages("com.lore.master.data.entity.admin")
+                .persistenceUnit("admin")
+                .build();
+    }
+
+    /**
+     * B端数据源的EntityManagerFactory
+     */
+    @Bean(name = "businessEntityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean businessEntityManagerFactory(
+            EntityManagerFactoryBuilder builder,
+            @Qualifier("businessDataSource") DataSource dataSource) {
+        return builder
+                .dataSource(dataSource)
+                .packages("com.lore.master.data.entity.business")
+                .persistenceUnit("business")
                 .build();
     }
 
@@ -96,12 +144,43 @@ public class DataSourceConfig {
         return entityManagerFactory.createEntityManager();
     }
 
+    @Bean(name = "adminEntityManager")
+    public EntityManager adminEntityManager(@Qualifier("adminEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+        return entityManagerFactory.createEntityManager();
+    }
+
+    /**
+     * B端数据源的EntityManager
+     */
+    @Bean(name = "businessEntityManager")
+    public EntityManager businessEntityManager(@Qualifier("businessEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+        return entityManagerFactory.createEntityManager();
+    }
+
     /**
      * 存储数据源的EntityManager
      */
     @Bean(name = "storageEntityManager")
     public EntityManager storageEntityManager(@Qualifier("storageEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
         return entityManagerFactory.createEntityManager();
+    }
+
+    /**
+     * 管理端数据源的事务管理器
+     */
+    @Bean(name = "adminTransactionManager")
+    public PlatformTransactionManager adminTransactionManager(
+            @Qualifier("adminEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+        return new JpaTransactionManager(entityManagerFactory);
+    }
+
+    /**
+     * B端数据源的事务管理器
+     */
+    @Bean(name = "businessTransactionManager")
+    public PlatformTransactionManager businessTransactionManager(
+            @Qualifier("businessEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+        return new JpaTransactionManager(entityManagerFactory);
     }
 
     /**
@@ -113,4 +192,3 @@ public class DataSourceConfig {
         return new JpaTransactionManager(entityManagerFactory);
     }
 }
-

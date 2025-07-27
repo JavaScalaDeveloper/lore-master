@@ -13,7 +13,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
     scanBasePackages = {
         "com.lore.master.web.consumer",
         "com.lore.master.service.consumer",
-        "com.lore.master.service.middleware.storage",
+        "com.lore.master.service.middleware",
         "com.lore.master.data.config",
         "com.lore.master.common"
     },
@@ -21,6 +21,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 )
 @EntityScan(basePackages = {
     "com.lore.master.data.entity.consumer",
+//    "com.lore.master.data.entity.admin",
+    "com.lore.master.data.entity.business",
     "com.lore.master.data.entity.storage"
 })
 @EnableJpaAuditing

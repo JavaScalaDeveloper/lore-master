@@ -120,4 +120,30 @@ public interface FileStorageRepository extends JpaRepository<FileStorage, Long> 
      */
     @Query("SELECT f FROM FileStorage f WHERE f.status = :status ORDER BY f.createdTime DESC")
     Page<FileStorage> findRecentFiles(@Param("status") Integer status, Pageable pageable);
+
+    /**
+     * 根据文件ID和状态查找文件
+     */
+    Optional<FileStorage> findByFileIdAndStatus(String fileId, Integer status);
+
+    /**
+     * 根据文件ID统计数量
+     */
+    Long countByFileIdAndStatus(String fileId, Integer status);
+
+    /**
+     * 查找用户在指定存储桶中相同MD5的文件（用于重复上传检测）
+     */
+    @Query("SELECT f FROM FileStorage f WHERE f.md5Hash = :md5Hash AND f.uploadUserId = :userId AND f.bucketName = :bucketName AND f.status = 1 ORDER BY f.createdTime DESC")
+    List<FileStorage> findByMd5HashAndUploadUserIdAndBucketNameForDuplicateCheck(
+            @Param("md5Hash") String md5Hash,
+            @Param("userId") String userId,
+            @Param("bucketName") String bucketName);
+
+    /**
+     * 更新文件访问统计
+     */
+    @Modifying
+    @Query("UPDATE FileStorage f SET f.accessCount = f.accessCount + 1, f.lastAccessTime = CURRENT_TIMESTAMP WHERE f.fileId = :fileId")
+    int updateAccessCount(@Param("fileId") String fileId);
 }

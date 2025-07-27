@@ -1,25 +1,21 @@
 package com.lore.master.web.consumer.controller;
 
 import com.lore.master.common.result.Result;
+import com.lore.master.data.vo.storage.FileInfoVO;
+import com.lore.master.service.middleware.storage.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 文件查看控制器（简化版，使用查询参数风格，不使用RESTful风格）
@@ -30,8 +26,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class FileViewController {
 
-    @PersistenceContext(unitName = "storage")
-    private EntityManager storageEntityManager;
+    private final FileStorageService fileStorageService;
 
     /**
      * 查看文件（在线预览）- 使用查询参数
@@ -46,42 +41,25 @@ public class FileViewController {
         try {
             log.info("接收到文件查看请求: fileId={}, accessUserId={}", fileId, accessUserId);
 
-            // 从数据库查询文件信息
-            String sql = "SELECT file_id, original_name, file_size, file_type, file_data, status FROM file_storage WHERE file_id = ?";
-            Query query = storageEntityManager.createNativeQuery(sql);
-            query.setParameter(1, fileId);
+            // 获取文件信息
+            FileInfoVO fileInfo = fileStorageService.getFileInfo(fileId);
+            if (fileInfo == null) {
+                log.warn("文件信息不存在: fileId={}", fileId);
+                handleFileError(response, "File info not found: " + fileId, HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
 
-            @SuppressWarnings("unchecked")
-            List<Object[]> results = query.getResultList();
-
-            if (results.isEmpty()) {
-                log.warn("文件不存在: fileId={}", fileId);
+            // 使用FileStorageService下载文件数据
+            byte[] fileData = fileStorageService.downloadFile(fileId, accessUserId, "consumer", request.getRemoteAddr());
+            if (fileData == null || fileData.length == 0) {
+                log.warn("文件不存在或数据为空: fileId={}", fileId);
                 handleFileError(response, "File not found: " + fileId, HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
-
-            Object[] fileData = results.get(0);
-            String originalName = (String) fileData[1];
-            Long fileSize = ((Number) fileData[2]).longValue();
-            String fileType = (String) fileData[3];
-            byte[] binaryData = (byte[]) fileData[4];
-            Boolean status = (Boolean) fileData[5];
-
-            // 检查文件状态
-            if (status == null || !status) {
-                log.warn("文件已被删除: fileId={}, status={}", fileId, status);
-                handleFileError(response, "File has been deleted: " + fileId, HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-
-            if (binaryData == null || binaryData.length == 0) {
-                log.warn("文件数据为空: fileId={}", fileId);
-                handleFileError(response, "File data not found: " + fileId, HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-
-            // 更新访问统计
-            updateAccessCount(fileId);
+            String originalName = fileInfo.getOriginalName();
+            Long fileSize = fileInfo.getFileSize();
+            String fileType = fileInfo.getFileType();
+            byte[] binaryData = fileData;
 
             // 设置响应头
             response.setContentType(fileType);
@@ -118,42 +96,23 @@ public class FileViewController {
         try {
             log.info("接收到文件下载请求: fileId={}, accessUserId={}", fileId, accessUserId);
 
-            // 从数据库查询文件信息
-            String sql = "SELECT file_id, original_name, file_size, file_type, file_data, status FROM file_storage WHERE file_id = ?";
-            Query query = storageEntityManager.createNativeQuery(sql);
-            query.setParameter(1, fileId);
+            // 获取文件信息
+            FileInfoVO fileInfo = fileStorageService.getFileInfo(fileId);
+            if (fileInfo == null) {
+                log.warn("文件信息不存在: fileId={}", fileId);
+                handleFileError(response, "File info not found: " + fileId, HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
 
-            @SuppressWarnings("unchecked")
-            List<Object[]> results = query.getResultList();
-
-            if (results.isEmpty()) {
-                log.warn("文件不存在: fileId={}", fileId);
+            // 使用FileStorageService下载文件数据
+            byte[] fileData = fileStorageService.downloadFile(fileId, accessUserId, "consumer", request.getRemoteAddr());
+            if (fileData == null || fileData.length == 0) {
+                log.warn("文件不存在或数据为空: fileId={}", fileId);
                 handleFileError(response, "File not found: " + fileId, HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
-
-            Object[] fileData = results.get(0);
-            String originalName = (String) fileData[1];
-            Long fileSize = ((Number) fileData[2]).longValue();
-            String fileType = (String) fileData[3];
-            byte[] binaryData = (byte[]) fileData[4];
-            Boolean status = (Boolean) fileData[5];
-
-            // 检查文件状态
-            if (status == null || !status) {
-                log.warn("文件已被删除: fileId={}, status={}", fileId, status);
-                handleFileError(response, "File has been deleted: " + fileId, HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-
-            if (binaryData == null || binaryData.length == 0) {
-                log.warn("文件数据为空: fileId={}", fileId);
-                handleFileError(response, "File data not found: " + fileId, HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-
-            // 更新访问统计
-            updateAccessCount(fileId);
+            String originalName = fileInfo.getOriginalName();
+            byte[] binaryData = fileData;
 
             // 设置响应头（强制下载）
             response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
@@ -181,13 +140,7 @@ public class FileViewController {
     @GetMapping("/exists")
     public Result<Boolean> fileExists(@RequestParam("fileId") String fileId) {
         try {
-            String sql = "SELECT COUNT(*) FROM file_storage WHERE file_id = ? AND status = true";
-            Query query = storageEntityManager.createNativeQuery(sql);
-            query.setParameter(1, fileId);
-
-            Number count = (Number) query.getSingleResult();
-            boolean exists = count.intValue() > 0;
-
+            boolean exists = fileStorageService.fileExists(fileId);
             return Result.success("文件存在性检查完成", exists);
 
         } catch (Exception e) {
@@ -203,40 +156,25 @@ public class FileViewController {
     @GetMapping("/info")
     public Result<Map<String, Object>> getFileInfo(@RequestParam("fileId") String fileId) {
         try {
-            String sql = "SELECT file_id, original_name, file_size, file_type, file_category, bucket_name, " +
-                        "is_public, created_time, access_count, last_access_time, status FROM file_storage WHERE file_id = ?";
-            Query query = storageEntityManager.createNativeQuery(sql);
-            query.setParameter(1, fileId);
-
-            @SuppressWarnings("unchecked")
-            List<Object[]> results = query.getResultList();
-
-            if (results.isEmpty()) {
+            FileInfoVO fileInfo = fileStorageService.getFileInfo(fileId);
+            if (fileInfo == null) {
                 return Result.error("文件不存在: " + fileId);
             }
+            Map<String, Object> result = new HashMap<>();
+            result.put("fileId", fileInfo.getFileId());
+            result.put("fileName", fileInfo.getOriginalName());
+            result.put("fileSize", fileInfo.getFileSize());
+            result.put("fileType", fileInfo.getFileType());
+            result.put("fileCategory", fileInfo.getFileCategory());
+            result.put("bucketName", fileInfo.getBucketName());
+            result.put("isPublic", fileInfo.getIsPublic());
+            result.put("accessUrl", "/api/file/view?fileId=" + fileId);
+            result.put("downloadUrl", "/api/file/download?fileId=" + fileId);
+            result.put("uploadTime", fileInfo.getCreatedTime());
+            result.put("accessCount", fileInfo.getAccessCount());
+            result.put("lastAccessTime", fileInfo.getLastAccessTime());
 
-            Object[] data = results.get(0);
-            Boolean status = (Boolean) data[10];
-
-            if (status == null || !status) {
-                return Result.error("文件已被删除: " + fileId);
-            }
-
-            Map<String, Object> fileInfo = new HashMap<>();
-            fileInfo.put("fileId", data[0]);
-            fileInfo.put("fileName", data[1]);
-            fileInfo.put("fileSize", data[2]);
-            fileInfo.put("fileType", data[3]);
-            fileInfo.put("fileCategory", data[4]);
-            fileInfo.put("bucketName", data[5]);
-            fileInfo.put("isPublic", data[6]);
-            fileInfo.put("accessUrl", "/api/file/view?fileId=" + fileId);
-            fileInfo.put("downloadUrl", "/api/file/download?fileId=" + fileId);
-            fileInfo.put("uploadTime", data[7]);
-            fileInfo.put("accessCount", data[8]);
-            fileInfo.put("lastAccessTime", data[9]);
-
-            return Result.success("获取文件信息成功", fileInfo);
+            return Result.success("获取文件信息成功", result);
 
         } catch (Exception e) {
             log.error("获取文件信息失败: fileId={}", fileId, e);
@@ -244,21 +182,7 @@ public class FileViewController {
         }
     }
 
-    /**
-     * 更新访问统计
-     */
-    private void updateAccessCount(String fileId) {
-        try {
-            String updateSql = "UPDATE file_storage SET access_count = access_count + 1, last_access_time = NOW() WHERE file_id = ?";
-            Query updateQuery = storageEntityManager.createNativeQuery(updateSql);
-            updateQuery.setParameter(1, fileId);
-            updateQuery.executeUpdate();
-
-            log.debug("更新文件访问统计成功: fileId={}", fileId);
-        } catch (Exception e) {
-            log.warn("更新访问统计失败: fileId={}, error={}", fileId, e.getMessage());
-        }
-    }
+    // 访问统计更新已移至FileStorageService
 
     /**
      * 处理文件错误

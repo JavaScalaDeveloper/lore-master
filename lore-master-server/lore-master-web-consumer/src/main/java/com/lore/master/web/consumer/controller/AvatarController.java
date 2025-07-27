@@ -1,33 +1,23 @@
 package com.lore.master.web.consumer.controller;
 
-import com.alibaba.fastjson2.JSONObject;
 import com.lore.master.common.result.Result;
 import com.lore.master.data.entity.consumer.ConsumerUser;
 import com.lore.master.data.repository.consumer.ConsumerUserRepository;
-import com.lore.master.web.consumer.dto.FileUploadInfo;
+import com.lore.master.data.vo.storage.FileInfoVO;
+import com.lore.master.service.middleware.storage.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
-
-import java.security.MessageDigest;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 /**
- * 用户头像管理控制器（简化版，使用查询参数风格）
+ * 用户头像管理控制器（使用JPA Repository实现）
  */
 @Slf4j
 @RestController
@@ -36,15 +26,13 @@ import java.util.Optional;
 public class AvatarController {
 
     private final ConsumerUserRepository consumerUserRepository;
-
-    @PersistenceContext(unitName = "storage")
-    private EntityManager storageEntityManager;
+    private final FileStorageService fileStorageService;
 
     /**
-     * 上传用户头像
+     * 上传用户头像（使用JPA Repository实现）
      */
     @PostMapping("/upload")
-    @Transactional(value = "storageTransactionManager", rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
+    @Transactional(rollbackFor = Exception.class)
     public Result<Map<String, Object>> uploadAvatar(
             @RequestParam("file") MultipartFile file,
             @RequestParam("userId") String userId,
@@ -67,17 +55,12 @@ public class AvatarController {
                 return Result.error("文件验证失败");
             }
 
-            // 3. 读取文件数据并计算哈希
-            byte[] fileData = file.getBytes();
-            String md5Hash = calculateMD5(fileData);
-            String sha256Hash = calculateSHA256(fileData);
-
-            // 4. 如果用户已有头像，先删除旧头像
+            // 3. 如果用户已有头像，先删除旧头像
             if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
                 try {
                     String oldFileId = extractFileIdFromUrl(user.getAvatarUrl());
                     if (oldFileId != null) {
-                        deleteOldAvatar(oldFileId);
+                        fileStorageService.deleteFile(oldFileId, userId, "consumer");
                         log.info("已删除用户旧头像: userId={}, oldFileId={}", userId, oldFileId);
                     }
                 } catch (Exception e) {
@@ -85,47 +68,33 @@ public class AvatarController {
                 }
             }
 
-            // 5. 创建文件上传信息对象
-            String tempFileId = "avatar_" + userId + "_" + System.currentTimeMillis();
-            FileUploadInfo uploadInfo = new FileUploadInfo(tempFileId, file, userId, user.getNickname(), remark);
-            uploadInfo.setFileName(generateFileName(file.getOriginalFilename()));
-            uploadInfo.setFilePath(generateFilePath("avatars", uploadInfo.getFileName()));
-            uploadInfo.setFileExtension(getFileExtension(file.getOriginalFilename()));
-            uploadInfo.setFileData(fileData);
-            uploadInfo.setMd5Hash(md5Hash);
-            uploadInfo.setSha256Hash(sha256Hash);
+            // 4. 使用FileStorageService上传文件
+            FileInfoVO fileInfo = fileStorageService.uploadFile(file, userId, "consumer");
+            String actualFileId = fileInfo.getFileId();
 
-            // 6. 保存或更新文件数据到数据库（支持重复上传）
-            // 返回实际使用的fileId（可能是现有的fileId）
-            String actualFileId = saveOrUpdateFileStorage(uploadInfo);
+            // 5. 生成访问URL
+            String avatarUrl = "/api/file/view?fileId=" + actualFileId;
+            String downloadUrl = "/api/file/download?fileId=" + actualFileId;
 
-            // 7. 生成访问URL（使用查询参数格式，使用实际的fileId）
-            String avatarUrl = "/api/file/view?fileId=" + actualFileId + "&accessUserId=" + userId + "&accessUserType=consumer";
-            String downloadUrl = "/api/file/download?fileId=" + actualFileId + "&accessUserId=" + userId + "&accessUserType=consumer";
-
-            // 8. 更新用户头像信息
-            user.setAvatarUrl(avatarUrl);
-            consumerUserRepository.save(user);
-
-            // 9. 构建响应数据
+            // 7. 构建响应数据
             Map<String, Object> responseData = new HashMap<>();
             responseData.put("fileId", actualFileId);
-            responseData.put("fileName", file.getOriginalFilename());
-            responseData.put("fileSize", file.getSize());
-            responseData.put("fileSizeFormatted", formatFileSize(file.getSize()));
+            responseData.put("fileName", fileInfo.getOriginalName());
+            responseData.put("fileSize", fileInfo.getFileSize());
+            responseData.put("fileSizeFormatted", fileInfo.getFileSizeFormatted());
             responseData.put("accessUrl", avatarUrl);
             responseData.put("downloadUrl", downloadUrl);
-            responseData.put("uploadTime", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-            responseData.put("fileType", file.getContentType());
-            responseData.put("fileCategory", "image");
-            responseData.put("bucketName", "avatars");
-            responseData.put("md5Hash", md5Hash);
-            responseData.put("fileExtension", uploadInfo.getFileExtension());
+            responseData.put("uploadTime", fileInfo.getCreatedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            responseData.put("fileType", fileInfo.getFileType());
+            responseData.put("fileCategory", fileInfo.getFileCategory());
+            responseData.put("bucketName", fileInfo.getBucketName());
+            responseData.put("md5Hash", fileInfo.getMd5Hash());
+            responseData.put("fileExtension", fileInfo.getFileExtension());
             responseData.put("userId", userId);
             responseData.put("userNickname", user.getNickname());
 
             log.info("用户头像上传成功: userId={}, actualFileId={}, fileName={}, accessUrl={}",
-                    userId, actualFileId, file.getOriginalFilename(), avatarUrl);
+                    userId, actualFileId, fileInfo.getOriginalName(), avatarUrl);
 
             return Result.success("头像上传成功", responseData);
 
@@ -217,39 +186,7 @@ public class AvatarController {
         return String.format("%.1f %s", formattedSize, units[digitGroups]);
     }
 
-    /**
-     * 生成文件名
-     */
-    private String generateFileName(String originalFileName) {
-        String extension = getFileExtension(originalFileName);
-        String uuid = java.util.UUID.randomUUID().toString().replace("-", "");
-        return uuid + (extension.isEmpty() ? "" : "." + extension);
-    }
-
-    /**
-     * 生成文件路径
-     */
-    private String generateFilePath(String bucketName, String fileName) {
-        LocalDateTime now = LocalDateTime.now();
-        return String.format("%s/%d/%02d/%02d/%s",
-                bucketName, now.getYear(), now.getMonthValue(), now.getDayOfMonth(), fileName);
-    }
-
-    /**
-     * 获取文件扩展名
-     */
-    private String getFileExtension(String fileName) {
-        if (fileName == null || fileName.isEmpty()) {
-            return "";
-        }
-
-        int lastDotIndex = fileName.lastIndexOf('.');
-        if (lastDotIndex == -1 || lastDotIndex == fileName.length() - 1) {
-            return "";
-        }
-
-        return fileName.substring(lastDotIndex + 1).toLowerCase();
-    }
+    // 文件处理相关方法已移至FileStorageService
 
     /**
      * 从URL中提取fileId
@@ -275,157 +212,5 @@ public class AvatarController {
         return url.substring(startIndex, endIndex);
     }
 
-    /**
-     * 删除旧头像
-     */
-    private void deleteOldAvatar(String fileId) {
-        try {
-            String deleteSql = "UPDATE file_storage SET status = false, updated_time = NOW() WHERE file_id = ?";
-            Query deleteQuery = storageEntityManager.createNativeQuery(deleteSql);
-            deleteQuery.setParameter(1, fileId);
-            deleteQuery.executeUpdate();
-        } catch (Exception e) {
-            log.warn("删除旧头像失败: fileId={}, error={}", fileId, e.getMessage());
-        }
-    }
-
-    /**
-     * 计算MD5哈希
-     */
-    private String calculateMD5(byte[] data) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] hash = md.digest(data);
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hash) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (Exception e) {
-            log.warn("计算MD5失败", e);
-            return "";
-        }
-    }
-
-    /**
-     * 计算SHA256哈希
-     */
-    private String calculateSHA256(byte[] data) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hash = md.digest(data);
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hash) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (Exception e) {
-            log.warn("计算SHA256失败", e);
-            return "";
-        }
-    }
-
-    /**
-     * 保存或更新文件存储记录（支持重复上传，避免唯一索引冲突）
-     * 使用先查询后操作的方式，避免INSERT ON DUPLICATE KEY UPDATE的多线程问题
-     * @param uploadInfo 文件上传信息
-     * @return 实际使用的fileId（新文件返回新fileId，重复文件返回现有fileId）
-     */
-    private String saveOrUpdateFileStorage(FileUploadInfo uploadInfo) {
-        try {
-            // 1. 先查询是否存在相同的文件记录
-            // 策略：根据用户ID + 文件MD5哈希判断，避免同一用户重复存储相同内容的头像
-            // 这样既避免了重复存储，又允许不同用户上传相同的头像文件
-            String checkSql = "SELECT file_id, original_name, status FROM file_storage WHERE md5_hash = ? AND upload_user_id = ? AND bucket_name = ? ORDER BY created_time DESC LIMIT 1";
-            Query checkQuery = storageEntityManager.createNativeQuery(checkSql);
-            checkQuery.setParameter(1, uploadInfo.getMd5Hash());
-            checkQuery.setParameter(2, uploadInfo.getUserId());
-            checkQuery.setParameter(3, uploadInfo.getBucketName());
-
-            @SuppressWarnings("unchecked")
-            List<Object[]> existingFiles = checkQuery.getResultList();
-
-            if (!existingFiles.isEmpty()) {
-                // 2. 如果存在相同文件，更新现有记录，并返回现有的fileId
-                Object[] existingFile = existingFiles.get(0);
-                String existingFileId = (String) existingFile[0];
-                String existingOriginalName = (String) existingFile[1];
-                Boolean existingStatus = (Boolean) existingFile[2];
-
-                log.info("发现相同文件，更新现有记录: existingFileId={}, existingName={}, newName={}, md5Hash={}",
-                        existingFileId, existingOriginalName, uploadInfo.getFile().getOriginalFilename(), uploadInfo.getMd5Hash());
-
-                String updateSql = "UPDATE file_storage SET " +
-                                 "original_name = ?, file_name = ?, file_path = ?, file_size = ?, " +
-                                 "file_type = ?, file_extension = ?, file_data = ?, sha256_hash = ?, " +
-                                 "remark = ?, status = true, access_count = 0, updated_time = NOW() " +
-                                 "WHERE file_id = ?";
-
-                Query updateQuery = storageEntityManager.createNativeQuery(updateSql);
-                updateQuery.setParameter(1, uploadInfo.getFile().getOriginalFilename());
-                updateQuery.setParameter(2, uploadInfo.getFileName());
-                updateQuery.setParameter(3, uploadInfo.getFilePath());
-                updateQuery.setParameter(4, uploadInfo.getFile().getSize());
-                updateQuery.setParameter(5, uploadInfo.getFile().getContentType());
-                updateQuery.setParameter(6, uploadInfo.getFileExtension());
-                updateQuery.setParameter(7, uploadInfo.getFileData());
-                updateQuery.setParameter(8, uploadInfo.getSha256Hash());
-                updateQuery.setParameter(9, uploadInfo.getRemark() != null ? uploadInfo.getRemark() : "用户头像 - " + uploadInfo.getUserNickname());
-                updateQuery.setParameter(10, existingFileId);
-
-                int updateResult = updateQuery.executeUpdate();
-                if (updateResult <= 0) {
-                    throw new RuntimeException("更新文件记录失败");
-                }
-
-                log.info("文件记录更新成功: fileId={}, originalName={}", existingFileId, uploadInfo.getFile().getOriginalFilename());
-
-                // 返回现有的fileId，这是关键修复！
-                return existingFileId;
-
-            } else {
-                // 3. 如果不存在相同文件，插入新记录
-                log.info("插入新文件记录: fileId={}, md5Hash={}", uploadInfo.getFileId(), uploadInfo.getMd5Hash());
-
-                String insertSql = "INSERT INTO file_storage (file_id, original_name, file_name, file_path, file_size, " +
-                                 "file_type, file_extension, file_category, file_data, md5_hash, sha256_hash, " +
-                                 "upload_user_id, upload_user_type, bucket_name, is_public, remark, status, access_count, " +
-                                 "created_time, updated_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
-
-                Query insertQuery = storageEntityManager.createNativeQuery(insertSql);
-                insertQuery.setParameter(1, uploadInfo.getFileId());
-                insertQuery.setParameter(2, uploadInfo.getFile().getOriginalFilename());
-                insertQuery.setParameter(3, uploadInfo.getFileName());
-                insertQuery.setParameter(4, uploadInfo.getFilePath());
-                insertQuery.setParameter(5, uploadInfo.getFile().getSize());
-                insertQuery.setParameter(6, uploadInfo.getFile().getContentType());
-                insertQuery.setParameter(7, uploadInfo.getFileExtension());
-                insertQuery.setParameter(8, uploadInfo.getFileCategory());
-                insertQuery.setParameter(9, uploadInfo.getFileData());
-                insertQuery.setParameter(10, uploadInfo.getMd5Hash());
-                insertQuery.setParameter(11, uploadInfo.getSha256Hash());
-                insertQuery.setParameter(12, uploadInfo.getUserId());
-                insertQuery.setParameter(13, "consumer");
-                insertQuery.setParameter(14, uploadInfo.getBucketName());
-                insertQuery.setParameter(15, uploadInfo.getIsPublic());
-                insertQuery.setParameter(16, uploadInfo.getRemark() != null ? uploadInfo.getRemark() : "用户头像 - " + uploadInfo.getUserNickname());
-                insertQuery.setParameter(17, true);
-                insertQuery.setParameter(18, 0L);
-
-                int insertResult = insertQuery.executeUpdate();
-                if (insertResult <= 0) {
-                    throw new RuntimeException("插入文件记录失败");
-                }
-
-                log.info("文件记录插入成功: fileId={}, originalName={}", uploadInfo.getFileId(), uploadInfo.getFile().getOriginalFilename());
-
-                // 返回新生成的fileId
-                return uploadInfo.getFileId();
-            }
-
-        } catch (Exception e) {
-            log.error("保存或更新文件存储记录失败: fileId={}, fileName={}", uploadInfo.getFileId(), uploadInfo.getFile().getOriginalFilename(), e);
-            throw new RuntimeException("保存文件到数据库失败: " + e.getMessage());
-        }
-    }
+    // 所有文件存储相关的逻辑已移至FileStorageService，使用JPA Repository实现
 }
