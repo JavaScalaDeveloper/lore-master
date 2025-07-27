@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Form, Input, Button, message } from 'antd';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { encryptPasswordForTransmission } from '../../../../utils/crypto';
+import { adminApi } from '../../../../utils/request';
+import { API_PATHS } from '../../../../config/api';
 
 const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -16,7 +17,7 @@ const Login: React.FC = () => {
       console.log('原始密码:', values.password);
       console.log('加密后密码:', encryptedPassword);
 
-      const response = await axios.post('/api/admin/auth/login', {
+      const response = await adminApi.post(API_PATHS.ADMIN.AUTH.LOGIN, {
         username: values.username,
         password: encryptedPassword, // 传输加密后的密码
       });

@@ -220,7 +220,7 @@ public class UserIdGenerator {
     public String generateUniqueUserId() {
         String userId;
         int attempts = 0;
-        int maxAttempts = 10;
+        int maxAttempts = 12;
         
         do {
             userId = generateUserId();

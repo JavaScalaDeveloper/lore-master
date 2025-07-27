@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, message } from 'antd';
-import axios from 'axios';
+import { adminApi } from '../../../../utils/request';
+import { API_PATHS } from '../../../../config/api';
 
 const columns = [
   { title: 'ID', dataIndex: 'id', key: 'id' },
@@ -16,14 +17,9 @@ const UserManage: React.FC = () => {
   const fetchUsers = async (page = 1, pageSize = 10) => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('adminToken');
-      const tokenType = localStorage.getItem('tokenType') || 'Bearer';
-
-      const res = await axios.post('/api/admin/users/page', {
+      const res = await adminApi.post(API_PATHS.ADMIN.USERS.PAGE, {
         current: page,
         size: pageSize,
-      }, {
-        headers: token ? { Authorization: `${tokenType} ${token}` } : {},
       });
 
       // 检查新的响应格式：{ code: 200, message: "success", data: {...} }

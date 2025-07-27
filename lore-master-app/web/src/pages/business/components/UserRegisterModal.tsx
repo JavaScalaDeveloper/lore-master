@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Modal, Form, Input, Button, Select, Radio, message, Tabs, Space } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined, SafetyOutlined } from '@ant-design/icons';
 import { encryptPasswordForTransmission } from '../../../utils/crypto';
+import { consumerApi } from '../../../utils/request';
+import { API_PATHS } from '../../../config/api';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -39,8 +41,7 @@ const UserRegisterModal: React.FC<UserRegisterModalProps> = ({
 
       setSendingCode(true);
       
-      const response = await fetch('http://localhost:8082/api/user/register/send-code', {
-        method: 'POST',
+      const result = await consumerApi.post(API_PATHS.CONSUMER.REGISTER.SEND_CODE, null, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
@@ -49,8 +50,6 @@ const UserRegisterModal: React.FC<UserRegisterModalProps> = ({
           registerKey: email,
         }),
       });
-
-      const result = await response.json();
       
       if (result.code === 200) {
         message.success('验证码已发送，请查收邮箱');
@@ -101,15 +100,7 @@ const UserRegisterModal: React.FC<UserRegisterModalProps> = ({
 
       console.log('注册请求数据:', requestData);
 
-      const response = await fetch('http://localhost:8082/api/user/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData),
-      });
-
-      const result = await response.json();
+      const result = await consumerApi.post(API_PATHS.CONSUMER.REGISTER.REGISTER, requestData);
       console.log('注册响应:', result);
 
       if (result.code === 200) {
@@ -134,21 +125,9 @@ const UserRegisterModal: React.FC<UserRegisterModalProps> = ({
     }
 
     try {
-      const response = await fetch(
-        `http://localhost:8082/api/user/register/check?registerType=${activeTab}&registerKey=${encodeURIComponent(registerKey)}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
+      const result = await consumerApi.get(
+        `${API_PATHS.CONSUMER.REGISTER.CHECK}?registerType=${activeTab}&registerKey=${encodeURIComponent(registerKey)}`
       );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
       console.log('检查可用性响应:', result);
 
       if (result.code === 200) {

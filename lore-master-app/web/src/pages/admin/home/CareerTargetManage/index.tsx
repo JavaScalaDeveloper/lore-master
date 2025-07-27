@@ -28,6 +28,8 @@ import {
   BranchesOutlined,
   UserOutlined
 } from '@ant-design/icons';
+import { adminApi } from '../../../../utils/request';
+import { API_PATHS } from '../../../../config/api';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -119,22 +121,10 @@ const CareerTargetManage: React.FC = () => {
   const fetchTargets = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('adminToken');
-      const tokenType = localStorage.getItem('tokenType') || 'Bearer';
-
-      const response = await fetch('/api/admin/career-targets/page', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token ? `${tokenType} ${token}` : ''
-        },
-        body: JSON.stringify({
-          current: 1,
-          size: 100
-        })
+      const result = await adminApi.post(API_PATHS.ADMIN.CAREER_TARGETS.PAGE, {
+        current: 1,
+        size: 100
       });
-
-      const result = await response.json();
       console.log('API响应数据:', result); // 调试日志
 
       // 检查新的响应格式：{ code: 200, message: "success", data: {...} }

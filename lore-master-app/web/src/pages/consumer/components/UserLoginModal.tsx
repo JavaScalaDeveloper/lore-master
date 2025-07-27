@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Modal, Form, Input, Button, Checkbox, message, Divider, Space } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined, QqOutlined, WechatOutlined } from '@ant-design/icons';
 import { encryptPasswordForTransmission } from '../../../utils/crypto';
+import { consumerApi } from '../../../utils/request';
+import { API_PATHS } from '../../../config/api';
 
 interface UserLoginModalProps {
   visible: boolean;
@@ -28,15 +30,7 @@ const UserLoginModal: React.FC<UserLoginModalProps> = ({ visible, onCancel, onSu
       console.log('登录请求数据:', requestData);
 
       // 调用C端用户登录API
-      const response = await fetch('http://localhost:8082/api/user/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData),
-      });
-
-      const result = await response.json();
+      const result = await consumerApi.post(API_PATHS.CONSUMER.AUTH.LOGIN, requestData);
       console.log('登录响应:', result);
 
       if (result.success) {

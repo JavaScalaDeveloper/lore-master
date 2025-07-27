@@ -27,6 +27,8 @@ import {
   FileTextOutlined,
   DownloadOutlined
 } from '@ant-design/icons';
+import { adminApi } from '../../../../utils/request';
+import { API_PATHS } from '../../../../config/api';
 
 const { Title, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -118,22 +120,13 @@ const KnowledgeManage: React.FC = () => {
   const fetchKnowledgeList = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/knowledge-points/page', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        },
-        body: JSON.stringify({
-          page: 1,
-          pageSize: 100,
-          careerTargetId: selectedSubject !== 'all' ? selectedSubject : null,
-          levelMin: selectedLevel !== 'all' ? parseInt(selectedLevel.replace('L', '')) : null,
-          levelMax: selectedLevel !== 'all' ? parseInt(selectedLevel.replace('L', '')) : null
-        })
+      const result = await adminApi.post(API_PATHS.ADMIN.KNOWLEDGE.PAGE, {
+        page: 1,
+        pageSize: 100,
+        careerTargetId: selectedSubject !== 'all' ? selectedSubject : null,
+        levelMin: selectedLevel !== 'all' ? parseInt(selectedLevel.replace('L', '')) : null,
+        levelMax: selectedLevel !== 'all' ? parseInt(selectedLevel.replace('L', '')) : null
       });
-
-      const result = await response.json();
       if (result.success) {
         setKnowledgeList(result.data.records || []);
       } else {
