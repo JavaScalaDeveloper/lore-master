@@ -160,9 +160,9 @@ public class FileStorageServiceImpl implements FileStorageService {
         FileStorage fileStorage = fileOpt.get();
 
         // 检查文件状态
-        if (fileStorage.getStatus() != 1) {
-            throw new RuntimeException("文件已被删除或禁用");
-        }
+//        if (fileStorage.getStatus() != 1) {
+//            throw new RuntimeException("文件已被删除或禁用");
+//        }
 
         // 获取存储策略并读取文件
         StorageStrategy storageStrategy = storageStrategyFactory.getCurrentStrategy();
