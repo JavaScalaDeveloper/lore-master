@@ -71,4 +71,16 @@ public class LangChain4jConfig {
 //                .logResponses(true)
                 .build();
     }
+
+    public static void main(String[] args) {
+        ChatLanguageModel model = QwenChatModel
+                .builder()
+                .apiKey(System.getenv("LLM_API_KEY"))
+                .modelName("qwen-max")
+                .build();
+
+        String answer = model.chat("你好，你是谁？");
+
+        System.out.println(answer);
+    }
 }
