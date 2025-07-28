@@ -22,6 +22,12 @@ const TabBar: React.FC<TabBarProps> = ({ activeTab, onTabChange }) => {
       activeIcon: '🏠'
     },
     {
+      id: 'assessment',
+      title: '测评',
+      icon: '📝',
+      activeIcon: '📝'
+    },
+    {
       id: 'study',
       title: '学习',
       icon: '📚',

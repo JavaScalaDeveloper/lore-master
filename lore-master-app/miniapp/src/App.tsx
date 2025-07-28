@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './App.css';
 import TabBar from './components/TabBar';
 import Home from './pages/Home';
+import Assessment from './pages/Assessment';
 import Study from './pages/Study';
 import Profile from './pages/Profile';
 
@@ -12,6 +13,8 @@ function App() {
     switch (activeTab) {
       case 'home':
         return <Home />;
+      case 'assessment':
+        return <Assessment />;
       case 'study':
         return <Study />;
       case 'profile':

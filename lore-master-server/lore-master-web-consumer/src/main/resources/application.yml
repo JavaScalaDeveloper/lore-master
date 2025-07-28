@@ -194,3 +194,19 @@ file-storage:
     enable-compression: false
     # 压缩阈值（字节）
     compression-threshold: 1048576  # 1MB
+
+# LLM配置
+llm:
+  # API密钥（建议通过环境变量设置）
+  api:
+#    key: ${LLM_API_KEY}
+    key: ${LLM_API_KEY}
+    # API URL（支持OpenAI或兼容的API服务）
+    url: ${LLM_API_URL:https://api.openai.com/v1/chat/completions}
+#    url: ${LLM_API_URL:https://dashscope.aliyuncs.com/v1/chat}
+  # 模型配置
+  model: ${LLM_MODEL:qwen-max-2025-01-25}
+  # 最大Token数
+  max-tokens: ${LLM_MAX_TOKENS:100000}
+  # 温度参数（0.0-2.0，控制回答的随机性）
+  temperature: ${LLM_TEMPERATURE:0.7}

@@ -35,7 +35,8 @@
         <commons-io.version>2.11.0</commons-io.version>
         <jwt.version>4.4.0</jwt.version>
         <bcrypt.version>0.10.2</bcrypt.version>
-        <langchain4j.version>0.32.0</langchain4j.version>
+<!--        <langchain4j.version>0.32.0</langchain4j.version>-->
+        <langchain4j.version>1.0.0-alpha1</langchain4j.version>
     </properties>
 
     <dependencyManagement>
@@ -104,21 +105,60 @@
             </dependency>
 
             <!-- LangChain4j - 暂时注释，等基本功能稳定后再启用 -->
-            <!-- <dependency>
+            <dependency>
                 <groupId>dev.langchain4j</groupId>
                 <artifactId>langchain4j</artifactId>
                 <version>${langchain4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-spring-boot-starter</artifactId>
+                <artifactId>langchain4j-community-spring-boot-starter</artifactId>
                 <version>${langchain4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>dev.langchain4j</groupId>
                 <artifactId>langchain4j-open-ai</artifactId>
                 <version>${langchain4j.version}</version>
-            </dependency> -->
+            </dependency>
+
+            <dependency>
+                <groupId>dev.langchain4j</groupId>
+                <artifactId>langchain4j-community-dashscope-spring-boot-starter</artifactId>
+                <version>${langchain4j.version}</version>
+            </dependency>
+            <!--openai-->
+            <dependency>
+                <groupId>dev.langchain4j</groupId>
+                <artifactId>langchain4j-open-ai</artifactId>
+                <version>${langchain4j.version}</version>
+            </dependency>
+
+            <!--阿里-->
+            <dependency>
+                <groupId>dev.langchain4j</groupId>
+                <artifactId>langchain4j-community-dashscope</artifactId>
+                <version>${langchain4j.version}</version>
+            </dependency>
+
+            <!--ollama-->
+            <dependency>
+                <groupId>dev.langchain4j</groupId>
+                <artifactId>langchain4j-ollama</artifactId>
+                <version>${langchain4j.version}</version>
+            </dependency>
+            <!--核心-->
+            <dependency>
+                <groupId>dev.langchain4j</groupId>
+                <artifactId>langchain4j</artifactId>
+                <version>${langchain4j.version}</version>
+                <!--<exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-simple</artifactId>
+                    </exclusion>
+                </exclusions>-->
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 </project> 
