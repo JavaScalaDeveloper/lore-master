@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './Assessment.css';
 import { getApiDomain, API_PATHS, buildApiUrl } from '../config/api';
+import MarkdownMessage from '../components/MarkdownMessage';
+import 'highlight.js/styles/github-dark.css';
 
 interface Message {
   id: string;
@@ -371,8 +373,17 @@ const Assessment: React.FC = () => {
               </div>
               <div className="message-content">
                 <div className="message-text">
-                  {message.content}
-                  {message.isStreaming && <span className="cursor">|</span>}
+                  {message.type === 'assistant' ? (
+                    <MarkdownMessage
+                      content={message.content}
+                      isStreaming={message.isStreaming}
+                    />
+                  ) : (
+                    <>
+                      {message.content}
+                      {message.isStreaming && <span className="cursor">|</span>}
+                    </>
+                  )}
                 </div>
                 <div className="message-time">
                   {message.timestamp.toLocaleTimeString()}

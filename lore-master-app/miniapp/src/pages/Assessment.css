@@ -234,11 +234,34 @@
   word-wrap: break-word;
   white-space: pre-wrap;
   position: relative;
+  overflow-wrap: break-word;
 }
 
+/* 用户消息样式 */
 .message.user .message-text {
   background: #667eea;
   color: white;
+  white-space: pre-wrap;
+}
+
+/* AI消息样式 - 支持Markdown */
+.message.assistant .message-text {
+  background: rgba(255, 255, 255, 0.98);
+  white-space: normal;
+  padding: 16px 20px;
+}
+
+/* Markdown内容在消息中的样式调整 */
+.message.assistant .markdown-message {
+  margin: 0;
+}
+
+.message.assistant .markdown-message .markdown-paragraph:first-child {
+  margin-top: 0;
+}
+
+.message.assistant .markdown-message .markdown-paragraph:last-child {
+  margin-bottom: 0;
 }
 
 .message-time {

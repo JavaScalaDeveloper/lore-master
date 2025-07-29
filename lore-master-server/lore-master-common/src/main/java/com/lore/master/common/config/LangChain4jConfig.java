@@ -92,7 +92,7 @@ public class LangChain4jConfig {
     public OllamaStreamingChatModel ollamaStreamingChatModel() {
         return OllamaStreamingChatModel.builder()
                 .baseUrl("http://localhost:11434")
-                .modelName(modelName)
+                .modelName("qwen3:8b")
                 .temperature(Double.valueOf(temperature))
                 .build();
     }
