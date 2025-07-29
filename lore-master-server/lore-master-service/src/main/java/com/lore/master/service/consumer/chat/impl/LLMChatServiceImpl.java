@@ -2,8 +2,13 @@ package com.lore.master.service.consumer.chat.impl;
 
 import com.lore.master.common.config.LangChain4jConfig;
 import com.lore.master.service.consumer.chat.LLMChatService;
+import dev.langchain4j.community.model.dashscope.QwenStreamingChatModel;
+import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,18 +53,26 @@ public class LLMChatServiceImpl implements LLMChatService {
             return Flux.just("LLM服务暂时不可用，请检查API配置。");
         }
 
+
         try {
-            // 调用LLM API获取响应
-            String response = callLLMAPI(message);
+            Flux<String> flux = Flux.create(fluxSink -> streamingChatLanguageModel.chat(message,
+                    new StreamingChatResponseHandler() {
+                        @Override
+                        public void onPartialResponse(String partialResponse) {
+                            fluxSink.next(partialResponse);
+                        }
 
-            // 将响应分割成多个片段进行流式输出
-            String[] segments = splitResponse(response);
+                        @Override
+                        public void onCompleteResponse(ChatResponse completeResponse) {
+                            fluxSink.complete();
+                        }
 
-            return Flux.fromArray(segments)
-                    .delayElements(Duration.ofMillis(100))
-                    .doOnNext(segment -> log.debug("流式输出片段: {}", segment))
-                    .doOnError(error -> log.error("流式输出错误: {}", error.getMessage(), error));
-
+                        @Override
+                        public void onError(Throwable error) {
+                            fluxSink.error(error);
+                        }
+                    }));
+            return flux;
         } catch (Exception e) {
             log.error("LLM流式请求失败: userId={}, error={}", userId, e.getMessage(), e);
             return Flux.just("抱歉，处理您的请求时出现了错误：" + e.getMessage());

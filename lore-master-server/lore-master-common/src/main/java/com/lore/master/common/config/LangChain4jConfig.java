@@ -2,15 +2,13 @@ package com.lore.master.common.config;
 
 import dev.langchain4j.community.model.dashscope.QwenChatModel;
 import dev.langchain4j.community.model.dashscope.QwenStreamingChatModel;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
-import dev.langchain4j.model.chat.ChatLanguageModel;
 
+
+import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.ollama.OllamaChatModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import dev.langchain4j.model.chat.ChatLanguageModel;
 import java.time.Duration;
 
 /**
@@ -59,7 +57,7 @@ public class LangChain4jConfig {
      * 流式聊天模型
      */
     @Bean(name = "qwenStreamingChatLanguageModel")
-    public StreamingChatLanguageModel streamingChatLanguageModel() {
+    public QwenStreamingChatModel streamingChatLanguageModel() {
 //        return OpenAiStreamingChatModel.builder()
         return QwenStreamingChatModel.builder()
                 .apiKey(openaiApiKey)

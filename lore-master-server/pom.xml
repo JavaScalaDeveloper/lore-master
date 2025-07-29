@@ -36,7 +36,7 @@
         <jwt.version>4.4.0</jwt.version>
         <bcrypt.version>0.10.2</bcrypt.version>
 <!--        <langchain4j.version>0.32.0</langchain4j.version>-->
-        <langchain4j.version>1.0.0-alpha1</langchain4j.version>
+        <langchain4j.version>1.0.0-beta1</langchain4j.version>
     </properties>
 
     <dependencyManagement>
