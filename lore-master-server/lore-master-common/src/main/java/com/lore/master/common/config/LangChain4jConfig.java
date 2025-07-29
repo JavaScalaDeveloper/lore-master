@@ -6,6 +6,7 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 
+import dev.langchain4j.model.ollama.OllamaChatModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,12 +40,12 @@ public class LangChain4jConfig {
     /**
      * 同步聊天模型
      */
-    @Bean
+    @Bean(name = "qwenChatLanguageModel")
     public ChatLanguageModel chatLanguageModel() {
 //        return OpenAiChatModel.builder()
         return QwenChatModel.builder()
                 .apiKey(openaiApiKey)
-                .baseUrl(openaiBaseUrl)
+//                .baseUrl(openaiBaseUrl)
                 .modelName(modelName)
                 .temperature(temperature)
                 .maxTokens(maxTokens)
@@ -57,12 +58,12 @@ public class LangChain4jConfig {
     /**
      * 流式聊天模型
      */
-    @Bean
+    @Bean(name = "qwenStreamingChatLanguageModel")
     public StreamingChatLanguageModel streamingChatLanguageModel() {
 //        return OpenAiStreamingChatModel.builder()
         return QwenStreamingChatModel.builder()
                 .apiKey(openaiApiKey)
-                .baseUrl(openaiBaseUrl)
+//                .baseUrl(openaiBaseUrl)
                 .modelName(modelName)
                 .temperature(temperature)
                 .maxTokens(maxTokens)
@@ -73,6 +74,11 @@ public class LangChain4jConfig {
     }
 
     public static void main(String[] args) {
+        qwenChatTest();
+
+    }
+
+    private static void qwenChatTest() {
         ChatLanguageModel model = QwenChatModel
                 .builder()
                 .apiKey(System.getenv("LLM_API_KEY"))

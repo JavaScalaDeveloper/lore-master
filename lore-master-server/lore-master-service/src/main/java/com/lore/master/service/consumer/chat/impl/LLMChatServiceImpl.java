@@ -1,6 +1,10 @@
 package com.lore.master.service.consumer.chat.impl;
 
+import com.lore.master.common.config.LangChain4jConfig;
 import com.lore.master.service.consumer.chat.LLMChatService;
+import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -31,20 +35,10 @@ public class LLMChatServiceImpl implements LLMChatService {
     @Value("${llm.api.url:https://api.openai.com/v1/chat/completions}")
     private String apiUrl;
 
-    @Value("${llm.model:gpt-3.5-turbo}")
-    private String model;
-
-    @Value("${llm.max-tokens:1000}")
-    private int maxTokens;
-
-    @Value("${llm.temperature:0.7}")
-    private double temperature;
-
-    private final RestTemplate restTemplate;
-
-    public LLMChatServiceImpl() {
-        this.restTemplate = new RestTemplate();
-    }
+    @Resource(name = "qwenChatLanguageModel")
+    private ChatLanguageModel chatLanguageModel;
+    @Resource(name = "qwenStreamingChatLanguageModel")
+    private StreamingChatLanguageModel streamingChatLanguageModel;
 
     @Override
     public Flux<String> sendMessageStream(String message, String userId) {
@@ -57,15 +51,15 @@ public class LLMChatServiceImpl implements LLMChatService {
         try {
             // 调用LLM API获取响应
             String response = callLLMAPI(message);
-            
+
             // 将响应分割成多个片段进行流式输出
             String[] segments = splitResponse(response);
-            
+
             return Flux.fromArray(segments)
                     .delayElements(Duration.ofMillis(100))
                     .doOnNext(segment -> log.debug("流式输出片段: {}", segment))
                     .doOnError(error -> log.error("流式输出错误: {}", error.getMessage(), error));
-                    
+
         } catch (Exception e) {
             log.error("LLM流式请求失败: userId={}, error={}", userId, e.getMessage(), e);
             return Flux.just("抱歉，处理您的请求时出现了错误：" + e.getMessage());
@@ -98,35 +92,7 @@ public class LLMChatServiceImpl implements LLMChatService {
      */
     private String callLLMAPI(String message) {
         try {
-            // 构建请求体
-            Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("model", model);
-            requestBody.put("max_tokens", maxTokens);
-            requestBody.put("temperature", temperature);
-            
-            // 构建消息
-            Map<String, String> userMessage = new HashMap<>();
-            userMessage.put("role", "user");
-            userMessage.put("content", message);
-            requestBody.put("messages", List.of(userMessage));
-
-            // 设置请求头
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(apiKey);
-
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-
-            // 发送请求
-            Map<String, Object> response = restTemplate.exchange(
-                    apiUrl,
-                    HttpMethod.POST,
-                    request,
-                    Map.class
-            ).getBody();
-
-            // 解析响应
-            return parseResponse(response);
+            return chatLanguageModel.chat(message);
 
         } catch (Exception e) {
             log.error("调用LLM API失败: {}", e.getMessage(), e);
