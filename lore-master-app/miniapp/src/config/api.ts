@@ -68,6 +68,21 @@ export const API_PATHS = {
       EXISTS: '/api/file/exists',
       MD5: '/api/file/md5',
     },
+    CHAT: {
+      SEND: '/api/chat/send',
+      STREAM: '/api/chat/stream',
+      TEST: '/api/chat/test',
+    },
+    ENHANCED_CHAT: {
+      SEND: '/api/enhanced-chat/send',
+      STREAM: '/api/enhanced-chat/stream',
+      FUNCTION_CALL: '/api/enhanced-chat/function-call',
+      RAG: '/api/enhanced-chat/rag',
+      KNOWLEDGE: '/api/enhanced-chat/knowledge',
+      FUNCTIONS: '/api/enhanced-chat/functions',
+      DEMO: '/api/enhanced-chat/demo',
+      HEALTH: '/api/enhanced-chat/health',
+    },
   },
   BUSINESS: {
     AUTH: {

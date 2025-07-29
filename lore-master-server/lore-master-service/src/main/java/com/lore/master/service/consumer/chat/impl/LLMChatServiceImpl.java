@@ -40,9 +40,9 @@ public class LLMChatServiceImpl implements LLMChatService {
     @Value("${llm.api.url:https://api.openai.com/v1/chat/completions}")
     private String apiUrl;
 
-    @Resource(name = "qwenChatLanguageModel")
+    @Resource(name = "ollamaChatLanguageModel")
     private ChatLanguageModel chatLanguageModel;
-    @Resource(name = "qwenStreamingChatLanguageModel")
+    @Resource(name = "ollamaStreamingChatModel")
     private StreamingChatLanguageModel streamingChatLanguageModel;
 
     @Override

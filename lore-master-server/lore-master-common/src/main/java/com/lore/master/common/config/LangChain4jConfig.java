@@ -6,6 +6,7 @@ import dev.langchain4j.community.model.dashscope.QwenStreamingChatModel;
 
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.ollama.OllamaChatModel;
+import dev.langchain4j.model.ollama.OllamaStreamingChatModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -71,8 +72,35 @@ public class LangChain4jConfig {
                 .build();
     }
 
+
+    /**
+     * 同步聊天模型
+     */
+    @Bean(name = "ollamaChatLanguageModel")
+    public ChatLanguageModel ollamaChatLanguageModel() {
+        return  OllamaChatModel
+                .builder()
+                .baseUrl("http://localhost:11434")
+                .modelName("qwen3:8b")
+                .build();
+    }
+
+    /**
+     * 流式聊天模型
+     */
+    @Bean(name = "ollamaStreamingChatModel")
+    public OllamaStreamingChatModel ollamaStreamingChatModel() {
+        return OllamaStreamingChatModel.builder()
+                .baseUrl("http://localhost:11434")
+                .modelName(modelName)
+                .temperature(Double.valueOf(temperature))
+                .build();
+    }
+
+
     public static void main(String[] args) {
-        qwenChatTest();
+//        qwenChatTest();
+        ollamaChatTest();
 
     }
 
@@ -81,6 +109,18 @@ public class LangChain4jConfig {
                 .builder()
                 .apiKey(System.getenv("LLM_API_KEY"))
                 .modelName("qwen-max")
+                .build();
+
+        String answer = model.chat("你好，你是谁？");
+
+        System.out.println(answer);
+    }
+
+    private static void ollamaChatTest() {
+        ChatLanguageModel model = OllamaChatModel
+                .builder()
+                .baseUrl("http://localhost:11434")
+                .modelName("qwen3:8b")
                 .build();
 
         String answer = model.chat("你好，你是谁？");
