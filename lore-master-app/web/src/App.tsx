@@ -14,7 +14,9 @@ function App() {
     const checkLoginStatus = () => {
       const token = localStorage.getItem('adminToken');
       const user = localStorage.getItem('adminUser');
-      setIsLoggedIn(!!(token && user));
+      const loggedIn = !!(token && user);
+      console.log('🔍 检查登录状态:', { token: !!token, user: !!user, loggedIn });
+      setIsLoggedIn(loggedIn);
       setLoading(false);
     };
 
@@ -22,7 +24,19 @@ function App() {
 
     // 监听storage变化
     window.addEventListener('storage', checkLoginStatus);
-    return () => window.removeEventListener('storage', checkLoginStatus);
+
+    // 监听自定义事件（用于同一页面内的状态更新）
+    const handleLoginStateChange = () => {
+      console.log('🔄 收到登录状态变化事件');
+      checkLoginStatus();
+    };
+
+    window.addEventListener('loginStateChange', handleLoginStateChange);
+
+    return () => {
+      window.removeEventListener('storage', checkLoginStatus);
+      window.removeEventListener('loginStateChange', handleLoginStateChange);
+    };
   }, []);
 
   if (loading) {

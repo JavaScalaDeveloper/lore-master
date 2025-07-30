@@ -3,6 +3,7 @@ import './Profile.css';
 import { consumerApi } from '../utils/request';
 import { API_PATHS } from '../config/api';
 import AvatarUpload from '../components/AvatarUpload';
+import LearningGoalSelector from '../components/LearningGoalSelector';
 
 interface UserInfo {
   id: string;
@@ -15,6 +16,14 @@ interface UserInfo {
   studyHours: number;
   completedCourses: number;
   points: number;
+  learningGoal?: LearningGoal | null; // 学习目标
+}
+
+interface LearningGoal {
+  id: string;
+  name: string;
+  category: string;
+  subcategory: string;
 }
 
 const Profile: React.FC = () => {
@@ -25,6 +34,7 @@ const Profile: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [verifyCode, setVerifyCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showGoalSelector, setShowGoalSelector] = useState(false);
 
   useEffect(() => {
     // 检查本地存储的登录状态
@@ -190,6 +200,29 @@ const Profile: React.FC = () => {
     alert('验证码已发送到 ' + phoneNumber);
   };
 
+  // 保存学习目标
+  const handleSaveLearningGoal = async (goal: LearningGoal) => {
+    try {
+      // 更新本地用户信息
+      if (userInfo) {
+        const updatedUserInfo = {
+          ...userInfo,
+          learningGoal: goal
+        };
+        setUserInfo(updatedUserInfo);
+        localStorage.setItem('userInfo', JSON.stringify(updatedUserInfo));
+
+        // 这里可以调用API保存到后端
+        // await consumerApi.post(API_PATHS.CONSUMER.USER.UPDATE_GOAL, goal);
+
+        alert(`学习目标已设置为：${goal.name}`);
+      }
+    } catch (error) {
+      console.error('保存学习目标失败:', error);
+      alert('保存失败，请重试');
+    }
+  };
+
   // 退出登录
   const handleLogout = async () => {
     try {
@@ -301,10 +334,62 @@ const Profile: React.FC = () => {
             </div>
           </div>
 
+          {/* 学习目标 */}
+          <div className="goal-section">
+            <div className="goal-header">
+              <h3>🎯 我的学习目标</h3>
+              <button
+                className="goal-edit-btn"
+                onClick={() => setShowGoalSelector(true)}
+              >
+                {userInfo.learningGoal ? '修改' : '设置'}
+              </button>
+            </div>
+            {userInfo.learningGoal ? (
+              <div className="goal-card">
+                <div className="goal-info">
+                  <div className="goal-name">{userInfo.learningGoal.name}</div>
+                  <div className="goal-path">
+                    {userInfo.learningGoal.category} › {userInfo.learningGoal.subcategory}
+                  </div>
+                </div>
+                <div className="goal-status">
+                  <div className="goal-progress">
+                    <div className="progress-bar">
+                      <div className="progress-fill" style={{width: '35%'}}></div>
+                    </div>
+                    <span className="progress-text">35% 完成</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="goal-empty">
+                <div className="empty-icon">🎯</div>
+                <div className="empty-text">还未设置学习目标</div>
+                <div className="empty-desc">设置目标，让学习更有方向</div>
+                <button
+                  className="set-goal-btn"
+                  onClick={() => setShowGoalSelector(true)}
+                >
+                  立即设置
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* 功能菜单 */}
           <div className="menu-section">
             {menuItems.map((item, index) => (
-              <div key={index} className="menu-item">
+              <div
+                key={index}
+                className="menu-item"
+                onClick={() => {
+                  if (item.title === '学习计划') {
+                    setShowGoalSelector(true);
+                  }
+                }}
+                style={{ cursor: item.title === '学习计划' ? 'pointer' : 'default' }}
+              >
                 <div className="menu-icon">{item.icon}</div>
                 <div className="menu-content">
                   <div className="menu-title">{item.title}</div>
@@ -418,6 +503,14 @@ const Profile: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* 学习目标选择器 */}
+      <LearningGoalSelector
+        isVisible={showGoalSelector}
+        onClose={() => setShowGoalSelector(false)}
+        onSave={handleSaveLearningGoal}
+        currentGoal={userInfo?.learningGoal}
+      />
     </div>
   );
 };

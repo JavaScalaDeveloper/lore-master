@@ -206,6 +206,7 @@ llm:
 #    url: ${LLM_API_URL:https://dashscope.aliyuncs.com/v1/chat}
   # 模型配置
   model: ${LLM_MODEL:qwen-max}
+  ollama-model: qwen3:0.6b
   # 最大Token数
   max-tokens: ${LLM_MAX_TOKENS:100000}
   # 温度参数（0.0-2.0，控制回答的随机性）

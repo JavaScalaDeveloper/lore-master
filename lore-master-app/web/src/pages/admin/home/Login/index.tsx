@@ -22,29 +22,43 @@ const Login: React.FC = () => {
         password: encryptedPassword, // 传输加密后的密码
       });
 
+      console.log('🔍 登录响应数据:', response);
+
       // 检查响应格式：{ code: 200, message: "登录成功", data: {...}, timestamp: ... }
-      if (response.data && response.data.code === 200) {
-        const { data } = response.data;
+      if (response && response.code === 200) {
+        const { data } = response;
 
         // 保存token和用户信息
         if (data && data.token) {
           localStorage.setItem('adminToken', data.token);
           localStorage.setItem('tokenType', data.tokenType || 'Bearer');
+          console.log('✅ Token已保存:', data.token);
         }
 
         // 保存用户信息
         if (data && data.userInfo) {
           localStorage.setItem('adminUser', JSON.stringify(data.userInfo));
+          console.log('✅ 用户信息已保存:', data.userInfo);
+        } else {
+          // 如果没有userInfo，创建一个默认的
+          const defaultUser = { username: values.username, id: 1 };
+          localStorage.setItem('adminUser', JSON.stringify(defaultUser));
+          console.log('✅ 默认用户信息已保存:', defaultUser);
         }
 
-        message.success(response.data.message || '登录成功！');
+        message.success(response.message || '登录成功！');
 
-        // 延迟跳转，确保localStorage已保存
+        // 触发登录状态变化事件
+        window.dispatchEvent(new Event('loginStateChange'));
+
+        // 延迟跳转，确保localStorage已保存和状态更新
         setTimeout(() => {
-          navigate('/home', { replace: true });
-        }, 300);
+          console.log('🔄 准备跳转到管理端首页');
+          navigate('/admin/home', { replace: true });
+        }, 500);
       } else {
-        message.error(response.data.message || '登录失败');
+        console.log('❌ 登录失败，响应数据:', response);
+        message.error(response?.message || '登录失败');
       }
     } catch (error: any) {
       console.error('登录错误:', error);

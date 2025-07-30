@@ -429,21 +429,184 @@
   cursor: not-allowed;
 }
 
+/* 学习目标样式 */
+.goal-section {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin: 16px 0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.goal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.goal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.goal-edit-btn {
+  padding: 6px 16px;
+  border: 1px solid #667eea;
+  border-radius: 20px;
+  background: transparent;
+  color: #667eea;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.goal-edit-btn:hover {
+  background: #667eea;
+  color: white;
+}
+
+.goal-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 20px;
+  color: white;
+}
+
+.goal-info {
+  margin-bottom: 16px;
+}
+
+.goal-name {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.goal-path {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.goal-status {
+  margin-top: 16px;
+}
+
+.goal-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: white;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.goal-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.empty-text {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.empty-desc {
+  font-size: 14px;
+  margin-bottom: 24px;
+  color: #888;
+}
+
+.set-goal-btn {
+  padding: 12px 32px;
+  border: none;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.set-goal-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
 /* 响应式设计 */
 @media (max-width: 375px) {
   .stats-grid {
     gap: 12px;
   }
-  
+
   .stat-number {
     font-size: 18px;
   }
-  
+
   .stat-label {
     font-size: 10px;
   }
-  
+
   .modal-content {
     margin: 10px;
+  }
+
+  .goal-section {
+    padding: 16px;
+    margin: 12px 0;
+  }
+
+  .goal-header h3 {
+    font-size: 16px;
+  }
+
+  .goal-card {
+    padding: 16px;
+  }
+
+  .goal-name {
+    font-size: 16px;
+  }
+
+  .empty-icon {
+    font-size: 40px;
+  }
+
+  .empty-text {
+    font-size: 14px;
+  }
+
+  .set-goal-btn {
+    padding: 10px 24px;
+    font-size: 13px;
   }
 }

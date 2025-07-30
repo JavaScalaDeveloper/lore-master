@@ -17,161 +17,200 @@ import {
   Col,
   Statistic,
   Typography,
-  Progress,
-  Tooltip
+  Tree,
+  Tooltip,
+  Badge,
+  Breadcrumb,
+  Tabs,
+  Divider
 } from 'antd';
 import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
-  RobotOutlined,
-  BranchesOutlined,
-  UserOutlined
+  EyeOutlined,
+  CopyOutlined,
+  ArrowUpOutlined,
+  ArrowDownOutlined,
+  FolderOutlined,
+  FileOutlined,
+  HomeOutlined,
+  SettingOutlined,
+  BarChartOutlined,
+  ImportOutlined,
+  ExportOutlined
 } from '@ant-design/icons';
 import { adminApi } from '../../../../utils/request';
 import { API_PATHS } from '../../../../config/api';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
+const { TabPane } = Tabs;
 
-interface CareerTarget {
-  id: string;
-  name: string;
-  code: string;
-  description: string;
-  category: string;
-  difficultyLevel: number;
-  estimatedMonths: number;
-  status: boolean;
-  learningPathCount: number;
-  knowledgePointCount: number;
-  enrolledUsers: number;
-  completionRate: number;
-  aiGenerated: boolean;
-  createTime: string;
+interface LearningSkillCatalog {
+  id: number;
+  skillCode: string;
+  skillName: string;
+  skillPath: string;
+  level: number;
+  parentCode?: string;
+  parentName?: string;
+  icon?: string;
+  description?: string;
+  sortOrder: number;
+  isActive: boolean;
+  difficultyLevel?: string;
+  difficultyLevelName?: string;
+  estimatedHours?: number;
+  tagList?: string[];
+  createdTime: string;
+  updatedTime: string;
+  createdBy: string;
+  updatedBy: string;
+  children?: LearningSkillCatalog[];
+  childrenCount?: number;
+  hasChildren?: boolean;
+  fullPathName?: string;
+  levelName?: string;
+  statusName?: string;
 }
 
-const CareerTargetManage: React.FC = () => {
-  const [targets, setTargets] = useState<CareerTarget[]>([]);
+interface QueryParams {
+  skillCode?: string;
+  skillName?: string;
+  skillPathPrefix?: string;
+  level?: number;
+  parentCode?: string;
+  isActive?: boolean;
+  difficultyLevel?: string;
+  pageNum?: number;
+  pageSize?: number;
+  sortField?: string;
+  sortDirection?: string;
+  treeStructure?: boolean;
+  includeChildrenCount?: boolean;
+}
+
+const SkillCatalogManage: React.FC = () => {
+  const [skillList, setSkillList] = useState<LearningSkillCatalog[]>([]);
+  const [treeData, setTreeData] = useState<LearningSkillCatalog[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [pathModalVisible, setPathModalVisible] = useState(false);
-  const [editingTarget, setEditingTarget] = useState<CareerTarget | null>(null);
-  const [selectedTarget, setSelectedTarget] = useState<CareerTarget | null>(null);
+  const [viewModalVisible, setViewModalVisible] = useState(false);
+  const [editingSkill, setEditingSkill] = useState<LearningSkillCatalog | null>(null);
+  const [viewingSkill, setViewingSkill] = useState<LearningSkillCatalog | null>(null);
   const [form] = Form.useForm();
-  const [generatingPath, setGeneratingPath] = useState(false);
-
-  // 模拟数据
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const mockTargets: CareerTarget[] = [
-    {
-      id: '1',
-      name: 'Web工程师（业务系统）',
-      code: 'WEB_ENGINEER',
-      description: 'Web应用开发，包括前端、后端、数据库等全栈技术',
-      category: 'Development',
-      difficultyLevel: 3,
-      estimatedMonths: 12,
-      status: true,
-      learningPathCount: 8,
-      knowledgePointCount: 156,
-      enrolledUsers: 1248,
-      completionRate: 68.5,
-      aiGenerated: true,
-      createTime: '2024-01-15'
-    },
-    {
-      id: '2',
-      name: '大数据平台开发工程师',
-      code: 'BIGDATA_ENGINEER',
-      description: '大数据处理、分布式系统、数据仓库等技术',
-      category: 'BigData',
-      difficultyLevel: 4,
-      estimatedMonths: 18,
-      status: true,
-      learningPathCount: 12,
-      knowledgePointCount: 234,
-      enrolledUsers: 892,
-      completionRate: 45.2,
-      aiGenerated: true,
-      createTime: '2024-01-10'
-    },
-    {
-      id: '3',
-      name: '中间件开发工程师',
-      code: 'MIDDLEWARE_ENGINEER',
-      description: '中间件原理、源码分析、系统架构设计',
-      category: 'Infrastructure',
-      difficultyLevel: 5,
-      estimatedMonths: 24,
-      status: true,
-      learningPathCount: 15,
-      knowledgePointCount: 312,
-      enrolledUsers: 567,
-      completionRate: 32.8,
-      aiGenerated: true,
-      createTime: '2024-01-08'
-    }
-  ];
+  const [activeTab, setActiveTab] = useState('list');
+  const [queryParams, setQueryParams] = useState<QueryParams>({
+    pageNum: 1,
+    pageSize: 20,
+    isActive: true,
+    sortField: 'sortOrder',
+    sortDirection: 'asc'
+  });
+  const [statistics, setStatistics] = useState<any>({});
+  const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
+  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+  const [searchValue, setSearchValue] = useState('');
 
   useEffect(() => {
-    fetchTargets();
-  }, []);
+    fetchSkillList();
+    fetchStatistics();
+  }, [queryParams]);
 
-  const fetchTargets = async () => {
+  // 获取技能目录列表
+  const fetchSkillList = async () => {
     setLoading(true);
     try {
-      const result = await adminApi.post(API_PATHS.ADMIN.CAREER_TARGETS.PAGE, {
-        current: 1,
-        size: 100
-      });
-      console.log('API响应数据:', result); // 调试日志
-
-      // 检查新的响应格式：{ code: 200, message: "success", data: {...} }
+      const result = await adminApi.post(API_PATHS.ADMIN.SKILL_CATALOG.PAGE, queryParams);
       if (result.code === 200) {
-        // Spring Data Page对象结构：{ content: [...], totalElements: ..., ... }
         const pageData = result.data;
-        const targetList = pageData.content || pageData.records || pageData || [];
-        console.log('解析的目标列表:', targetList); // 调试日志
-        setTargets(Array.isArray(targetList) ? targetList : []);
+        const skillListData = pageData.content || pageData.records || pageData || [];
+        setSkillList(Array.isArray(skillListData) ? skillListData : []);
       } else {
-        message.error(result.message || '获取职业目标列表失败');
-        setTargets([]); // 确保设置为空数组
+        message.error(result.message || '获取技能目录列表失败');
+        setSkillList([]);
       }
     } catch (error) {
-      console.error('获取职业目标列表错误:', error);
-      message.error('获取职业目标列表失败');
-      setTargets([]); // 确保在错误时设置为空数组
+      console.error('获取技能目录列表错误:', error);
+      message.error('获取技能目录列表失败');
+      setSkillList([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAdd = () => {
-    setEditingTarget(null);
-    form.resetFields();
-    setModalVisible(true);
-  };
-
-  const handleEdit = (record: CareerTarget) => {
-    setEditingTarget(record);
-    form.setFieldsValue(record);
-    setModalVisible(true);
-  };
-
-  const handleDelete = async (id: string) => {
+  // 获取树形结构数据
+  const fetchTreeData = async () => {
+    setLoading(true);
     try {
-      const response = await fetch(`/api/admin/career-targets/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        }
+      const result = await adminApi.post(API_PATHS.ADMIN.SKILL_CATALOG.TREE, {
+        isActive: true,
+        treeStructure: true
       });
+      if (result.code === 200) {
+        setTreeData(result.data || []);
+      } else {
+        message.error(result.message || '获取技能目录树失败');
+        setTreeData([]);
+      }
+    } catch (error) {
+      console.error('获取技能目录树错误:', error);
+      message.error('获取技能目录树失败');
+      setTreeData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      const result = await response.json();
-      if (result.success) {
+  // 获取统计信息
+  const fetchStatistics = async () => {
+    try {
+      const result = await adminApi.get(API_PATHS.ADMIN.SKILL_CATALOG.STATISTICS);
+      if (result.code === 200) {
+        setStatistics(result.data || {});
+      }
+    } catch (error) {
+      console.error('获取统计信息错误:', error);
+    }
+  };
+
+  // 添加技能目录
+  const handleAdd = (parentCode?: string, level?: number) => {
+    setEditingSkill(null);
+    form.resetFields();
+    if (parentCode) {
+      form.setFieldsValue({ parentCode, level: (level || 0) + 1 });
+    }
+    setModalVisible(true);
+  };
+
+  // 编辑技能目录
+  const handleEdit = (record: LearningSkillCatalog) => {
+    setEditingSkill(record);
+    form.setFieldsValue({
+      ...record,
+      tagList: record.tagList || []
+    });
+    setModalVisible(true);
+  };
+
+  // 查看技能目录详情
+  const handleView = (record: LearningSkillCatalog) => {
+    setViewingSkill(record);
+    setViewModalVisible(true);
+  };
+
+  // 删除技能目录
+  const handleDelete = async (id: number) => {
+    try {
+      const result = await adminApi.delete(`${API_PATHS.ADMIN.SKILL_CATALOG.DELETE}/${id}`);
+      if (result.code === 200) {
         message.success('删除成功');
-        fetchTargets();
+        fetchSkillList();
+        if (activeTab === 'tree') {
+          fetchTreeData();
+        }
       } else {
         message.error(result.message || '删除失败');
       }
@@ -180,28 +219,49 @@ const CareerTargetManage: React.FC = () => {
     }
   };
 
+  // 批量删除
+  const handleBatchDelete = async () => {
+    if (selectedRowKeys.length === 0) {
+      message.warning('请选择要删除的记录');
+      return;
+    }
+
+    try {
+      const result = await adminApi.post(API_PATHS.ADMIN.SKILL_CATALOG.BATCH_DELETE, selectedRowKeys);
+      if (result.code === 200) {
+        message.success('批量删除成功');
+        setSelectedRowKeys([]);
+        fetchSkillList();
+      } else {
+        message.error(result.message || '批量删除失败');
+      }
+    } catch (error) {
+      message.error('批量删除失败');
+    }
+  };
+
+  // 提交表单
   const handleSubmit = async (values: any) => {
     try {
-      const url = editingTarget
-        ? `/api/admin/career-targets/${editingTarget.id}`
-        : '/api/admin/career-targets';
+      const submitData = {
+        ...values,
+        tagList: values.tagList || []
+      };
 
-      const method = editingTarget ? 'PUT' : 'POST';
+      let result;
+      if (editingSkill) {
+        result = await adminApi.put(`${API_PATHS.ADMIN.SKILL_CATALOG.UPDATE}/${editingSkill.id}`, submitData);
+      } else {
+        result = await adminApi.post(API_PATHS.ADMIN.SKILL_CATALOG.CREATE, submitData);
+      }
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        },
-        body: JSON.stringify(values)
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        message.success(editingTarget ? '更新成功' : '添加成功');
+      if (result.code === 200) {
+        message.success(editingSkill ? '更新成功' : '添加成功');
         setModalVisible(false);
-        fetchTargets();
+        fetchSkillList();
+        if (activeTab === 'tree') {
+          fetchTreeData();
+        }
       } else {
         message.error(result.message || '操作失败');
       }
@@ -210,245 +270,480 @@ const CareerTargetManage: React.FC = () => {
     }
   };
 
-  const handleGenerateLearningPath = async (target: CareerTarget) => {
-    setSelectedTarget(target);
-    setGeneratingPath(true);
-    
+  // 切换状态
+  const handleToggleStatus = async (id: number, isActive: boolean) => {
     try {
-      // 模拟AI生成学习路径
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      message.success(`已为"${target.name}"生成AI学习路径`);
-      setPathModalVisible(true);
+      const result = await adminApi.put(`${API_PATHS.ADMIN.SKILL_CATALOG.TOGGLE_STATUS}/${id}?isActive=${isActive}`);
+      if (result.code === 200) {
+        message.success('状态切换成功');
+        fetchSkillList();
+      } else {
+        message.error(result.message || '状态切换失败');
+      }
     } catch (error) {
-      message.error('生成学习路径失败');
-    } finally {
-      setGeneratingPath(false);
+      message.error('状态切换失败');
     }
   };
 
-  const getDifficultyColor = (level: number) => {
-    const colors = ['#52c41a', '#1890ff', '#faad14', '#f5222d', '#722ed1'];
+  // 复制技能目录
+  const handleCopy = async (record: LearningSkillCatalog) => {
+    const newSkillCode = `${record.skillCode}_copy_${Date.now()}`;
+    const newSkillName = `${record.skillName}_副本`;
+
+    try {
+      const result = await adminApi.post(
+        `${API_PATHS.ADMIN.SKILL_CATALOG.COPY}/${record.id}?newSkillCode=${newSkillCode}&newSkillName=${newSkillName}`
+      );
+      if (result.code === 200) {
+        message.success('复制成功');
+        fetchSkillList();
+      } else {
+        message.error(result.message || '复制失败');
+      }
+    } catch (error) {
+      message.error('复制失败');
+    }
+  };
+
+  // 工具方法
+  const getDifficultyColor = (level: string) => {
+    const colors: Record<string, string> = {
+      'beginner': '#52c41a',
+      'intermediate': '#1890ff',
+      'advanced': '#f5222d'
+    };
+    return colors[level] || '#666';
+  };
+
+  const getLevelColor = (level: number) => {
+    const colors = ['#52c41a', '#1890ff', '#faad14'];
     return colors[level - 1] || '#666';
   };
 
-  const getDifficultyText = (level: number) => {
-    const texts = ['入门', '初级', '中级', '高级', '专家'];
-    return texts[level - 1] || '未知';
+  const getLevelIcon = (level: number) => {
+    return level === 3 ? <FileOutlined /> : <FolderOutlined />;
+  };
+
+  // 搜索过滤
+  const handleSearch = (value: string) => {
+    setSearchValue(value);
+    setQueryParams(prev => ({
+      ...prev,
+      skillName: value,
+      pageNum: 1
+    }));
+  };
+
+  // 切换Tab
+  const handleTabChange = (key: string) => {
+    setActiveTab(key);
+    if (key === 'tree' && treeData.length === 0) {
+      fetchTreeData();
+    }
   };
 
   const columns = [
     {
-      title: '职业目标',
-      dataIndex: 'name',
-      key: 'name',
-      render: (text: string, record: CareerTarget) => (
+      title: '技能信息',
+      dataIndex: 'skillName',
+      key: 'skillName',
+      width: 250,
+      render: (text: string, record: LearningSkillCatalog) => (
         <Space direction="vertical" size="small">
           <Space>
+            {getLevelIcon(record.level)}
             <Text strong>{text}</Text>
-            {record.aiGenerated && (
-              <Tooltip title="AI生成的学习路径">
-                <Tag color="blue" icon={<RobotOutlined />}>AI</Tag>
-              </Tooltip>
-            )}
+            <Tag color={getLevelColor(record.level)}>{record.levelName}</Tag>
           </Space>
-          <Tag color="default">{record.code}</Tag>
+          <Text type="secondary" style={{ fontSize: '12px' }}>
+            {record.skillCode}
+          </Text>
+          {record.fullPathName && (
+            <Text type="secondary" style={{ fontSize: '11px' }}>
+              {record.fullPathName}
+            </Text>
+          )}
         </Space>
       ),
     },
     {
-      title: '分类',
-      dataIndex: 'category',
-      key: 'category',
-      render: (category: string) => <Tag color="geekblue">{category}</Tag>,
+      title: '层级',
+      dataIndex: 'level',
+      key: 'level',
+      width: 80,
+      align: 'center' as const,
+      render: (level: number) => (
+        <Badge count={level} color={getLevelColor(level)} />
+      ),
     },
     {
-      title: '难度等级',
+      title: '父级',
+      dataIndex: 'parentName',
+      key: 'parentName',
+      width: 120,
+      render: (parentName: string) => parentName || '-',
+    },
+    {
+      title: '难度',
       dataIndex: 'difficultyLevel',
       key: 'difficultyLevel',
-      render: (level: number) => (
-        <Space>
+      width: 100,
+      align: 'center' as const,
+      render: (level: string, record: LearningSkillCatalog) => (
+        level ? (
           <Tag color={getDifficultyColor(level)}>
-            {'★'.repeat(level)}{'☆'.repeat(5 - level)}
+            {record.difficultyLevelName}
           </Tag>
-          <Text type="secondary">{getDifficultyText(level)}</Text>
-        </Space>
+        ) : '-'
       ),
     },
     {
       title: '预估时长',
-      dataIndex: 'estimatedMonths',
-      key: 'estimatedMonths',
-      render: (months: number) => `${months}个月`,
+      dataIndex: 'estimatedHours',
+      key: 'estimatedHours',
+      width: 100,
+      align: 'center' as const,
+      render: (hours: number) => hours ? `${hours}h` : '-',
+    },
+    {
+      title: '排序',
+      dataIndex: 'sortOrder',
+      key: 'sortOrder',
+      width: 80,
       align: 'center' as const,
     },
     {
-      title: '学习路径',
-      dataIndex: 'learningPathCount',
-      key: 'learningPathCount',
-      align: 'center' as const,
-    },
-    {
-      title: '知识点数',
-      dataIndex: 'knowledgePointCount',
-      key: 'knowledgePointCount',
-      align: 'center' as const,
-    },
-    {
-      title: '学习人数',
-      dataIndex: 'enrolledUsers',
-      key: 'enrolledUsers',
+      title: '子项数量',
+      dataIndex: 'childrenCount',
+      key: 'childrenCount',
+      width: 100,
       align: 'center' as const,
       render: (count: number) => (
-        <Space>
-          <UserOutlined />
-          <Text>{count}</Text>
-        </Space>
-      ),
-    },
-    {
-      title: '完成率',
-      dataIndex: 'completionRate',
-      key: 'completionRate',
-      render: (rate: number) => (
-        <Progress
-          percent={rate}
-          size="small"
-          format={(percent) => `${percent}%`}
-          strokeColor={rate >= 60 ? '#52c41a' : rate >= 40 ? '#faad14' : '#f5222d'}
-        />
+        <Badge count={count || 0} showZero color="#108ee9" />
       ),
     },
     {
       title: '状态',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: boolean) => (
-        <Tag color={status ? 'success' : 'default'}>
-          {status ? '启用' : '禁用'}
-        </Tag>
+      dataIndex: 'isActive',
+      key: 'isActive',
+      width: 80,
+      align: 'center' as const,
+      render: (isActive: boolean, record: LearningSkillCatalog) => (
+        <Switch
+          checked={isActive}
+          size="small"
+          onChange={(checked) => handleToggleStatus(record.id, checked)}
+        />
       ),
     },
     {
       title: '操作',
       key: 'action',
-      render: (_: any, record: CareerTarget) => (
-        <Space size="middle">
-          <Tooltip title="查看学习路径">
+      width: 200,
+      fixed: 'right' as const,
+      render: (_: any, record: LearningSkillCatalog) => (
+        <Space size="small">
+          <Tooltip title="查看详情">
             <Button
               type="link"
-              icon={<BranchesOutlined />}
-              onClick={() => {/* 查看学习路径 */}}
-            >
-              路径
-            </Button>
+              size="small"
+              icon={<EyeOutlined />}
+              onClick={() => handleView(record)}
+            />
           </Tooltip>
-          <Tooltip title="AI生成学习路径">
+          <Tooltip title="添加子项">
             <Button
               type="link"
-              icon={<RobotOutlined />}
-              loading={generatingPath && selectedTarget?.id === record.id}
-              onClick={() => handleGenerateLearningPath(record)}
-            >
-              AI生成
-            </Button>
+              size="small"
+              icon={<PlusOutlined />}
+              disabled={record.level >= 3}
+              onClick={() => handleAdd(record.skillCode, record.level)}
+            />
           </Tooltip>
-          <Button
-            type="link"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
-            编辑
-          </Button>
+          <Tooltip title="编辑">
+            <Button
+              type="link"
+              size="small"
+              icon={<EditOutlined />}
+              onClick={() => handleEdit(record)}
+            />
+          </Tooltip>
+          <Tooltip title="复制">
+            <Button
+              type="link"
+              size="small"
+              icon={<CopyOutlined />}
+              onClick={() => handleCopy(record)}
+            />
+          </Tooltip>
           <Popconfirm
-            title="确定要删除这个职业目标吗？"
+            title="确定要删除这个技能目录吗？"
+            description="删除后不可恢复，请谨慎操作"
             onConfirm={() => handleDelete(record.id)}
             okText="确定"
             cancelText="取消"
           >
             <Button
               type="link"
+              size="small"
               danger
               icon={<DeleteOutlined />}
-            >
-              删除
-            </Button>
+            />
           </Popconfirm>
         </Space>
       ),
     },
   ];
 
-  // 统计数据 - 添加安全检查
-  const safeTargets = Array.isArray(targets) ? targets : [];
-  const totalTargets = safeTargets.length;
-  const activeTargets = safeTargets.filter(t => t && t.status).length;
-  const totalUsers = safeTargets.reduce((sum, t) => sum + (t?.enrolledUsers || 0), 0);
-  const avgCompletionRate = totalTargets > 0
-    ? safeTargets.reduce((sum, t) => sum + (t?.completionRate || 0), 0) / totalTargets
-    : 0;
+  // 行选择配置
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (selectedKeys: React.Key[]) => {
+      setSelectedRowKeys(selectedKeys as number[]);
+    },
+  };
 
   return (
-    <div>
+    <div style={{ padding: '24px', background: '#f5f5f5', minHeight: '100vh' }}>
+      {/* 页面头部 */}
       <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Title level={2} style={{ margin: 0 }}>职业目标管理</Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-          添加职业目标
-        </Button>
+        <div>
+          <Title level={2} style={{ margin: 0 }}>技能目录管理</Title>
+          <Breadcrumb style={{ marginTop: 8 }}>
+            <Breadcrumb.Item>
+              <HomeOutlined />
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>系统管理</Breadcrumb.Item>
+            <Breadcrumb.Item>技能目录管理</Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
+        <Space>
+          <Button icon={<ImportOutlined />}>导入</Button>
+          <Button icon={<ExportOutlined />}>导出</Button>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => handleAdd()}>
+            添加技能目录
+          </Button>
+        </Space>
       </div>
 
       {/* 统计卡片 */}
       <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col span={6}>
           <Card>
-            <Statistic title="职业目标总数" value={totalTargets} />
+            <Statistic
+              title="技能目录总数"
+              value={statistics.totalCount || 0}
+              prefix={<BarChartOutlined />}
+            />
           </Card>
         </Col>
         <Col span={6}>
           <Card>
-            <Statistic title="启用目标" value={activeTargets} />
+            <Statistic
+              title="启用目录"
+              value={statistics.activeCount || 0}
+              prefix={<SettingOutlined />}
+              valueStyle={{ color: '#3f8600' }}
+            />
           </Card>
         </Col>
         <Col span={6}>
           <Card>
-            <Statistic title="学习总人数" value={totalUsers} />
+            <Statistic
+              title="一级分类"
+              value={statistics.levelStats?.level1 || 0}
+              prefix={<FolderOutlined />}
+              valueStyle={{ color: '#1890ff' }}
+            />
           </Card>
         </Col>
         <Col span={6}>
           <Card>
-            <Statistic 
-              title="平均完成率" 
-              value={avgCompletionRate} 
-              precision={1}
-              suffix="%" 
+            <Statistic
+              title="学习目标"
+              value={statistics.levelStats?.level3 || 0}
+              prefix={<FileOutlined />}
+              valueStyle={{ color: '#722ed1' }}
             />
           </Card>
         </Col>
       </Row>
 
-      {/* 职业目标列表 */}
+      {/* 主要内容区域 */}
       <Card>
-        <Table
-          columns={columns}
-          dataSource={targets}
-          rowKey="id"
-          loading={loading}
-          pagination={{
-            total: targets.length,
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total) => `共 ${total} 条记录`,
-          }}
-        />
+        <Tabs activeKey={activeTab} onChange={handleTabChange}>
+          <TabPane tab="列表视图" key="list">
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Space>
+                <Input.Search
+                  placeholder="搜索技能名称"
+                  allowClear
+                  style={{ width: 300 }}
+                  onSearch={handleSearch}
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                />
+                <Select
+                  placeholder="选择层级"
+                  allowClear
+                  style={{ width: 120 }}
+                  onChange={(value) => setQueryParams(prev => ({ ...prev, level: value, pageNum: 1 }))}
+                >
+                  <Select.Option value={1}>一级分类</Select.Option>
+                  <Select.Option value={2}>二级分类</Select.Option>
+                  <Select.Option value={3}>三级目标</Select.Option>
+                </Select>
+                <Select
+                  placeholder="选择状态"
+                  allowClear
+                  style={{ width: 120 }}
+                  onChange={(value) => setQueryParams(prev => ({ ...prev, isActive: value, pageNum: 1 }))}
+                >
+                  <Select.Option value={true}>启用</Select.Option>
+                  <Select.Option value={false}>禁用</Select.Option>
+                </Select>
+              </Space>
+              <Space>
+                {selectedRowKeys.length > 0 && (
+                  <Popconfirm
+                    title={`确定要删除选中的 ${selectedRowKeys.length} 个技能目录吗？`}
+                    onConfirm={handleBatchDelete}
+                    okText="确定"
+                    cancelText="取消"
+                  >
+                    <Button danger>批量删除</Button>
+                  </Popconfirm>
+                )}
+              </Space>
+            </div>
+
+            <Table
+              columns={columns}
+              dataSource={skillList}
+              rowKey="id"
+              loading={loading}
+              rowSelection={rowSelection}
+              scroll={{ x: 1200 }}
+              pagination={{
+                current: queryParams.pageNum,
+                pageSize: queryParams.pageSize,
+                total: skillList.length,
+                showSizeChanger: true,
+                showQuickJumper: true,
+                showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条记录`,
+                onChange: (page, size) => {
+                  setQueryParams(prev => ({ ...prev, pageNum: page, pageSize: size }));
+                },
+              }}
+            />
+          </TabPane>
+
+          <TabPane tab="树形视图" key="tree">
+            <div style={{ marginBottom: 16 }}>
+              <Input.Search
+                placeholder="搜索技能名称"
+                allowClear
+                style={{ width: 300 }}
+                onSearch={(value) => {
+                  // 树形搜索逻辑
+                  if (value) {
+                    const filterTree = (nodes: LearningSkillCatalog[]): LearningSkillCatalog[] => {
+                      return nodes.filter(node => {
+                        const match = node.skillName.toLowerCase().includes(value.toLowerCase());
+                        const childMatch = node.children && filterTree(node.children).length > 0;
+                        if (childMatch) {
+                          node.children = filterTree(node.children!);
+                        }
+                        return match || childMatch;
+                      });
+                    };
+                    // 这里可以实现树形搜索
+                  }
+                }}
+              />
+            </div>
+
+            <Tree
+              treeData={treeData.map(item => ({
+                title: (
+                  <Space>
+                    <Text strong>{item.skillName}</Text>
+                    <Tag color={getLevelColor(item.level)}>
+                      {item.levelName}
+                    </Tag>
+                    {item.difficultyLevel && (
+                      <Tag color={getDifficultyColor(item.difficultyLevel)}>
+                        {item.difficultyLevelName}
+                      </Tag>
+                    )}
+                    <Switch
+                      size="small"
+                      checked={item.isActive}
+                      onChange={(checked) => handleToggleStatus(item.id, checked)}
+                    />
+                  </Space>
+                ),
+                key: item.skillCode,
+                children: item.children?.map(child => ({
+                  title: (
+                    <Space>
+                      <Text>{child.skillName}</Text>
+                      <Tag color={getLevelColor(child.level)}>
+                        {child.levelName}
+                      </Tag>
+                      {child.difficultyLevel && (
+                        <Tag color={getDifficultyColor(child.difficultyLevel)}>
+                          {child.difficultyLevelName}
+                        </Tag>
+                      )}
+                      <Switch
+                        size="small"
+                        checked={child.isActive}
+                        onChange={(checked) => handleToggleStatus(child.id, checked)}
+                      />
+                    </Space>
+                  ),
+                  key: child.skillCode,
+                  children: child.children?.map(grandChild => ({
+                    title: (
+                      <Space>
+                        <Text>{grandChild.skillName}</Text>
+                        <Tag color={getLevelColor(grandChild.level)}>
+                          {grandChild.levelName}
+                        </Tag>
+                        {grandChild.difficultyLevel && (
+                          <Tag color={getDifficultyColor(grandChild.difficultyLevel)}>
+                            {grandChild.difficultyLevelName}
+                          </Tag>
+                        )}
+                        <Switch
+                          size="small"
+                          checked={grandChild.isActive}
+                          onChange={(checked) => handleToggleStatus(grandChild.id, checked)}
+                        />
+                      </Space>
+                    ),
+                    key: grandChild.skillCode,
+                  }))
+                }))
+              }))}
+              expandedKeys={expandedKeys}
+              onExpand={(keys) => setExpandedKeys(keys as string[])}
+              showLine
+              showIcon
+            />
+          </TabPane>
+        </Tabs>
       </Card>
 
       {/* 添加/编辑模态框 */}
       <Modal
-        title={editingTarget ? '编辑职业目标' : '添加职业目标'}
+        title={editingSkill ? '编辑技能目录' : '添加技能目录'}
         open={modalVisible}
         onCancel={() => setModalVisible(false)}
         onOk={() => form.submit()}
-        width={700}
+        width={800}
+        destroyOnClose
       >
         <Form
           form={form}
@@ -458,75 +753,113 @@ const CareerTargetManage: React.FC = () => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="name"
-                label="职业目标名称"
-                rules={[{ required: true, message: '请输入职业目标名称' }]}
+                name="skillName"
+                label="技能名称"
+                rules={[{ required: true, message: '请输入技能名称' }]}
               >
-                <Input placeholder="请输入职业目标名称" />
+                <Input placeholder="请输入技能名称" />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
-                name="code"
-                label="职业代码"
-                rules={[{ required: true, message: '请输入职业代码' }]}
+                name="skillCode"
+                label="技能编码"
+                rules={[
+                  { required: true, message: '请输入技能编码' },
+                  { pattern: /^[a-zA-Z0-9_]+$/, message: '技能编码只能包含字母、数字和下划线' }
+                ]}
               >
-                <Input placeholder="请输入职业代码" />
+                <Input placeholder="请输入技能编码" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item
+                name="level"
+                label="层级"
+                rules={[{ required: true, message: '请选择层级' }]}
+              >
+                <Select placeholder="请选择层级">
+                  <Select.Option value={1}>一级分类</Select.Option>
+                  <Select.Option value={2}>二级分类</Select.Option>
+                  <Select.Option value={3}>三级目标</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="parentCode"
+                label="父级编码"
+                tooltip="二级和三级必须指定父级编码"
+              >
+                <Input placeholder="请输入父级编码" />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="sortOrder"
+                label="排序序号"
+              >
+                <InputNumber min={0} style={{ width: '100%' }} placeholder="排序序号" />
               </Form.Item>
             </Col>
           </Row>
 
           <Form.Item
             name="description"
-            label="职业描述"
-            rules={[{ required: true, message: '请输入职业描述' }]}
+            label="技能描述"
           >
-            <TextArea rows={4} placeholder="请输入职业描述" />
+            <TextArea rows={3} placeholder="请输入技能描述" />
           </Form.Item>
 
           <Row gutter={16}>
             <Col span={8}>
               <Form.Item
-                name="category"
-                label="职业分类"
-                rules={[{ required: true, message: '请选择职业分类' }]}
-              >
-                <Select placeholder="请选择职业分类">
-                  <Select.Option value="Development">开发类</Select.Option>
-                  <Select.Option value="BigData">大数据类</Select.Option>
-                  <Select.Option value="Infrastructure">基础设施类</Select.Option>
-                  <Select.Option value="AI">人工智能类</Select.Option>
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item
                 name="difficultyLevel"
                 label="难度等级"
-                rules={[{ required: true, message: '请选择难度等级' }]}
               >
-                <Select placeholder="请选择难度等级">
-                  {[1, 2, 3, 4, 5].map(level => (
-                    <Select.Option key={level} value={level}>
-                      {'★'.repeat(level)}{'☆'.repeat(5 - level)} {getDifficultyText(level)}
-                    </Select.Option>
-                  ))}
+                <Select placeholder="请选择难度等级" allowClear>
+                  <Select.Option value="beginner">初级</Select.Option>
+                  <Select.Option value="intermediate">中级</Select.Option>
+                  <Select.Option value="advanced">高级</Select.Option>
                 </Select>
               </Form.Item>
             </Col>
             <Col span={8}>
               <Form.Item
-                name="estimatedMonths"
-                label="预估学习月数"
-                rules={[{ required: true, message: '请输入预估学习月数' }]}
+                name="estimatedHours"
+                label="预估学习时长(小时)"
               >
-                <InputNumber min={1} max={60} style={{ width: '100%' }} />
+                <InputNumber min={0} style={{ width: '100%' }} placeholder="预估学习时长" />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="icon"
+                label="图标"
+              >
+                <Input placeholder="请输入图标" />
               </Form.Item>
             </Col>
           </Row>
 
           <Form.Item
-            name="status"
+            name="tagList"
+            label="标签"
+            tooltip="多个标签用回车分隔"
+          >
+            <Select
+              mode="tags"
+              style={{ width: '100%' }}
+              placeholder="请输入标签"
+              tokenSeparators={[',']}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="isActive"
             label="状态"
             valuePropName="checked"
             initialValue={true}
@@ -536,28 +869,154 @@ const CareerTargetManage: React.FC = () => {
         </Form>
       </Modal>
 
-      {/* AI生成学习路径结果模态框 */}
+      {/* 查看详情模态框 */}
       <Modal
-        title={`${selectedTarget?.name} - AI生成的学习路径`}
-        open={pathModalVisible}
-        onCancel={() => setPathModalVisible(false)}
-        width={1000}
+        title="技能目录详情"
+        open={viewModalVisible}
+        onCancel={() => setViewModalVisible(false)}
         footer={[
-          <Button key="close" onClick={() => setPathModalVisible(false)}>
+          <Button key="close" onClick={() => setViewModalVisible(false)}>
             关闭
           </Button>,
-          <Button key="save" type="primary">
-            保存学习路径
+          <Button key="edit" type="primary" onClick={() => {
+            setViewModalVisible(false);
+            if (viewingSkill) {
+              handleEdit(viewingSkill);
+            }
+          }}>
+            编辑
           </Button>
         ]}
+        width={700}
       >
-        <div style={{ maxHeight: 600, overflowY: 'auto' }}>
-          <Text type="secondary">AI已为该职业目标生成完整的学习路径，包含基础到专家的所有阶段...</Text>
-          {/* 这里可以展示AI生成的学习路径树形结构 */}
-        </div>
+        {viewingSkill && (
+          <div>
+            <Row gutter={16}>
+              <Col span={12}>
+                <div style={{ marginBottom: 16 }}>
+                  <Text strong>技能名称：</Text>
+                  <Text>{viewingSkill.skillName}</Text>
+                </div>
+              </Col>
+              <Col span={12}>
+                <div style={{ marginBottom: 16 }}>
+                  <Text strong>技能编码：</Text>
+                  <Text>{viewingSkill.skillCode}</Text>
+                </div>
+              </Col>
+            </Row>
+
+            <Row gutter={16}>
+              <Col span={8}>
+                <div style={{ marginBottom: 16 }}>
+                  <Text strong>层级：</Text>
+                  <Tag color={getLevelColor(viewingSkill.level)}>
+                    {viewingSkill.levelName}
+                  </Tag>
+                </div>
+              </Col>
+              <Col span={8}>
+                <div style={{ marginBottom: 16 }}>
+                  <Text strong>父级：</Text>
+                  <Text>{viewingSkill.parentName || '-'}</Text>
+                </div>
+              </Col>
+              <Col span={8}>
+                <div style={{ marginBottom: 16 }}>
+                  <Text strong>排序：</Text>
+                  <Text>{viewingSkill.sortOrder}</Text>
+                </div>
+              </Col>
+            </Row>
+
+            <div style={{ marginBottom: 16 }}>
+              <Text strong>完整路径：</Text>
+              <Text>{viewingSkill.fullPathName}</Text>
+            </div>
+
+            {viewingSkill.description && (
+              <div style={{ marginBottom: 16 }}>
+                <Text strong>描述：</Text>
+                <div style={{ marginTop: 8, padding: 12, background: '#f5f5f5', borderRadius: 4 }}>
+                  {viewingSkill.description}
+                </div>
+              </div>
+            )}
+
+            <Row gutter={16}>
+              <Col span={8}>
+                <div style={{ marginBottom: 16 }}>
+                  <Text strong>难度等级：</Text>
+                  {viewingSkill.difficultyLevel ? (
+                    <Tag color={getDifficultyColor(viewingSkill.difficultyLevel)}>
+                      {viewingSkill.difficultyLevelName}
+                    </Tag>
+                  ) : <Text>-</Text>}
+                </div>
+              </Col>
+              <Col span={8}>
+                <div style={{ marginBottom: 16 }}>
+                  <Text strong>预估时长：</Text>
+                  <Text>{viewingSkill.estimatedHours ? `${viewingSkill.estimatedHours}小时` : '-'}</Text>
+                </div>
+              </Col>
+              <Col span={8}>
+                <div style={{ marginBottom: 16 }}>
+                  <Text strong>状态：</Text>
+                  <Tag color={viewingSkill.isActive ? 'success' : 'default'}>
+                    {viewingSkill.statusName}
+                  </Tag>
+                </div>
+              </Col>
+            </Row>
+
+            {viewingSkill.tagList && viewingSkill.tagList.length > 0 && (
+              <div style={{ marginBottom: 16 }}>
+                <Text strong>标签：</Text>
+                <div style={{ marginTop: 8 }}>
+                  {viewingSkill.tagList.map((tag, index) => (
+                    <Tag key={index} color="blue">{tag}</Tag>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <Divider />
+
+            <Row gutter={16}>
+              <Col span={12}>
+                <div style={{ marginBottom: 8 }}>
+                  <Text strong>创建时间：</Text>
+                  <Text>{viewingSkill.createdTime}</Text>
+                </div>
+              </Col>
+              <Col span={12}>
+                <div style={{ marginBottom: 8 }}>
+                  <Text strong>更新时间：</Text>
+                  <Text>{viewingSkill.updatedTime}</Text>
+                </div>
+              </Col>
+            </Row>
+
+            <Row gutter={16}>
+              <Col span={12}>
+                <div>
+                  <Text strong>创建人：</Text>
+                  <Text>{viewingSkill.createdBy}</Text>
+                </div>
+              </Col>
+              <Col span={12}>
+                <div>
+                  <Text strong>更新人：</Text>
+                  <Text>{viewingSkill.updatedBy}</Text>
+                </div>
+              </Col>
+            </Row>
+          </div>
+        )}
       </Modal>
     </div>
   );
 };
 
-export default CareerTargetManage;
+export default SkillCatalogManage;

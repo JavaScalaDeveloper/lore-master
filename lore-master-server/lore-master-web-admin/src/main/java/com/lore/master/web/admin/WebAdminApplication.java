@@ -11,13 +11,18 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  */
 @SpringBootApplication
 @ComponentScan(basePackages = {
-    "com.lore.master.web.admin",
-    "com.lore.master.service",
-    "com.lore.master.data",
-    "com.lore.master.common"
+        "com.lore.master.web.admin",
+        "com.lore.master.service.admin",
+        "com.lore.master.data",
+        "com.lore.master.common"
 })
-@EnableJpaRepositories(basePackages = "com.lore.master.data.repository")
-@EntityScan(basePackages = "com.lore.master.data.entity")
+@EntityScan(basePackages = {
+        "com.lore.master.data.entity.consumer",
+        "com.lore.master.data.entity.admin",
+        "com.lore.master.data.entity.business",
+        "com.lore.master.data.entity.storage"
+})
+
 public class WebAdminApplication {
 
     public static void main(String[] args) {
