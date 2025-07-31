@@ -48,6 +48,12 @@ export const API_PATHS = {
     PROFILE: {
       GET: '/api/user/profile',
     },
+    LEARNING_GOAL: {
+      SAVE: '/api/user/learning-goal',
+      CURRENT: '/api/user/learning-goal/current',
+      LIST: '/api/user/learning-goal/list',
+      UPDATE_STATUS: '/api/user/learning-goal/{goalId}/status'
+    },
     AVATAR: {
       UPLOAD: '/api/user/avatar/upload',
       INFO: '/api/user/avatar/info',

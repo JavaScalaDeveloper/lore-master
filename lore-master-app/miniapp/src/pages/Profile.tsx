@@ -212,10 +212,25 @@ const Profile: React.FC = () => {
         setUserInfo(updatedUserInfo);
         localStorage.setItem('userInfo', JSON.stringify(updatedUserInfo));
 
-        // 这里可以调用API保存到后端
-        // await consumerApi.post(API_PATHS.CONSUMER.USER.UPDATE_GOAL, goal);
+        // 调用API保存到后端
+        try {
+          const requestData = {
+            skillCode: goal.id,
+            skillName: goal.name,
+            skillPath: `${goal.category}/${goal.subcategory}/${goal.id}`,
+            priority: 2 // 设置为中等优先级
+          };
 
-        alert(`学习目标已设置为：${goal.name}`);
+          const result = await consumerApi.post(API_PATHS.CONSUMER.LEARNING_GOAL.SAVE, requestData);
+          if (result.success || result.code === 200) {
+            alert(`学习目标已设置为：${goal.name}`);
+          } else {
+            alert(`保存学习目标失败：${result.message || '未知错误'}`);
+          }
+        } catch (error) {
+          console.error('保存学习目标API调用失败:', error);
+          alert('保存学习目标失败，请检查网络连接');
+        }
       }
     } catch (error) {
       console.error('保存学习目标失败:', error);
