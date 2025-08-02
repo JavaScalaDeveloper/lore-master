@@ -36,6 +36,11 @@ public class UserLoginRequest {
     private WechatUserInfo wechatUserInfo;
 
     /**
+     * 微信openid（用于避免重复调用微信接口）
+     */
+    private String openid;
+
+    /**
      * 是否记住我
      */
     private Boolean rememberMe = false;

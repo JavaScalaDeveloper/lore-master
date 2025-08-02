@@ -26,7 +26,7 @@ public class ConsumerUser {
     /**
      * 用户唯一ID（对外展示，格式：YYYYXXXXXXXX）
      */
-    @Column(name = "user_id", nullable = false, unique = true, length = 12)
+    @Column(name = "user_id", nullable = false, unique = true, length = 20)
     private String userId;
 
     /**

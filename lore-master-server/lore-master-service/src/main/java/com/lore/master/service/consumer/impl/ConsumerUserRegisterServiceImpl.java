@@ -52,7 +52,9 @@ public class ConsumerUserRegisterServiceImpl implements ConsumerUserRegisterServ
 
         // 5. 创建用户
         ConsumerUser user = createUser(strategy, request);
+        log.info("保存用户前，userId: {}", user.getUserId());
         user = consumerUserRepository.save(user);
+        log.info("保存用户后，userId: {}", user.getUserId());
 
         // 6. 创建认证方式
         ConsumerUserAuthMethod authMethod = createAuthMethod(strategy, request, user.getUserId());
@@ -109,31 +111,50 @@ public class ConsumerUserRegisterServiceImpl implements ConsumerUserRegisterServ
      * 创建用户
      */
     private ConsumerUser createUser(ConsumerUserRegisterStrategy strategy, UserRegisterRequest request) {
+        log.info("开始创建用户");
         ConsumerUser user = new ConsumerUser();
-        user.setUserId(userIdGenerator.generateUniqueUserId());
-        user.setNickname(strategy.getDefaultNickname(request));
+        log.info("创建用户对象成功");
         
-        // 设置其他用户信息（暂时注释，因为DTO中可能没有这些字段）
-        // if (StrUtil.isNotBlank(request.getAvatarUrl())) {
-        //     user.setAvatarUrl(request.getAvatarUrl());
-        // }
-
-        // if (request.getGender() != null) {
-        //     user.setGender(request.getGender());
-        // }
+        // 生成并设置用户ID
+        log.info("开始生成用户ID");
+        String userId = userIdGenerator.generateUniqueUserId();
+        log.info("生成的用户ID: {}, 长度: {}, 是否为空: {}", userId, userId != null ? userId.length() : 0, userId == null || userId.isEmpty());
+        
+        if (userId == null || userId.isEmpty()) {
+            log.error("生成用户ID失败，userId为空");
+            throw new RuntimeException("生成用户ID失败，userId为空");
+        }
+        
+        user.setUserId(userId);
+        log.info("用户ID设置成功: {}, 设置后用户对象中的userId: {}", userId, user.getUserId());
+        
+        // 验证设置是否成功
+        if (user.getUserId() == null || user.getUserId().isEmpty()) {
+            log.error("用户ID设置失败，设置后userId为空");
+            throw new RuntimeException("用户ID设置失败，设置后userId为空");
+        }
+        
+        user.setNickname(strategy.getDefaultNickname(request));
+        log.info("设置用户昵称: {}", user.getNickname());
         
         // 设置默认值
         user.setCurrentLevel(1);
         user.setTotalScore(0);
         user.setStudyDays(0);
-        // user.setContinuousDays(0); // 如果User实体没有这个字段，先注释
         user.setStatus(1); // 正常状态
         user.setIsVerified(1); // 已验证
         user.setLoginCount(0);
+        log.info("设置用户默认属性完成");
         
         // 设置客户端信息
         if (StrUtil.isNotBlank(request.getClientIp())) {
             user.setLastLoginIp(request.getClientIp());
+        }
+        
+        // 再次检查userId是否为空
+        if (user.getUserId() == null || user.getUserId().isEmpty()) {
+            log.error("用户对象中的userId为空");
+            throw new RuntimeException("用户对象中的userId为空");
         }
         
         return user;

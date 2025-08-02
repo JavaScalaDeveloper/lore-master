@@ -110,6 +110,13 @@ spring:
     deserialization:
       fail-on-unknown-properties: false
 
+# 微信小程序配置
+wechat:
+  miniapp:
+    appid: wx38b3b6bbdb9b9ec0
+    # 开发环境可直接填写secret，生产环境建议使用环境变量
+    secret: ${WECHAT_MINIAPP_SECRET}
+
 # 日志配置
 logging:
   level:
@@ -154,7 +161,6 @@ lore:
       
     # 学习配置
     study:
-      daily-goal: 30 # 每日学习目标（分钟）
       level-up-score: 100 # 升级所需积分
 
 # 文件存储配置

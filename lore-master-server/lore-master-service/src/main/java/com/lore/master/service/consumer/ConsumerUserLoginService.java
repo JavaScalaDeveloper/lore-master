@@ -39,4 +39,12 @@ public interface ConsumerUserLoginService {
      * @return 用户ID，如果令牌无效返回null
      */
     String validateToken(String token);
+
+    /**
+     * 获取当前用户信息
+     * 
+     * @param userId 用户ID
+     * @return 用户登录响应，包含用户信息
+     */
+    UserLoginResponse getUserInfo(String userId);
 }

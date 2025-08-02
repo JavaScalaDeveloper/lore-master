@@ -129,6 +129,25 @@ public class ConsumerUserLoginServiceImpl implements ConsumerUserLoginService {
     }
 
     /**
+     * 获取当前用户信息
+     */
+    @Override
+    public UserLoginResponse getUserInfo(String userId) {
+        Optional<ConsumerUser> userOpt = consumerUserRepository.findByUserId(userId);
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("用户不存在");
+        }
+
+        ConsumerUser user = userOpt.get();
+        if (user.getStatus() != 1) {
+            throw new RuntimeException("账号已被禁用");
+        }
+
+        // 构建响应，不需要生成新token
+        return buildLoginResponse(user, null, null, false);
+    }
+
+    /**
      * 更新登录信息
      */
     private void updateLoginInfo(ConsumerUser user, UserLoginRequest request) {

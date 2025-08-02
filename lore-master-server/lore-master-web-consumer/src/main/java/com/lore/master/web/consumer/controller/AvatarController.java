@@ -1,15 +1,19 @@
 package com.lore.master.web.consumer.controller;
 
 import com.lore.master.common.result.Result;
+import com.lore.master.common.util.JwtUtil;
 import com.lore.master.data.entity.consumer.ConsumerUser;
 import com.lore.master.data.repository.consumer.ConsumerUserRepository;
-import com.lore.master.data.vo.storage.FileInfoVO;
+import com.lore.master.data.dto.consumer.AvatarUploadDTO;
+import com.lore.master.data.vo.consumer.AvatarUploadVO;
+import com.lore.master.service.consumer.UserAvatarService;
 import com.lore.master.service.middleware.storage.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.util.StringUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -27,6 +31,7 @@ public class AvatarController {
 
     private final ConsumerUserRepository consumerUserRepository;
     private final FileStorageService fileStorageService;
+    private final UserAvatarService userAvatarService;
 
     /**
      * 上传用户头像（使用JPA Repository实现）
@@ -35,71 +40,68 @@ public class AvatarController {
     @Transactional(rollbackFor = Exception.class)
     public Result<Map<String, Object>> uploadAvatar(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("userId") String userId,
-            @RequestParam(value = "remark", required = false) String remark) {
+            @RequestParam(value = "remark", required = false) String remark,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
 
         try {
-            log.info("接收到头像上传请求: userId={}, fileName={}, fileSize={}",
-                    userId, file.getOriginalFilename(), file.getSize());
+            // 从Authorization头中获取token
+        if (StringUtils.isEmpty(authorization)) {
+            return Result.error("未提供Authorization令牌");
+        }
 
-            // 1. 验证用户是否存在
-            Optional<ConsumerUser> userOpt = consumerUserRepository.findByUserId(userId);
-            if (userOpt.isEmpty()) {
-                return Result.error("用户不存在: " + userId);
-            }
+        // 提取token（去掉Bearer前缀）
+        String token = authorization.replace("Bearer ", "");
+
+        // 验证token并获取userId
+        String userId = JwtUtil.getUserIdFromToken(token);
+        if (StringUtils.isEmpty(userId)) {
+            return Result.error("无效的令牌或令牌已过期");
+        }
+
+        log.info("接收到头像上传请求: userId={}, fileName={}, fileSize={}",
+                userId, file.getOriginalFilename(), file.getSize());
+
+        // 1. 验证用户是否存在
+        Optional<ConsumerUser> userOpt = consumerUserRepository.findByUserId(userId);
+        if (userOpt.isEmpty()) {
+            return Result.error("用户不存在: " + userId);
+        }
 
             ConsumerUser user = userOpt.get();
 
-            // 2. 验证文件
-            if (!validateAvatarFile(file)) {
-                return Result.error("文件验证失败");
-            }
+            // 2. 创建AvatarUploadDTO
+            AvatarUploadDTO uploadDTO = new AvatarUploadDTO();
+            uploadDTO.setUserId(userId);
+            uploadDTO.setFile(file);
+            uploadDTO.setRemark(remark);
 
-            // 3. 如果用户已有头像，先删除旧头像
-            if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
-                try {
-                    String oldFileId = extractFileIdFromUrl(user.getAvatarUrl());
-                    if (oldFileId != null) {
-                        fileStorageService.deleteFile(oldFileId, userId, "consumer");
-                        log.info("已删除用户旧头像: userId={}, oldFileId={}", userId, oldFileId);
-                    }
-                } catch (Exception e) {
-                    log.warn("删除旧头像失败，继续上传新头像: userId={}, error={}", userId, e.getMessage());
-                }
-            }
+            // 3. 调用服务层上传头像
+            AvatarUploadVO uploadResult = userAvatarService.uploadUserAvatar(uploadDTO);
 
-            // 4. 使用FileStorageService上传文件
-            FileInfoVO fileInfo = fileStorageService.uploadFile(file, userId, "consumer");
-            String actualFileId = fileInfo.getFileId();
-
-            // 5. 生成访问URL
-            String avatarUrl = "/api/file/view?fileId=" + actualFileId;
-            String downloadUrl = "/api/file/download?fileId=" + actualFileId;
-
-            // 7. 构建响应数据
+            // 4. 构建响应数据
             Map<String, Object> responseData = new HashMap<>();
-            responseData.put("fileId", actualFileId);
-            responseData.put("fileName", fileInfo.getOriginalName());
-            responseData.put("fileSize", fileInfo.getFileSize());
-            responseData.put("fileSizeFormatted", fileInfo.getFileSizeFormatted());
-            responseData.put("accessUrl", avatarUrl);
-            responseData.put("downloadUrl", downloadUrl);
-            responseData.put("uploadTime", fileInfo.getCreatedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-            responseData.put("fileType", fileInfo.getFileType());
-            responseData.put("fileCategory", fileInfo.getFileCategory());
-            responseData.put("bucketName", fileInfo.getBucketName());
-            responseData.put("md5Hash", fileInfo.getMd5Hash());
-            responseData.put("fileExtension", fileInfo.getFileExtension());
-            responseData.put("userId", userId);
-            responseData.put("userNickname", user.getNickname());
+            responseData.put("fileId", uploadResult.getFileId());
+            responseData.put("fileName", uploadResult.getFileName());
+            responseData.put("fileSize", uploadResult.getFileSize());
+            responseData.put("fileSizeFormatted", uploadResult.getFileSizeFormatted());
+            responseData.put("accessUrl", uploadResult.getAccessUrl());
+            responseData.put("downloadUrl", uploadResult.getDownloadUrl());
+            responseData.put("uploadTime", uploadResult.getUploadTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            responseData.put("fileType", uploadResult.getFileType());
+            responseData.put("fileCategory", uploadResult.getFileCategory());
+            responseData.put("bucketName", uploadResult.getBucketName());
+            responseData.put("md5Hash", uploadResult.getMd5Hash());
+            responseData.put("fileExtension", uploadResult.getFileExtension());
+            responseData.put("userId", uploadResult.getUserId());
+            responseData.put("userNickname", uploadResult.getUserNickname());
 
             log.info("用户头像上传成功: userId={}, actualFileId={}, fileName={}, accessUrl={}",
-                    userId, actualFileId, fileInfo.getOriginalName(), avatarUrl);
+                    userId, uploadResult.getFileId(), uploadResult.getFileName(), uploadResult.getAccessUrl());
 
             return Result.success("头像上传成功", responseData);
 
         } catch (Exception e) {
-            log.error("用户头像上传失败: userId={}, fileName={}", userId,
+            log.error("用户头像上传失败: fileName={}",
                     file != null ? file.getOriginalFilename() : "unknown", e);
             return Result.error("头像上传失败: " + e.getMessage());
         }
@@ -109,8 +111,24 @@ public class AvatarController {
      * 获取用户头像URL
      */
     @GetMapping("/url")
-    public Result<Map<String, String>> getAvatarUrl(@RequestParam("userId") String userId) {
+    public Result<Map<String, String>> getAvatarUrl(@RequestHeader(value = "Authorization", required = false) String authorization) {
         try {
+            // 从Authorization头中获取token
+            if (StringUtils.isEmpty(authorization)) {
+                return Result.error("未提供Authorization令牌");
+            }
+
+            // 提取token（去掉Bearer前缀）
+            String token = authorization.replace("Bearer ", "");
+
+            // 验证token并获取userId
+            String userId = JwtUtil.getUserIdFromToken(token);
+            if (StringUtils.isEmpty(userId)) {
+                return Result.error("无效的令牌或令牌已过期");
+            }
+
+            log.info("接收到获取头像URL请求: userId={}", userId);
+
             Optional<ConsumerUser> userOpt = consumerUserRepository.findByUserId(userId);
             if (userOpt.isEmpty()) {
                 return Result.error("用户不存在: " + userId);
@@ -127,7 +145,7 @@ public class AvatarController {
             return Result.success("获取头像URL成功", result);
 
         } catch (Exception e) {
-            log.error("获取用户头像URL失败: userId={}", userId, e);
+            log.error("获取用户头像URL失败", e);
             return Result.error("获取头像URL失败: " + e.getMessage());
         }
     }

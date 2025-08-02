@@ -34,12 +34,10 @@ public class FileViewController {
      */
     @GetMapping("/view")
     public void viewFile(@RequestParam("fileId") String fileId,
-                        @RequestParam(value = "accessUserId", required = false) String accessUserId,
-                        @RequestParam(value = "accessUserType", defaultValue = "consumer") String accessUserType,
                         HttpServletRequest request,
                         HttpServletResponse response) {
         try {
-            log.info("接收到文件查看请求: fileId={}, accessUserId={}", fileId, accessUserId);
+            log.info("接收到文件查看请求: fileId={}", fileId);
 
             // 获取文件信息
             FileInfoVO fileInfo = fileStorageService.getFileInfo(fileId);
@@ -50,7 +48,7 @@ public class FileViewController {
             }
 
             // 使用FileStorageService下载文件数据
-            byte[] fileData = fileStorageService.downloadFile(fileId, accessUserId, "consumer", request.getRemoteAddr());
+            byte[] fileData = fileStorageService.downloadFile(fileId, null, "consumer", request.getRemoteAddr());
             if (fileData == null || fileData.length == 0) {
                 log.warn("文件不存在或数据为空: fileId={}", fileId);
                 handleFileError(response, "File not found: " + fileId, HttpServletResponse.SC_NOT_FOUND);
@@ -89,12 +87,10 @@ public class FileViewController {
      */
     @GetMapping("/download")
     public void downloadFile(@RequestParam("fileId") String fileId,
-                           @RequestParam(value = "accessUserId", required = false) String accessUserId,
-                           @RequestParam(value = "accessUserType", defaultValue = "consumer") String accessUserType,
                            HttpServletRequest request,
                            HttpServletResponse response) {
         try {
-            log.info("接收到文件下载请求: fileId={}, accessUserId={}", fileId, accessUserId);
+            log.info("接收到文件下载请求: fileId={}", fileId);
 
             // 获取文件信息
             FileInfoVO fileInfo = fileStorageService.getFileInfo(fileId);
@@ -105,7 +101,7 @@ public class FileViewController {
             }
 
             // 使用FileStorageService下载文件数据
-            byte[] fileData = fileStorageService.downloadFile(fileId, accessUserId, "consumer", request.getRemoteAddr());
+            byte[] fileData = fileStorageService.downloadFile(fileId, null, "consumer", request.getRemoteAddr());
             if (fileData == null || fileData.length == 0) {
                 log.warn("文件不存在或数据为空: fileId={}", fileId);
                 handleFileError(response, "File not found: " + fileId, HttpServletResponse.SC_NOT_FOUND);

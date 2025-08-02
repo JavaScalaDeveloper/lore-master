@@ -1,9 +1,13 @@
 package com.lore.master.web.consumer.controller;
 
+import com.lore.master.common.annotation.RequireLogin;
+import com.lore.master.common.context.UserContext;
 import com.lore.master.common.result.Result;
 import com.lore.master.data.dto.UserLoginRequest;
 import com.lore.master.data.vo.UserLoginResponse;
 import com.lore.master.service.consumer.ConsumerUserLoginService;
+import com.lore.master.service.consumer.strategy.ConsumerUserLoginStrategy;
+import com.lore.master.service.consumer.factory.ConsumerUserLoginStrategyFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserLoginController {
 
     private final ConsumerUserLoginService userLoginService;
+    private final ConsumerUserLoginStrategyFactory strategyFactory;
 
     /**
      * 用户登录
@@ -56,6 +61,25 @@ public class UserLoginController {
         } catch (Exception e) {
             log.error("刷新令牌失败", e);
             return Result.error("刷新失败，请重新登录");
+        }
+    }
+
+    /**
+     * 获取当前用户信息
+     */
+    @GetMapping("/info")
+    @RequireLogin
+    public Result<UserLoginResponse> info() {
+        try {
+            String userId = UserContext.getCurrentUserId();
+            if (userId == null) {
+                return Result.error("用户未登录");
+            }
+            UserLoginResponse response = userLoginService.getUserInfo(userId);
+            return Result.success("获取成功", response);
+        } catch (Exception e) {
+            log.error("获取用户信息失败", e);
+            return Result.error(e.getMessage());
         }
     }
 
@@ -107,6 +131,19 @@ public class UserLoginController {
             return "tablet";
         } else {
             return "web";
+        }
+    }
+
+    /**
+     * 测试登录策略
+     */
+    @GetMapping("/test-strategy")
+    public Result<String> testStrategy(@RequestParam String loginType) {
+        try {
+            ConsumerUserLoginStrategy strategy = strategyFactory.getStrategy(loginType);
+            return Result.success("获取策略成功: " + strategy.getClass().getName());
+        } catch (Exception e) {
+            return Result.error("获取策略失败: " + e.getMessage());
         }
     }
 }

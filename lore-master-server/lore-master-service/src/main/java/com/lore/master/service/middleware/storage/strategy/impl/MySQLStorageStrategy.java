@@ -139,13 +139,13 @@ public class MySQLStorageStrategy implements StorageStrategy {
     @Override
     public String generateAccessUrl(FileStorage fileStorage, int expireMinutes) {
         // MySQL存储策略生成的是本地访问URL
-        return String.format("/api/file/view/%s", fileStorage.getFileId());
+        return String.format("/api/file/view?fileId=%s", fileStorage.getFileId());
     }
 
     @Override
     public String generateDownloadUrl(FileStorage fileStorage, int expireMinutes) {
         // MySQL存储策略生成的是本地下载URL
-        return String.format("/api/file/download/%s", fileStorage.getFileId());
+        return String.format("/api/file/download?fileId=%s", fileStorage.getFileId());
     }
 
     @Override

@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -72,7 +73,7 @@ public class ConsumerUserLearningGoalServiceImpl implements ConsumerUserLearning
             goal.setSkillName(request.getSkillName());
             goal.setSkillPath(request.getSkillPath());
             goal.setTargetLevel(request.getTargetLevel());
-            goal.setCurrentProgress(0.0);
+            goal.setCurrentProgress(BigDecimal.valueOf(0.0));
             goal.setStartDate(request.getStartDate() != null ? request.getStartDate() : LocalDate.now());
             goal.setTargetDate(request.getTargetDate());
             goal.setStatus(UserLearningGoalStatusEnum.ACTIVE.name());
@@ -186,7 +187,8 @@ public class ConsumerUserLearningGoalServiceImpl implements ConsumerUserLearning
         response.setSkillName(goal.getSkillName());
         response.setSkillPath(goal.getSkillPath());
         response.setTargetLevel(goal.getTargetLevel());
-        response.setCurrentProgress(goal.getCurrentProgress());
+        BigDecimal currentProgress = goal.getCurrentProgress();
+        response.setCurrentProgress(currentProgress.doubleValue());
         response.setStartDate(goal.getStartDate());
         response.setTargetDate(goal.getTargetDate());
         response.setStatus(goal.getStatus());
