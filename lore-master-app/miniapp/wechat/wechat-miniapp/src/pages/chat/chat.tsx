@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react'
+﻿import { useState, useRef } from 'react'
 import { useLoad, navigateBack, showToast, request, getStorageSync, connectSocket, onSocketOpen, onSocketMessage, onSocketClose, onSocketError, sendSocketMessage, closeSocket } from '@tarojs/taro'
-import { View, Text, ScrollView, Textarea, Button } from '@tarojs/components'
+import { View, Text, ScrollView, Textarea, Button, Image } from '@tarojs/components'
 import MarkdownRenderer from '../../components/MarkdownRenderer/MarkdownRenderer'
 import './chat.css'
 
@@ -42,6 +42,7 @@ const Chat = () => {
   const [currentTypingId, setCurrentTypingId] = useState<string | null>(null)
   const [wsConnected, setWsConnected] = useState(false)
   const [wsConnecting, setWsConnecting] = useState(false)
+  const [userInfo, setUserInfo] = useState<any>(null)
 
   const scrollViewRef = useRef<any>()
   const currentMessageIdRef = useRef<string | null>(null)
@@ -56,6 +57,13 @@ const Chat = () => {
 
   useLoad(() => {
     console.log('聊天页面加载')
+
+    // 获取用户信息
+    const storedUserInfo = getStorageSync('userInfo')
+    if (storedUserInfo) {
+      setUserInfo(storedUserInfo)
+    }
+
     initializeChat()
 
     // 延迟初始化WebSocket，确保页面完全加载
@@ -606,8 +614,19 @@ const Chat = () => {
                     {new Date(message.timestamp).toLocaleTimeString()}
                   </Text>
                 </View>
-                <View className='avatar-container'>
-                  <Text className='user-avatar-text'>👤</Text>
+                <View className='avatar-container user-avatar-container'>
+                  {userInfo?.avatarUrl ? (
+                    <Image
+                      src={userInfo.avatarUrl}
+                      className='user-avatar-image'
+                      mode='aspectFill'
+                      onError={() => {
+                        console.log('用户头像加载失败，使用默认头像')
+                      }}
+                    />
+                  ) : (
+                    <Text className='user-avatar-text'>👤</Text>
+                  )}
                 </View>
               </View>
             )}
