@@ -15,6 +15,7 @@ import com.lore.master.data.repository.consumer.ConsumerUserRepository;
 import com.lore.master.service.consumer.strategy.ConsumerUserLoginStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -140,6 +141,9 @@ public class WechatLoginStrategy implements ConsumerUserLoginStrategy {
      * 使用微信登录code换取openid
      */
     private String getOpenidByCode(String code) {
+        if (StringUtils.isBlank(secret)) {
+            secret = System.getenv("WECHAT_MINIAPP_SECRET");
+        }
         try {
             // 构建请求参数
             Map<String, Object> params = new HashMap<>();

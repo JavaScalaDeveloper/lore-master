@@ -6,7 +6,7 @@
     "coverView": false,
     "lazyloadPlaceholderEnable": false,
     "skylineRenderEnable": false,
-    "preloadBackgroundData": false,
+    "preloadBackgroundData": true,
     "autoAudits": false,
     "useApiHook": true,
     "useApiHostProcess": true,

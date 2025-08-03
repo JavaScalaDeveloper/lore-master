@@ -26,7 +26,9 @@ public class LangChain4jConfig {
 
     @Value("${llm.model:gpt-3.5-turbo}")
     private String modelName;
-    @Value("${llm.ollama-model:qwen3:0.6b}")
+    @Value("${llm.ollama.url}")
+    private String ollamaUrl;
+    @Value("${llm.ollama.model:qwen3:0.6b}")
     private String ollamaModelName;
 
     @Value("${langchain4j.openai.temperature:0.7}")
@@ -82,7 +84,7 @@ public class LangChain4jConfig {
     public ChatLanguageModel ollamaChatLanguageModel() {
         return  OllamaChatModel
                 .builder()
-                .baseUrl("http://localhost:11434")
+                .baseUrl(ollamaUrl)
                 .modelName(ollamaModelName)
                 .build();
     }
@@ -93,7 +95,7 @@ public class LangChain4jConfig {
     @Bean(name = "ollamaStreamingChatModel")
     public OllamaStreamingChatModel ollamaStreamingChatModel() {
         return OllamaStreamingChatModel.builder()
-                .baseUrl("http://localhost:11434")
+                .baseUrl(ollamaUrl)
                 .modelName(ollamaModelName)
                 .temperature(Double.valueOf(temperature))
                 .build();

@@ -3,6 +3,7 @@ export default defineAppConfig({
     'pages/index/index',
     'pages/study/study',
     'pages/profile/profile',
+    'pages/chat/chat',
   ],
   window: {
     backgroundTextStyle: 'light',

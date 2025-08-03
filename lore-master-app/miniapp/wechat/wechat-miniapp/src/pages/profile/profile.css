@@ -1,12 +1,14 @@
 .profile-container {
-  padding: 20px;
+  padding: 0;
   text-align: center;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  font-size: 16px; /* 默认字体大小 */
+  justify-content: flex-start;
+  font-size: 22px; /* 继续放大默认字体大小 */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
 }
 
 .profile-title {
@@ -149,16 +151,106 @@
   background-color: #ffebeb;
 }
 
-/* 用户信息区域 */
+/* 新的用户信息卡片样式 */
+.user-info-card {
+  display: flex;
+  align-items: center;
+  width: calc(100% - 40px);
+  padding: 20px;
+  margin: 20px 20px 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.user-info-card:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.user-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  margin-right: 16px;
+}
+
+.user-avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.user-info-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.user-nickname {
+  font-size: 26px;
+  font-weight: 700;
+  color: #2d3748;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.user-id-text {
+  font-size: 18px;
+  color: #667eea;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  padding: 6px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  font-weight: 500;
+}
+
+.edit-arrow {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.edit-arrow:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.arrow-text {
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* 保留原有的用户信息区域样式（用于未登录状态） */
 .user-info-section {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
-  padding: 30px 20px 20px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+  padding: 40px 20px 30px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
   border-radius: 0 0 30px 30px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  position: relative;
 }
 
 .avatar-container {
@@ -167,29 +259,62 @@
 }
 
 .avatar {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
-  border: 4px solid white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 5px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
 }
 
 .avatar:hover {
   transform: scale(1.05);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 1);
 }
 
-.avatar-placeholder {
-  width: 100px;
-  height: 100px;
+.avatar::after {
+  content: '📷';
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
   border-radius: 50%;
-  background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 4px solid white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  color: white;
+  border: 3px solid white;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.avatar:hover::after {
+  opacity: 1;
+}
+
+.avatar-placeholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f0f0f0 0%, #d0d0d0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 5px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.avatar-placeholder::before {
+  content: '👤';
+  font-size: 48px;
+  opacity: 0.6;
 }
 
 .placeholder-text {
@@ -206,17 +331,21 @@
 }
 
 .nickname {
-  font-size: 22px;
-  font-weight: 600;
-  color: #333;
+  font-size: 24px;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .user-id {
   font-size: 14px;
-  color: #888;
-  background-color: rgba(0, 0, 0, 0.05);
-  padding: 4px 12px;
+  color: #667eea;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  padding: 6px 16px;
   border-radius: 20px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  font-weight: 500;
 }
 
 .not-login {
@@ -265,42 +394,51 @@
 
 /* 功能列表样式 */
 .function-list {
-  width: 100%;
-  padding: 15px;
+  width: calc(100% - 40px);
+  padding: 0 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
 .function-item {
-  background-color: white;
-  border-radius: 16px;
-  padding: 20px 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 20px 18px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   justify-content: space-between;
   transition: all 0.3s ease;
-  border: 1px solid #f0f0f0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
 }
 
 .function-item:hover {
-  background-color: #fafafa;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
 .function-icon {
-  font-size: 24px;
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
-  border-radius: 14px;
+  font-size: 28px;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #00bcd4;
+  color: white;
   font-weight: bold;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+}
+
+.function-item:hover .function-icon {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 .function-info {
@@ -312,20 +450,95 @@
 }
 
 .function-name {
-  font-size: 18px;
+  font-size: 24px;
   font-weight: 600;
   color: #333;
 }
 
 .function-desc {
-  font-size: 14px;
+  font-size: 20px;
   color: #888;
 }
 
 .arrow-right {
-  font-size: 18px;
+  font-size: 22px;
   color: #ccc;
   font-weight: bold;
+}
+
+/* 学习目标紧凑样式 */
+.goal-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.goal-path {
+  font-size: 20px;
+  color: #888;
+  font-weight: 500;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  padding: 4px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.goal-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.progress-bar-compact {
+  flex: 1;
+  height: 10px;
+  background: linear-gradient(135deg, #f0f0f0, #e8e8e8);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.progress-bar-compact::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.8), transparent);
+  border-radius: 6px 6px 0 0;
+}
+
+.progress-fill-compact {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  border-radius: 6px;
+  transition: width 0.3s ease;
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
+  position: relative;
+}
+
+.progress-fill-compact::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.6), transparent);
+  border-radius: 6px 6px 0 0;
+}
+
+.progress-text-compact {
+  font-size: 18px;
+  color: #667eea;
+  font-weight: 600;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(102, 126, 234, 0.2);
 }
 
 /* 退出登录按钮样式 */
@@ -353,12 +566,28 @@
 .stats-container {
   display: flex;
   justify-content: space-around;
-  width: 100%;
-  padding: 20px;
-  background-color: white;
-  border-radius: 16px;
-  margin: 20px 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  width: calc(100% - 40px);
+  padding: 24px 20px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  margin: 8px 20px 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 为统计容器添加装饰性背景 */
+.stats-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+  z-index: -1;
 }
 
 .stat-item {
@@ -366,91 +595,210 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
+  padding: 16px 8px;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.stat-item:hover {
+  background: rgba(102, 126, 234, 0.1);
+  transform: translateY(-3px);
+}
+
+.stat-icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+  transition: transform 0.3s ease;
+}
+
+.stat-item:hover .stat-icon {
+  transform: scale(1.2);
 }
 
 .stat-value {
-  font-size: 24px;
-  font-weight: 700;
-  color: #07c160;
-}
-
-.stat-label {
-  font-size: 14px;
-  color: #888;
-}
-
-/* 学习目标区域 */
-.goal-section {
-  width: 100%;
-  padding: 20px;
-  background-color: white;
-  border-radius: 16px;
-  margin: 10px 0 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.goal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.goal-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-}
-
-.modify-btn {
-  background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
-  color: #333;
-  border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 500;
-  box-shadow: 0 2px 6px rgba(161, 196, 253, 0.3);
+  font-size: 40px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
   transition: all 0.3s ease;
 }
 
-.modify-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(161, 196, 253, 0.4);
+.stat-item:hover .stat-value {
+  transform: scale(1.1);
 }
 
-.goal-content {
+.stat-label {
+  font-size: 19px;
+  color: #666;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+  transition: color 0.3s ease;
+}
+
+.stat-item:hover .stat-label {
+  color: #667eea;
+}
+
+
+
+/* 加载动画 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.user-info-section,
+.user-info-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.stats-container {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.stats-container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+
+
+.function-item {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.function-item:nth-child(1) { animation-delay: 0.1s; }
+.function-item:nth-child(2) { animation-delay: 0.2s; }
+.function-item:nth-child(3) { animation-delay: 0.3s; }
+.function-item:nth-child(4) { animation-delay: 0.4s; }
+.function-item:nth-child(5) { animation-delay: 0.5s; }
+
+.function-item:active {
+  animation: pulse 0.3s ease;
+}
+
+/* 登录提示区域优化 */
+.login-prompt {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  gap: 24px;
+  padding: 40px 30px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  width: calc(100% - 80px);
+  max-width: 400px;
+  margin: 40px auto;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.goal-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
+.prompt-text {
+  font-size: 24px;
+  color: #666;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.5;
 }
 
-.goal-category {
-  font-size: 14px;
-  color: #888;
-}
+/* 响应式设计 */
+@media (max-width: 480px) {
+  .profile-container {
+    font-size: 20px;
+  }
 
-.progress-bar {
-  width: 100%;
-  height: 10px;
-  background-color: #f0f0f0;
-  border-radius: 5px;
-  overflow: hidden;
-}
+  .user-avatar {
+    width: 60px;
+    height: 60px;
+  }
 
-.progress {
-  height: 100%;
-  background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
-  border-radius: 5px;
-}
+  .user-nickname {
+    font-size: 22px;
+  }
 
-.progress-text {
-  font-size: 14px;
-  color: #888;
-  text-align: right;
+  .user-id-text {
+    font-size: 16px;
+  }
+
+  .avatar, .avatar-placeholder {
+    width: 100px;
+    height: 100px;
+  }
+
+  .nickname {
+    font-size: 20px;
+  }
+
+  .stats-container {
+    padding: 20px 16px;
+  }
+
+  .stat-icon {
+    font-size: 20px;
+  }
+
+  .stat-value {
+    font-size: 34px;
+  }
+
+  .stat-label {
+    font-size: 17px;
+  }
+
+  .goal-path {
+    font-size: 18px;
+  }
+
+  .progress-text-compact {
+    font-size: 16px;
+  }
+
+  .function-item {
+    padding: 16px 14px;
+  }
+
+  .function-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+  }
+
+  .function-name {
+    font-size: 22px;
+  }
+
+  .function-desc {
+    font-size: 18px;
+  }
+
+  .login-prompt {
+    padding: 32px 24px;
+    width: calc(100% - 60px);
+  }
+
+  .prompt-text {
+    font-size: 22px;
+  }
 }
