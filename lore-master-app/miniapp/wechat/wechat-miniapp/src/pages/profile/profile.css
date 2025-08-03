@@ -1,0 +1,456 @@
+.profile-container {
+  padding: 20px;
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 16px; /* 默认字体大小 */
+}
+
+.profile-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 40px;
+}
+
+/* 顶部信息区域 */
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
+  width: 100%;
+}
+
+.avatar-wrapper {
+  position: relative;
+}
+
+/* 上传头像提示 */
+.avatar-hint {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(7, 193, 96, 0.8);
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.user-info-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-id {
+  font-size: 14px;
+  color: #888;
+}
+
+/* 中间内容区域 */
+.profile-content {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.user-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.action-card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.action-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.action-icon {
+  width: 40px;
+  height: 40px;
+  background-color: #f0f9ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  color: #07c160;
+  font-size: 20px;
+}
+
+.action-btn {
+  background-color: transparent;
+  color: #333;
+  border: none;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 0;
+  margin: 0;
+  height: auto;
+  line-height: normal;
+}
+
+.login-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 40px 20px;
+  background-color: #f8f8f8;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.prompt-text {
+  font-size: 16px;
+  color: #666;
+}
+
+/* 底部区域 */
+.profile-footer {
+  width: 100%;
+  padding: 20px 0;
+  display: flex;
+  justify-content: center;
+}
+
+
+
+.logout-btn:hover {
+  background-color: #ffebeb;
+}
+
+/* 用户信息区域 */
+.user-info-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 30px 20px 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+  border-radius: 0 0 30px 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.avatar-container {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 4px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.avatar-placeholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.placeholder-text {
+  color: #888;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.nickname {
+  font-size: 22px;
+  font-weight: 600;
+  color: #333;
+}
+
+.user-id {
+  font-size: 14px;
+  color: #888;
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.not-login {
+  font-size: 18px;
+  color: #888;
+  font-weight: 500;
+}
+
+.edit-btn {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 10px;
+  box-shadow: 0 2px 6px rgba(79, 172, 254, 0.3);
+  transition: all 0.3s ease;
+}
+
+.edit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(79, 172, 254, 0.4);
+}
+
+/* 登录按钮样式 */
+.login-btn {
+  background: linear-gradient(135deg, #07c160 0%, #05a550 100%);
+  color: white;
+  width: 80%;
+  border-radius: 50px;
+  margin-top: 50px;
+  padding: 14px 0;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 12px rgba(7, 193, 96, 0.3);
+  transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+  background: linear-gradient(135deg, #09d96d 0%, #07c160 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(7, 193, 96, 0.4);
+}
+
+/* 功能列表样式 */
+.function-list {
+  width: 100%;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.function-item {
+  background-color: white;
+  border-radius: 16px;
+  padding: 20px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
+}
+
+.function-item:hover {
+  background-color: #fafafa;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.function-icon {
+  font-size: 24px;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #00bcd4;
+  font-weight: bold;
+}
+
+.function-info {
+  flex: 1;
+  margin-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.function-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.function-desc {
+  font-size: 14px;
+  color: #888;
+}
+
+.arrow-right {
+  font-size: 18px;
+  color: #ccc;
+  font-weight: bold;
+}
+
+/* 退出登录按钮样式 */
+.logout-btn {
+  background: linear-gradient(135deg, #ff4d4f 0%, #f5222d 100%);
+  color: white;
+  border-radius: 50px;
+  width: 80%;
+  max-width: 300px;
+  font-size: 18px;
+  padding: 14px 0;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 12px rgba(245, 34, 45, 0.2);
+}
+
+.logout-btn:hover {
+  background: linear-gradient(135deg, #ff7875 0%, #ff4d4f 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(245, 34, 45, 0.3);
+}
+
+/* 学习数据统计 */
+.stats-container {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  padding: 20px;
+  background-color: white;
+  border-radius: 16px;
+  margin: 20px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #07c160;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #888;
+}
+
+/* 学习目标区域 */
+.goal-section {
+  width: 100%;
+  padding: 20px;
+  background-color: white;
+  border-radius: 16px;
+  margin: 10px 0 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.goal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.goal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.modify-btn {
+  background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+  color: #333;
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(161, 196, 253, 0.3);
+  transition: all 0.3s ease;
+}
+
+.modify-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(161, 196, 253, 0.4);
+}
+
+.goal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.goal-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.goal-category {
+  font-size: 14px;
+  color: #888;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+  border-radius: 5px;
+}
+
+.progress-text {
+  font-size: 14px;
+  color: #888;
+  text-align: right;
+}
