@@ -58,7 +58,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             llmChatService.sendMessageStream(userMessage, userId)
                 .doOnNext(chunk -> {
                     try {
-                        log.debug("发送流式数据块: sessionId={}, chunk={}", sessionId, chunk);
+//                        log.debug("发送流式数据块: sessionId={}, chunk={}", sessionId, chunk);
                         sendMessage(session, chunk);
                     } catch (Exception e) {
                         log.error("发送流式数据失败: sessionId={}", sessionId, e);

@@ -1,5 +1,6 @@
 package com.lore.master.web.consumer.controller;
 
+import com.lore.master.common.annotation.RequireLogin;
 import com.lore.master.common.result.Result;
 import com.lore.master.data.dto.UserLearningGoalRequest;
 import com.lore.master.data.vo.UserLearningGoalResponse;
@@ -24,7 +25,8 @@ public class UserLearningGoalController {
      * 保存用户学习目标
      * 同一个用户可以保存多个不同目标，但用户-目标是唯一的
      */
-    @PostMapping
+    @PostMapping("/saveLearningGoal")
+    @RequireLogin
     public Result<UserLearningGoalResponse> saveLearningGoal(@Valid @RequestBody UserLearningGoalRequest request) {
         try {
             UserLearningGoalResponse response = userLearningGoalService.saveLearningGoal(request);
@@ -42,6 +44,7 @@ public class UserLearningGoalController {
      * 获取用户当前学习目标
      */
     @GetMapping("/current")
+    @RequireLogin
     public Result<UserLearningGoalResponse> getCurrentLearningGoal() {
         try {
             UserLearningGoalResponse response = userLearningGoalService.getCurrentLearningGoal();
@@ -56,6 +59,7 @@ public class UserLearningGoalController {
      * 获取用户所有学习目标
      */
     @GetMapping("/list")
+    @RequireLogin
     public Result<java.util.List<UserLearningGoalResponse>> getUserLearningGoals() {
         try {
             java.util.List<UserLearningGoalResponse> response = userLearningGoalService.getUserLearningGoals();
@@ -70,6 +74,7 @@ public class UserLearningGoalController {
      * 更新学习目标状态
      */
     @PutMapping("/{goalId}/status")
+    @RequireLogin
     public Result<Boolean> updateLearningGoalStatus(@PathVariable Long goalId, @RequestParam String status) {
         try {
             boolean success = userLearningGoalService.updateLearningGoalStatus(goalId, status);

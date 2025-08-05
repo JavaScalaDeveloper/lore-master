@@ -1,8 +1,23 @@
 import { useState, useEffect } from 'react'
-import { useLoad, login, getUserProfile, getStorageSync, setStorageSync, removeStorageSync, request, showToast, getSystemInfo, getNetworkType, chooseImage, hideLoading, showActionSheet, uploadFile } from '@tarojs/taro'
+import { useLoad, useDidShow, login, getUserProfile, getStorageSync, setStorageSync, removeStorageSync, request, showToast, getSystemInfo, getNetworkType, chooseImage, hideLoading, showActionSheet, uploadFile, navigateTo } from '@tarojs/taro'
 import { View, Text, Button, Image } from '@tarojs/components'
 import { API_ENDPOINTS, buildApiUrl, getApiHeaders, apiLog } from '../../config/api'
 import './profile.css'
+
+interface UserLearningGoal {
+  id: number
+  skillCode: string
+  skillName: string
+  skillPath: string
+  targetLevel?: string
+  currentProgress?: number
+  startDate?: string
+  targetDate?: string
+  description?: string
+  status?: string
+  createdTime?: string
+  updatedTime?: string
+}
 
 const Profile = () => {
   const [userInfo, setUserInfo] = useState<any>(null)
@@ -10,12 +25,26 @@ const Profile = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false) // 添加加载状态，防止重复点击
   const [lastLoginTime, setLastLoginTime] = useState<number>(0) // 记录上次登录请求时间，防止短时间内重复请求
   const [fontSize, setFontSize] = useState<number>(16) // 字体大小状态，默认16px
+  const [currentLearningGoal, setCurrentLearningGoal] = useState<UserLearningGoal | null>(null) // 当前学习目标
+  const [loadingGoal, setLoadingGoal] = useState<boolean>(false) // 学习目标加载状态
   const MIN_LOGIN_INTERVAL = 2000 // 最小登录间隔(毫秒)
   const DEFAULT_AVATAR = 'https://via.placeholder.com/100?text=默认头像' // 默认头像地址
 
   useLoad(() => {
     console.log('页面加载，开始检查登录状态')
     checkLoginStatus()
+    // 如果已登录，获取学习目标
+    if (isLogin) {
+      loadCurrentLearningGoal()
+    }
+  })
+
+  // 页面显示时刷新学习目标（从其他页面返回时）
+  useDidShow(() => {
+    console.log('页面显示，刷新学习目标')
+    if (isLogin) {
+      loadCurrentLearningGoal()
+    }
   })
 
   // 添加useEffect来确保组件挂载时也检查登录状态
@@ -23,6 +52,59 @@ const Profile = () => {
     console.log('组件挂载，检查本地存储的登录状态')
     checkLocalLoginStatus()
   }, [])
+
+  // 监听登录状态变化，获取学习目标
+  useEffect(() => {
+    if (isLogin) {
+      console.log('用户已登录，获取学习目标')
+      loadCurrentLearningGoal()
+    } else {
+      console.log('用户未登录，清空学习目标')
+      setCurrentLearningGoal(null)
+    }
+  }, [isLogin])
+
+  // 获取当前学习目标
+  const loadCurrentLearningGoal = async () => {
+    try {
+      setLoadingGoal(true)
+      const token = getStorageSync('token')
+      if (!token) {
+        console.log('未登录，无法获取学习目标')
+        return
+      }
+
+      apiLog('获取当前学习目标...')
+      const response = await request({
+        url: API_ENDPOINTS.USER_LEARNING_GOAL_CURRENT,
+        method: 'GET',
+        header: getApiHeaders(token)
+      })
+
+      console.log('学习目标响应:', response)
+
+      if (response.statusCode === 200 && response.data.success) {
+        const goal = response.data.data
+        setCurrentLearningGoal(goal)
+        console.log('获取学习目标成功:', goal)
+      } else {
+        console.log('暂无学习目标或获取失败:', response.data.message)
+        setCurrentLearningGoal(null)
+      }
+    } catch (e) {
+      console.error('获取学习目标失败:', e)
+      setCurrentLearningGoal(null)
+    } finally {
+      setLoadingGoal(false)
+    }
+  }
+
+  // 跳转到学习目标设置页面
+  const handleEditLearningGoal = () => {
+    navigateTo({
+      url: '/pages/learning-goal/learning-goal'
+    })
+  }
 
   // 检查本地存储的登录状态（不调用接口）
   const checkLocalLoginStatus = () => {
@@ -702,21 +784,53 @@ const Profile = () => {
       <View className='profile-content'>
         {isLogin ? (
           <View className='function-list'>
-            <View className='function-item' onClick={() => showToast({ title: '功能开发中' })}>
+            <View className='function-item'>
               <View className='function-icon'>🎯</View>
               <View className='function-info'>
                 <View className='goal-title-row'>
                   <Text className='function-name'>我的学习目标</Text>
-                  <Text className='goal-path'>外语 {'>'} 英语 {'>'} 雅思</Text>
+                  {loadingGoal ? (
+                    <Text className='goal-path'>加载中...</Text>
+                  ) : currentLearningGoal ? (
+                    <View className='goal-info'>
+                      <Text className='goal-name'>{currentLearningGoal.skillName}</Text>
+                      <Text className='goal-path'>{currentLearningGoal.skillPath}</Text>
+                      {currentLearningGoal.targetLevel && (
+                        <Text className='goal-level'>目标等级: {currentLearningGoal.targetLevel}</Text>
+                      )}
+                    </View>
+                  ) : (
+                    <Text className='goal-path'>暂未设置学习目标</Text>
+                  )}
                 </View>
-                <View className='goal-progress-row'>
-                  <View className='progress-bar-compact'>
-                    <View className='progress-fill-compact' style={{ width: '35%' }}></View>
+                {currentLearningGoal && (
+                  <View className='goal-progress-row'>
+                    <View className='progress-bar-compact'>
+                      <View className='progress-fill-compact' style={{ width: `${currentLearningGoal.currentProgress || 0}%` }}></View>
+                    </View>
+                    <Text className='progress-text-compact'>{currentLearningGoal.currentProgress || 0}% 完成</Text>
                   </View>
-                  <Text className='progress-text-compact'>35% 完成</Text>
-                </View>
+                )}
               </View>
-              <View className='arrow-right'>→</View>
+              <View className='goal-actions'>
+                <Button
+                  className='refresh-goal-btn'
+                  size='mini'
+                  onClick={() => loadCurrentLearningGoal()}
+                  loading={loadingGoal}
+                  disabled={loadingGoal}
+                >
+                  🔄
+                </Button>
+                <Button
+                  className='edit-goal-btn'
+                  size='mini'
+                  type='primary'
+                  onClick={handleEditLearningGoal}
+                >
+                  {currentLearningGoal ? '修改' : '设置'}
+                </Button>
+              </View>
             </View>
             <View className='function-item' onClick={() => showToast({ title: '功能开发中' })}>
               <View className='function-icon'>📚</View>

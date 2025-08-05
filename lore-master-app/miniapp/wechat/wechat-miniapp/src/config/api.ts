@@ -93,6 +93,11 @@ export const API_ENDPOINTS = {
   // 聊天相关
   CHAT_SEND_MESSAGE: `${API_CONFIG.baseUrl}/api/chat/sendMessageStream`,
   CHAT_UPLOAD_FILE: `${API_CONFIG.baseUrl}/api/chat/upload`,
+
+  // 学习目标相关
+  SKILL_CATALOG_TREE: `${API_CONFIG.baseUrl}/api/consumer/skill-catalog/tree`,
+  USER_LEARNING_GOAL: `${API_CONFIG.baseUrl}/api/user/learning-goal`,
+  USER_LEARNING_GOAL_CURRENT: `${API_CONFIG.baseUrl}/api/user/learning-goal/current`,
 };
 
 // 导出基础URL，用于拼接相对路径

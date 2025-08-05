@@ -134,3 +134,12 @@ lore:
       allowed-headers:
         - "*"
       allow-credentials: true
+
+llm:
+  # API密钥（建议通过环境变量设置）
+  api:
+    key: ${LLM_API_KEY:default-value}
+  # 模型配置
+  ollama:
+    url: http://localhost:11434
+    model: ${LLM_MODEL:qwen3:0.6b}

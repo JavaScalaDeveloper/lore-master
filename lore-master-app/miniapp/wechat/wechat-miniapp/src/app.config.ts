@@ -4,6 +4,7 @@ export default defineAppConfig({
     'pages/study/study',
     'pages/profile/profile',
     'pages/chat/chat',
+    'pages/learning-goal/learning-goal',
   ],
   window: {
     backgroundTextStyle: 'light',

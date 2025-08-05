@@ -16,13 +16,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         "com.lore.master.data",
         "com.lore.master.common"
 })
-@EntityScan(basePackages = {
-        "com.lore.master.data.entity.consumer",
-        "com.lore.master.data.entity.admin",
-        "com.lore.master.data.entity.business",
-        "com.lore.master.data.entity.storage"
-})
-
 public class WebAdminApplication {
 
     public static void main(String[] args) {
