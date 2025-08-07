@@ -3,6 +3,8 @@ package com.lore.master.web.admin.controller;
 import com.lore.master.common.result.Result;
 import com.lore.master.data.dto.admin.LearningSkillCatalogDTO;
 import com.lore.master.data.dto.admin.LearningSkillCatalogQueryDTO;
+import com.lore.master.data.validation.CreateGroup;
+import com.lore.master.data.validation.UpdateGroup;
 import com.lore.master.data.vo.admin.LearningSkillCatalogVO;
 import com.lore.master.service.admin.LearningSkillCatalogService;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
@@ -32,7 +33,7 @@ public class LearningSkillCatalogController {
      * 创建技能目录
      */
     @PostMapping("/create")
-    public Result<LearningSkillCatalogVO> createSkillCatalog(@Valid @RequestBody LearningSkillCatalogDTO dto) {
+    public Result<LearningSkillCatalogVO> createSkillCatalog(@Validated(CreateGroup.class) @RequestBody LearningSkillCatalogDTO dto) {
         log.info("创建技能目录: {}", dto.getSkillCode());
         try {
             LearningSkillCatalogVO result = skillCatalogService.createSkillCatalog(dto);
@@ -49,8 +50,8 @@ public class LearningSkillCatalogController {
     @PutMapping("/update/{id}")
     public Result<LearningSkillCatalogVO> updateSkillCatalog(
             @PathVariable @NotNull Long id,
-            @Valid @RequestBody LearningSkillCatalogDTO dto) {
-        log.info("更新技能目录: id={}, skillCode={}", id, dto.getSkillCode());
+            @Validated(UpdateGroup.class) @RequestBody LearningSkillCatalogDTO dto) {
+        log.info("更新技能目录: id={}, skillCode={}, skillPath={}", id, dto.getSkillCode(), dto.getSkillPath());
         try {
             LearningSkillCatalogVO result = skillCatalogService.updateSkillCatalog(id, dto);
             return Result.success("更新成功", result);

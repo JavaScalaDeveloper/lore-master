@@ -85,8 +85,10 @@ const Profile = () => {
 
       if (response.statusCode === 200 && response.data.success) {
         const goal = response.data.data
+        console.log('获取学习目标成功，详细数据:', goal)
+        console.log('skillCode:', goal?.skillCode)
+        console.log('skillName:', goal?.skillName)
         setCurrentLearningGoal(goal)
-        console.log('获取学习目标成功:', goal)
       } else {
         console.log('暂无学习目标或获取失败:', response.data.message)
         setCurrentLearningGoal(null)
@@ -103,6 +105,27 @@ const Profile = () => {
   const handleEditLearningGoal = () => {
     navigateTo({
       url: '/pages/learning-goal/learning-goal'
+    })
+  }
+
+  // 查看学习目标思维导图
+  const handleViewMindmap = () => {
+    if (!currentLearningGoal) {
+      showToast({
+        title: '请先设置学习目标',
+        icon: 'none'
+      })
+      return
+    }
+
+    console.log('准备跳转到思维导图，学习目标信息:', currentLearningGoal)
+
+    // 跳转到思维导图页面，传递技能编码和名称
+    const url = `/pages/mindmap/mindmap?skillCode=${currentLearningGoal.skillCode}&skillName=${encodeURIComponent(currentLearningGoal.skillName)}`
+    console.log('跳转URL:', url)
+
+    navigateTo({
+      url: url
     })
   }
 
@@ -784,7 +807,7 @@ const Profile = () => {
       <View className='profile-content'>
         {isLogin ? (
           <View className='function-list'>
-            <View className='function-item'>
+            <View className='function-item' onClick={handleViewMindmap}>
               <View className='function-icon'>🎯</View>
               <View className='function-info'>
                 <View className='goal-title-row'>
@@ -798,6 +821,7 @@ const Profile = () => {
                       {currentLearningGoal.targetLevel && (
                         <Text className='goal-level'>目标等级: {currentLearningGoal.targetLevel}</Text>
                       )}
+                      <Text className='goal-hint'>点击查看学习路径图</Text>
                     </View>
                   ) : (
                     <Text className='goal-path'>暂未设置学习目标</Text>

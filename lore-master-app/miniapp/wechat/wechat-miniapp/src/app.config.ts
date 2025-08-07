@@ -5,6 +5,9 @@ export default defineAppConfig({
     'pages/profile/profile',
     'pages/chat/chat',
     'pages/learning-goal/learning-goal',
+    'pages/mindmap/mindmap',
+    'pages/mindmap/debug',
+    'pages/mindmap/test-api',
   ],
   window: {
     backgroundTextStyle: 'light',

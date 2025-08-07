@@ -83,15 +83,24 @@ public class LearningSkillCatalogServiceImpl implements LearningSkillCatalogServ
             throw new RuntimeException("技能编码已存在: " + dto.getSkillCode());
         }
         
-        // 更新字段
-        BeanUtils.copyProperties(dto, entity, "id", "createdTime", "createdBy");
+        // 保存原有的skillPath，避免被null值覆盖
+        String originalSkillPath = entity.getSkillPath();
+        String originalParentCode = entity.getParentCode();
+        String originalSkillCode = entity.getSkillCode();
+
+        // 更新字段（排除skillPath，因为它需要特殊处理）
+        BeanUtils.copyProperties(dto, entity, "id", "createdTime", "createdBy", "skillPath");
         entity.setUpdatedTime(LocalDateTime.now());
-        
-        // 如果父级或编码发生变化，重新生成路径
-        if (!Objects.equals(entity.getParentCode(), dto.getParentCode()) || 
-            !Objects.equals(entity.getSkillCode(), dto.getSkillCode())) {
+
+        // 如果父级或编码发生变化，重新生成路径；否则保持原路径
+        if (!Objects.equals(originalParentCode, dto.getParentCode()) ||
+            !Objects.equals(originalSkillCode, dto.getSkillCode())) {
             String skillPath = generateSkillPath(dto.getParentCode(), dto.getSkillCode());
             entity.setSkillPath(skillPath);
+            log.info("技能路径已更新: {} -> {}", originalSkillPath, skillPath);
+        } else {
+            // 保持原有路径
+            entity.setSkillPath(originalSkillPath);
         }
         
         // 处理标签

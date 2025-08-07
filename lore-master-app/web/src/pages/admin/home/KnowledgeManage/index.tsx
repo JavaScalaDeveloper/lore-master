@@ -12,484 +12,824 @@ import {
   Popconfirm,
   Tag,
   Card,
-  Upload,
   Tree,
   Tabs,
   Typography,
-  Divider
+  Divider,
+  Row,
+  Col,
+  InputNumber,
+  Tooltip,
+  Spin
 } from 'antd';
 import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
-  UploadOutlined,
   FolderOutlined,
   FileTextOutlined,
-  DownloadOutlined
+  EyeOutlined,
+  NodeIndexOutlined,
+  TableOutlined,
+  ReloadOutlined,
+  ArrowUpOutlined,
+  ArrowDownOutlined
 } from '@ant-design/icons';
 import { adminApi } from '../../../../utils/request';
-import { API_PATHS } from '../../../../config/api';
+import EditableTree from './components/EditableTree';
 
 const { Title, Paragraph } = Typography;
 const { TextArea } = Input;
 const { TabPane } = Tabs;
 
-interface KnowledgeItem {
-  id: string;
-  title: string;
-  subject: string;
-  level: string;
-  type: 'text' | 'video' | 'audio' | 'document';
-  content: string;
-  tags: string[];
-  status: boolean;
-  difficulty: number;
-  createTime: string;
-  updateTime: string;
+// 知识图谱节点接口
+interface KnowledgeMapNode {
+  id: number;
+  nodeCode: string;
+  nodeName: string;
+  nodeType: 'ROOT' | 'LEVEL' | 'BRANCH' | 'LEAF';
+  parentCode?: string;
+  rootCode: string;
+  nodePath: string;
+  levelDepth: number;
+  levelType?: string;
+  sortOrder: number;
+  skillCatalogCode?: string;
+  description?: string;
+  difficultyLevel: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
+  estimatedHours: number;
+  status: 'ACTIVE' | 'INACTIVE';
+  createdBy?: string;
+  createdTime?: string;
+  updatedBy?: string;
+  updatedTime?: string;
+}
+
+// 树形节点接口
+interface TreeNode {
+  nodeCode: string;
+  nodeName: string;
+  nodeType: string;
+  levelDepth: number;
+  levelType?: string;
+  sortOrder: number;
+  difficultyLevel?: string;
+  estimatedHours?: number;
+  description?: string;
+  children?: TreeNode[];
+}
+
+// 技能树响应接口
+interface SkillTreeResponse {
+  rootCode: string;
+  rootName: string;
+  children: TreeNode[];
+}
+
+// 查询请求接口
+interface QueryRequest {
+  rootCode?: string;
+  nodeType?: string;
+  levelDepth?: number;
+  levelType?: string;
+  difficultyLevel?: string;
+  status?: string;
+  keyword?: string;
+  pageNum?: number;
+  pageSize?: number;
 }
 
 const KnowledgeManage: React.FC = () => {
-  const [knowledgeList, setKnowledgeList] = useState<KnowledgeItem[]>([]);
+  // 状态管理
+  const [knowledgeList, setKnowledgeList] = useState<KnowledgeMapNode[]>([]);
+  const [skillTreeData, setSkillTreeData] = useState<SkillTreeResponse | null>(null);
+  const [rootNodes, setRootNodes] = useState<KnowledgeMapNode[]>([]);
   const [loading, setLoading] = useState(false);
+  const [treeLoading, setTreeLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [editingItem, setEditingItem] = useState<KnowledgeItem | null>(null);
+  const [editingItem, setEditingItem] = useState<KnowledgeMapNode | null>(null);
   const [form] = Form.useForm();
-  const [selectedSubject, setSelectedSubject] = useState<string>('all');
-  const [selectedLevel, setSelectedLevel] = useState<string>('all');
-
-  // 模拟数据
-  const mockKnowledgeList: KnowledgeItem[] = [
-    {
-      id: '1',
-      title: 'Java基础语法 - 变量与数据类型',
-      subject: 'Java编程',
-      level: 'L1',
-      type: 'text',
-      content: 'Java中的基本数据类型包括byte、short、int、long、float、double、boolean、char...',
-      tags: ['基础语法', '数据类型', '变量'],
-      status: true,
-      difficulty: 1,
-      createTime: '2024-01-15',
-      updateTime: '2024-01-20'
-    },
-    {
-      id: '2',
-      title: '面向对象编程 - 类与对象',
-      subject: 'Java编程',
-      level: 'L3',
-      type: 'video',
-      content: '面向对象编程的核心概念，类的定义、对象的创建和使用...',
-      tags: ['面向对象', '类', '对象'],
-      status: true,
-      difficulty: 3,
-      createTime: '2024-01-16',
-      updateTime: '2024-01-21'
-    },
-    {
-      id: '3',
-      title: '英语语法 - 时态详解',
-      subject: '英语学习',
-      level: 'L2',
-      type: 'document',
-      content: '英语中的12种时态详细讲解，包括一般现在时、现在进行时...',
-      tags: ['语法', '时态', '基础'],
-      status: true,
-      difficulty: 2,
-      createTime: '2024-01-17',
-      updateTime: '2024-01-22'
-    },
-    {
-      id: '4',
-      title: '数学基础 - 函数与方程',
-      subject: '数学基础',
-      level: 'L4',
-      type: 'text',
-      content: '函数的概念、性质和图像，一元二次方程的解法...',
-      tags: ['函数', '方程', '代数'],
-      status: false,
-      difficulty: 4,
-      createTime: '2024-01-18',
-      updateTime: '2024-01-23'
-    }
-  ];
+  const [activeTab, setActiveTab] = useState<string>('list');
+  const [selectedRootCode, setSelectedRootCode] = useState<string>('');
+  const [queryParams, setQueryParams] = useState<QueryRequest>({
+    pageNum: 1,
+    pageSize: 20,
+    status: 'ACTIVE'
+  });
 
   useEffect(() => {
+    fetchRootNodes();
     fetchKnowledgeList();
-  }, [selectedSubject, selectedLevel]);
+  }, []);
 
+  useEffect(() => {
+    if (selectedRootCode && activeTab === 'tree') {
+      fetchSkillTree();
+    }
+  }, [selectedRootCode, activeTab]);
+
+  // 获取根节点列表
+  const fetchRootNodes = async () => {
+    try {
+      const result = await adminApi.post('/api/admin/knowledge-map/getRootNodes');
+      if (result.success) {
+        setRootNodes(result.data || []);
+        if (result.data && result.data.length > 0) {
+          setSelectedRootCode(result.data[0].nodeCode);
+        }
+      } else {
+        message.error(result.message || '获取根节点失败');
+      }
+    } catch (error) {
+      message.error('获取根节点失败');
+    }
+  };
+
+  // 获取知识图谱节点列表
   const fetchKnowledgeList = async () => {
     setLoading(true);
     try {
-      const result = await adminApi.post(API_PATHS.ADMIN.KNOWLEDGE.PAGE, {
-        page: 1,
-        pageSize: 100,
-        careerTargetId: selectedSubject !== 'all' ? selectedSubject : null,
-        levelMin: selectedLevel !== 'all' ? parseInt(selectedLevel.replace('L', '')) : null,
-        levelMax: selectedLevel !== 'all' ? parseInt(selectedLevel.replace('L', '')) : null
-      });
+      const result = await adminApi.post('/api/admin/knowledge-map/getNodeList', queryParams);
       if (result.success) {
-        setKnowledgeList(result.data.records || []);
+        setKnowledgeList(result.data || []);
       } else {
-        message.error(result.message || '获取知识库列表失败');
+        message.error(result.message || '获取知识图谱列表失败');
       }
     } catch (error) {
-      message.error('获取知识库列表失败');
+      message.error('获取知识图谱列表失败');
     } finally {
       setLoading(false);
     }
   };
 
+  // 获取技能树结构
+  const fetchSkillTree = async () => {
+    if (!selectedRootCode) return;
+
+    setTreeLoading(true);
+    try {
+      const result = await adminApi.post(`/api/admin/knowledge-map/getSkillTree?rootCode=${selectedRootCode}`);
+      if (result.success) {
+        setSkillTreeData(result.data);
+      } else {
+        message.error(result.message || '获取技能树失败');
+      }
+    } catch (error) {
+      message.error('获取技能树失败');
+    } finally {
+      setTreeLoading(false);
+    }
+  };
+
+  // 添加节点
   const handleAdd = () => {
     setEditingItem(null);
     form.resetFields();
-    setModalVisible(true);
-  };
-
-  const handleEdit = (record: KnowledgeItem) => {
-    setEditingItem(record);
+    // 设置默认值
     form.setFieldsValue({
-      ...record,
-      tags: record.tags.join(',')
+      nodeType: 'LEAF',
+      difficultyLevel: 'BEGINNER',
+      estimatedHours: 0,
+      status: 'ACTIVE',
+      sortOrder: 0
     });
     setModalVisible(true);
   };
 
-  const handleDelete = async (id: string) => {
+  // 编辑节点
+  const handleEdit = (record: KnowledgeMapNode) => {
+    setEditingItem(record);
+    form.setFieldsValue(record);
+    setModalVisible(true);
+  };
+
+  // 删除节点
+  const handleDelete = async (nodeCode: string) => {
     try {
-      message.success('删除成功');
-      fetchKnowledgeList();
+      const result = await adminApi.post(`/api/admin/knowledge-map/deleteNode?nodeCode=${nodeCode}`);
+      if (result.success) {
+        message.success('删除成功');
+        fetchKnowledgeList();
+        if (selectedRootCode && activeTab === 'tree') {
+          fetchSkillTree();
+        }
+      } else {
+        message.error(result.message || '删除失败');
+      }
     } catch (error) {
       message.error('删除失败');
     }
   };
 
+  // 树形视图专用的处理函数
+  const handleNodeEdit = async (nodeCode: string, data: any) => {
+    try {
+      const result = await adminApi.post('/api/admin/knowledge-map/updateNode', {
+        nodeCode,
+        ...data
+      });
+      if (result.success) {
+        fetchSkillTree();
+        fetchKnowledgeList();
+      } else {
+        message.error(result.message || '更新失败');
+      }
+    } catch (error) {
+      message.error('更新失败');
+    }
+  };
+
+  const handleNodeDelete = async (nodeCode: string) => {
+    await handleDelete(nodeCode);
+  };
+
+  const handleAddChildNode = (parentCode?: string) => {
+    setEditingItem(null);
+    form.resetFields();
+    if (parentCode) {
+      form.setFieldsValue({ parentCode });
+    }
+    setModalVisible(true);
+  };
+
+  const handleNodeMove = async (nodeCode: string, newParentCode: string, newSortOrder: number) => {
+    try {
+      const result = await adminApi.post('/api/admin/knowledge-map/moveNode', {
+        nodeCode,
+        newParentCode,
+        newSortOrder
+      });
+      if (result.success) {
+        fetchSkillTree();
+        fetchKnowledgeList();
+      } else {
+        message.error(result.message || '移动失败');
+      }
+    } catch (error) {
+      message.error('移动失败');
+    }
+  };
+
+  // 提交表单
   const handleSubmit = async (values: any) => {
     try {
       const submitData = {
         ...values,
-        tags: values.tags ? values.tags.split(',').map((tag: string) => tag.trim()) : []
+        rootCode: values.rootCode || selectedRootCode
       };
-      
+
+      let result;
       if (editingItem) {
-        message.success('更新成功');
+        result = await adminApi.post('/api/admin/knowledge-map/updateNode', submitData);
       } else {
-        message.success('添加成功');
+        result = await adminApi.post('/api/admin/knowledge-map/addNode', submitData);
       }
-      setModalVisible(false);
-      fetchKnowledgeList();
+
+      if (result.success) {
+        message.success(editingItem ? '更新成功' : '添加成功');
+        setModalVisible(false);
+        fetchKnowledgeList();
+        if (selectedRootCode && activeTab === 'tree') {
+          fetchSkillTree();
+        }
+      } else {
+        message.error(result.message || '操作失败');
+      }
     } catch (error) {
       message.error('操作失败');
     }
   };
 
-  const handleStatusChange = async (id: string, status: boolean) => {
+  // 状态切换
+  const handleStatusChange = async (nodeCode: string, status: string) => {
     try {
-      message.success(`${status ? '启用' : '禁用'}成功`);
-      fetchKnowledgeList();
+      const result = await adminApi.post('/api/admin/knowledge-map/updateNode', {
+        nodeCode,
+        status
+      });
+      if (result.success) {
+        message.success(`${status === 'ACTIVE' ? '启用' : '禁用'}成功`);
+        fetchKnowledgeList();
+      } else {
+        message.error(result.message || '状态更新失败');
+      }
     } catch (error) {
       message.error('状态更新失败');
     }
   };
 
-  const getTypeIcon = (type: string) => {
+  // 获取节点类型图标
+  const getNodeTypeIcon = (nodeType: string) => {
     const iconMap = {
-      text: <FileTextOutlined style={{ color: '#1890ff' }} />,
-      video: <FileTextOutlined style={{ color: '#f5222d' }} />,
-      audio: <FileTextOutlined style={{ color: '#52c41a' }} />,
-      document: <FileTextOutlined style={{ color: '#faad14' }} />
+      ROOT: <FolderOutlined style={{ color: '#722ed1' }} />,
+      LEVEL: <FolderOutlined style={{ color: '#1890ff' }} />,
+      BRANCH: <FolderOutlined style={{ color: '#52c41a' }} />,
+      LEAF: <FileTextOutlined style={{ color: '#faad14' }} />
     };
-    return iconMap[type as keyof typeof iconMap] || <FileTextOutlined />;
+    return iconMap[nodeType as keyof typeof iconMap] || <FileTextOutlined />;
   };
 
-  const getTypeTag = (type: string) => {
+  // 获取节点类型标签
+  const getNodeTypeTag = (nodeType: string) => {
     const typeMap = {
-      text: { color: 'blue', text: '文本' },
-      video: { color: 'red', text: '视频' },
-      audio: { color: 'green', text: '音频' },
-      document: { color: 'orange', text: '文档' }
+      ROOT: { color: 'purple', text: '根节点' },
+      LEVEL: { color: 'blue', text: '层级节点' },
+      BRANCH: { color: 'green', text: '分支节点' },
+      LEAF: { color: 'orange', text: '叶子节点' }
     };
-    const config = typeMap[type as keyof typeof typeMap];
+    const config = typeMap[nodeType as keyof typeof typeMap];
     return <Tag color={config.color}>{config.text}</Tag>;
   };
 
-  const getLevelColor = (level: string) => {
-    const levelNum = parseInt(level.replace('L', ''));
-    if (levelNum <= 3) return 'green';
-    if (levelNum <= 6) return 'orange';
-    return 'red';
+  // 获取难度等级颜色
+  const getDifficultyColor = (level: string) => {
+    const colorMap = {
+      BEGINNER: 'green',
+      INTERMEDIATE: 'orange',
+      ADVANCED: 'red',
+      EXPERT: 'purple'
+    };
+    return colorMap[level as keyof typeof colorMap] || 'default';
   };
 
+  // 获取难度等级文本
+  const getDifficultyText = (level: string) => {
+    const textMap = {
+      BEGINNER: '初级',
+      INTERMEDIATE: '中级',
+      ADVANCED: '高级',
+      EXPERT: '专家'
+    };
+    return textMap[level as keyof typeof textMap] || level;
+  };
+
+  // 表格列定义
   const columns = [
     {
-      title: '标题',
-      dataIndex: 'title',
-      key: 'title',
-      render: (text: string, record: KnowledgeItem) => (
+      title: '节点编码',
+      dataIndex: 'nodeCode',
+      key: 'nodeCode',
+      width: 150,
+    },
+    {
+      title: '节点名称',
+      dataIndex: 'nodeName',
+      key: 'nodeName',
+      render: (text: string, record: KnowledgeMapNode) => (
         <Space>
-          {getTypeIcon(record.type)}
+          {getNodeTypeIcon(record.nodeType)}
           <span>{text}</span>
         </Space>
       ),
     },
     {
-      title: '学科',
-      dataIndex: 'subject',
-      key: 'subject',
-      render: (subject: string) => <Tag>{subject}</Tag>,
+      title: '节点类型',
+      dataIndex: 'nodeType',
+      key: 'nodeType',
+      render: (nodeType: string) => getNodeTypeTag(nodeType),
     },
     {
-      title: '等级',
-      dataIndex: 'level',
-      key: 'level',
+      title: '层级深度',
+      dataIndex: 'levelDepth',
+      key: 'levelDepth',
+      render: (depth: number) => (
+        <Tag color="blue">第{depth}层</Tag>
+      ),
+    },
+    {
+      title: '层级类型',
+      dataIndex: 'levelType',
+      key: 'levelType',
+      render: (levelType: string) => levelType ? (
+        <Tag color="green">{levelType}</Tag>
+      ) : '-',
+    },
+    {
+      title: '难度等级',
+      dataIndex: 'difficultyLevel',
+      key: 'difficultyLevel',
       render: (level: string) => (
-        <Tag color={getLevelColor(level)}>{level}</Tag>
+        <Tag color={getDifficultyColor(level)}>
+          {getDifficultyText(level)}
+        </Tag>
       ),
     },
     {
-      title: '类型',
-      dataIndex: 'type',
-      key: 'type',
-      render: (type: string) => getTypeTag(type),
+      title: '预估时长',
+      dataIndex: 'estimatedHours',
+      key: 'estimatedHours',
+      render: (hours: number) => `${hours}小时`,
     },
     {
-      title: '难度',
-      dataIndex: 'difficulty',
-      key: 'difficulty',
-      render: (difficulty: number) => (
-        <span>{'★'.repeat(difficulty)}{'☆'.repeat(5 - difficulty)}</span>
-      ),
-    },
-    {
-      title: '标签',
-      dataIndex: 'tags',
-      key: 'tags',
-      render: (tags: string[]) => (
-        <Space wrap>
-          {tags.map(tag => (
-            <Tag key={tag}>{tag}</Tag>
-          ))}
-        </Space>
-      ),
+      title: '排序',
+      dataIndex: 'sortOrder',
+      key: 'sortOrder',
     },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      render: (status: boolean, record: KnowledgeItem) => (
+      render: (status: string, record: KnowledgeMapNode) => (
         <Switch
-          checked={status}
-          onChange={(checked) => handleStatusChange(record.id, checked)}
+          checked={status === 'ACTIVE'}
+          onChange={(checked) => handleStatusChange(record.nodeCode, checked ? 'ACTIVE' : 'INACTIVE')}
           size="small"
         />
       ),
     },
     {
-      title: '更新时间',
-      dataIndex: 'updateTime',
-      key: 'updateTime',
-    },
-    {
       title: '操作',
       key: 'action',
-      render: (_: any, record: KnowledgeItem) => (
-        <Space size="middle">
-          <Button
-            type="link"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
-            编辑
-          </Button>
-          <Button
-            type="link"
-            icon={<DownloadOutlined />}
-            onClick={() => {/* 导出 */}}
-          >
-            导出
-          </Button>
+      width: 200,
+      render: (_: any, record: KnowledgeMapNode) => (
+        <Space size="small">
+          <Tooltip title="查看详情">
+            <Button
+              type="link"
+              size="small"
+              icon={<EyeOutlined />}
+              onClick={() => handleEdit(record)}
+            />
+          </Tooltip>
+          <Tooltip title="编辑">
+            <Button
+              type="link"
+              size="small"
+              icon={<EditOutlined />}
+              onClick={() => handleEdit(record)}
+            />
+          </Tooltip>
           <Popconfirm
-            title="确定要删除这个知识点吗？"
-            onConfirm={() => handleDelete(record.id)}
+            title="确定要删除这个节点吗？"
+            onConfirm={() => handleDelete(record.nodeCode)}
             okText="确定"
             cancelText="取消"
           >
-            <Button
-              type="link"
-              danger
-              icon={<DeleteOutlined />}
-            >
-              删除
-            </Button>
+            <Tooltip title="删除">
+              <Button
+                type="link"
+                size="small"
+                danger
+                icon={<DeleteOutlined />}
+              />
+            </Tooltip>
           </Popconfirm>
         </Space>
       ),
     },
   ];
 
+  // 转换树形数据
+  const convertToTreeData = (treeData: SkillTreeResponse | null): any[] => {
+    if (!treeData) return [];
+
+    const convertNode = (node: TreeNode): any => ({
+      title: (
+        <Space>
+          {getNodeTypeIcon(node.nodeType)}
+          <span>{node.nodeName}</span>
+          {node.difficultyLevel && (
+            <Tag color={getDifficultyColor(node.difficultyLevel)}>
+              {getDifficultyText(node.difficultyLevel)}
+            </Tag>
+          )}
+          {node.estimatedHours && (
+            <Tag color="blue">{node.estimatedHours}h</Tag>
+          )}
+        </Space>
+      ),
+      key: node.nodeCode,
+      children: node.children?.map(convertNode) || []
+    });
+
+    return treeData.children?.map(convertNode) || [];
+  };
+
+  // 转换为可编辑树形数据
+  const convertToEditableTreeData = (treeData: SkillTreeResponse | null): any[] => {
+    if (!treeData) return [];
+
+    const convertNode = (node: TreeNode, parentCode?: string): any => ({
+      nodeCode: node.nodeCode,
+      nodeName: node.nodeName,
+      nodeType: node.nodeType,
+      levelDepth: node.levelDepth,
+      levelType: node.levelType,
+      difficultyLevel: node.difficultyLevel || '初级',
+      estimatedHours: node.estimatedHours || 0,
+      description: node.description,
+      parentCode: parentCode,
+      sortOrder: node.sortOrder,
+      key: node.nodeCode,
+      children: node.children ? node.children.map(child => convertNode(child, node.nodeCode)) : undefined,
+    });
+
+    return treeData.children ? treeData.children.map(child => convertNode(child, treeData.rootCode)) : [];
+  };
+
   return (
     <div>
       <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Title level={2} style={{ margin: 0 }}>知识库管理</Title>
+        <Title level={2} style={{ margin: 0 }}>知识图谱管理</Title>
         <Space>
-          <Upload>
-            <Button icon={<UploadOutlined />}>批量导入</Button>
-          </Upload>
+          <Button icon={<ReloadOutlined />} onClick={() => {
+            fetchKnowledgeList();
+            fetchRootNodes();
+          }}>
+            刷新
+          </Button>
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-            添加知识点
+            添加节点
           </Button>
         </Space>
       </div>
 
-      {/* 筛选条件 */}
-      <Card style={{ marginBottom: 16 }}>
-        <Space size="large">
-          <div>
-            <span style={{ marginRight: 8 }}>学科：</span>
-            <Select
-              value={selectedSubject}
-              onChange={setSelectedSubject}
-              style={{ width: 150 }}
-            >
-              <Select.Option value="all">全部学科</Select.Option>
-              <Select.Option value="Java编程">Java编程</Select.Option>
-              <Select.Option value="英语学习">英语学习</Select.Option>
-              <Select.Option value="数学基础">数学基础</Select.Option>
-            </Select>
-          </div>
-          <div>
-            <span style={{ marginRight: 8 }}>等级：</span>
-            <Select
-              value={selectedLevel}
-              onChange={setSelectedLevel}
-              style={{ width: 120 }}
-            >
-              <Select.Option value="all">全部等级</Select.Option>
-              {Array.from({ length: 9 }, (_, i) => (
-                <Select.Option key={i + 1} value={`L${i + 1}`}>L{i + 1}</Select.Option>
-              ))}
-            </Select>
-          </div>
-        </Space>
-      </Card>
+      {/* 标签页 */}
+      <Tabs activeKey={activeTab} onChange={setActiveTab}>
+        <TabPane tab={<span><TableOutlined />列表视图</span>} key="list">
+          {/* 筛选条件 */}
+          <Card style={{ marginBottom: 16 }}>
+            <Row gutter={16}>
+              <Col span={6}>
+                <span style={{ marginRight: 8 }}>根节点：</span>
+                <Select
+                  value={queryParams.rootCode}
+                  onChange={(value) => setQueryParams({...queryParams, rootCode: value})}
+                  style={{ width: '100%' }}
+                  placeholder="选择根节点"
+                >
+                  <Select.Option value="">全部</Select.Option>
+                  {rootNodes.map(node => (
+                    <Select.Option key={node.nodeCode} value={node.nodeCode}>
+                      {node.nodeName}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Col>
+              <Col span={6}>
+                <span style={{ marginRight: 8 }}>节点类型：</span>
+                <Select
+                  value={queryParams.nodeType}
+                  onChange={(value) => setQueryParams({...queryParams, nodeType: value})}
+                  style={{ width: '100%' }}
+                  placeholder="选择节点类型"
+                >
+                  <Select.Option value="">全部</Select.Option>
+                  <Select.Option value="ROOT">根节点</Select.Option>
+                  <Select.Option value="LEVEL">层级节点</Select.Option>
+                  <Select.Option value="BRANCH">分支节点</Select.Option>
+                  <Select.Option value="LEAF">叶子节点</Select.Option>
+                </Select>
+              </Col>
+              <Col span={6}>
+                <span style={{ marginRight: 8 }}>难度等级：</span>
+                <Select
+                  value={queryParams.difficultyLevel}
+                  onChange={(value) => setQueryParams({...queryParams, difficultyLevel: value})}
+                  style={{ width: '100%' }}
+                  placeholder="选择难度等级"
+                >
+                  <Select.Option value="">全部</Select.Option>
+                  <Select.Option value="BEGINNER">初级</Select.Option>
+                  <Select.Option value="INTERMEDIATE">中级</Select.Option>
+                  <Select.Option value="ADVANCED">高级</Select.Option>
+                  <Select.Option value="EXPERT">专家</Select.Option>
+                </Select>
+              </Col>
+              <Col span={6}>
+                <Button type="primary" onClick={fetchKnowledgeList}>
+                  查询
+                </Button>
+              </Col>
+            </Row>
+          </Card>
 
-      {/* 知识点列表 */}
-      <Card>
-        <Table
-          columns={columns}
-          dataSource={knowledgeList}
-          rowKey="id"
-          loading={loading}
-          pagination={{
-            total: knowledgeList.length,
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total) => `共 ${total} 条记录`,
-          }}
-        />
-      </Card>
+          {/* 知识图谱列表 */}
+          <Card>
+            <Table
+              columns={columns}
+              dataSource={knowledgeList}
+              rowKey="nodeCode"
+              loading={loading}
+              pagination={{
+                current: queryParams.pageNum,
+                pageSize: queryParams.pageSize,
+                total: knowledgeList.length,
+                showSizeChanger: true,
+                showQuickJumper: true,
+                showTotal: (total) => `共 ${total} 条记录`,
+                onChange: (page, size) => setQueryParams({
+                  ...queryParams,
+                  pageNum: page,
+                  pageSize: size
+                })
+              }}
+            />
+          </Card>
+        </TabPane>
+
+        <TabPane tab={<span><NodeIndexOutlined />树形视图</span>} key="tree">
+          <Card>
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <span style={{ marginRight: 8 }}>选择技能树：</span>
+                <Select
+                  value={selectedRootCode}
+                  onChange={setSelectedRootCode}
+                  style={{ width: 300 }}
+                  placeholder="选择要查看的技能树"
+                >
+                  {rootNodes.map(node => (
+                    <Select.Option key={node.nodeCode} value={node.nodeCode}>
+                      {node.nodeName}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </div>
+              <Space>
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => handleAddChildNode()}
+                  disabled={!selectedRootCode}
+                >
+                  添加子节点
+                </Button>
+                <Button
+                  icon={<ReloadOutlined />}
+                  onClick={() => {
+                    if (selectedRootCode) {
+                      fetchSkillTree();
+                    }
+                  }}
+                >
+                  刷新
+                </Button>
+              </Space>
+            </div>
+
+            <Spin spinning={treeLoading}>
+              {skillTreeData ? (
+                <div>
+                  <Title level={4}>{skillTreeData.rootName}</Title>
+                  <EditableTree
+                    treeData={convertToEditableTreeData(skillTreeData)}
+                    onNodeEdit={handleNodeEdit}
+                    onNodeDelete={handleNodeDelete}
+                    onNodeAdd={handleAddChildNode}
+                    onNodeMove={handleNodeMove}
+                  />
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '50px 0', color: '#999' }}>
+                  请选择要查看的技能树
+                </div>
+              )}
+            </Spin>
+          </Card>
+        </TabPane>
+      </Tabs>
 
       {/* 添加/编辑模态框 */}
       <Modal
-        title={editingItem ? '编辑知识点' : '添加知识点'}
+        title={editingItem ? '编辑节点' : '添加节点'}
         open={modalVisible}
         onCancel={() => setModalVisible(false)}
         onOk={() => form.submit()}
         width={800}
+        forceRender={false}
       >
         <Form
           form={form}
           layout="vertical"
           onFinish={handleSubmit}
         >
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="nodeCode"
+                label="节点编码"
+                rules={[{ required: true, message: '请输入节点编码' }]}
+              >
+                <Input placeholder="请输入节点编码" disabled={!!editingItem} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="nodeName"
+                label="节点名称"
+                rules={[{ required: true, message: '请输入节点名称' }]}
+              >
+                <Input placeholder="请输入节点名称" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="nodeType"
+                label="节点类型"
+                rules={[{ required: true, message: '请选择节点类型' }]}
+              >
+                <Select placeholder="请选择节点类型">
+                  <Select.Option value="ROOT">根节点</Select.Option>
+                  <Select.Option value="LEVEL">层级节点</Select.Option>
+                  <Select.Option value="BRANCH">分支节点</Select.Option>
+                  <Select.Option value="LEAF">叶子节点</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="parentCode"
+                label="父节点编码"
+              >
+                <Input placeholder="请输入父节点编码（根节点可为空）" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item
+                name="levelDepth"
+                label="层级深度"
+                rules={[{ required: true, message: '请输入层级深度' }]}
+              >
+                <InputNumber min={1} max={10} placeholder="层级深度" style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="levelType"
+                label="层级类型"
+              >
+                <Input placeholder="如：L1, L2等" />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="sortOrder"
+                label="排序序号"
+                rules={[{ required: true, message: '请输入排序序号' }]}
+              >
+                <InputNumber min={0} placeholder="排序序号" style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="difficultyLevel"
+                label="难度等级"
+                rules={[{ required: true, message: '请选择难度等级' }]}
+              >
+                <Select placeholder="请选择难度等级">
+                  <Select.Option value="BEGINNER">初级</Select.Option>
+                  <Select.Option value="INTERMEDIATE">中级</Select.Option>
+                  <Select.Option value="ADVANCED">高级</Select.Option>
+                  <Select.Option value="EXPERT">专家</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="estimatedHours"
+                label="预估时长(小时)"
+                rules={[{ required: true, message: '请输入预估时长' }]}
+              >
+                <InputNumber min={0} placeholder="预估学习时长" style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+          </Row>
+
           <Form.Item
-            name="title"
-            label="标题"
-            rules={[{ required: true, message: '请输入标题' }]}
+            name="skillCatalogCode"
+            label="技能目录编码"
           >
-            <Input placeholder="请输入知识点标题" />
+            <Input placeholder="请输入技能目录编码" />
           </Form.Item>
-          
-          <div style={{ display: 'flex', gap: 16 }}>
-            <Form.Item
-              name="subject"
-              label="学科"
-              rules={[{ required: true, message: '请选择学科' }]}
-              style={{ flex: 1 }}
-            >
-              <Select placeholder="请选择学科">
-                <Select.Option value="Java编程">Java编程</Select.Option>
-                <Select.Option value="英语学习">英语学习</Select.Option>
-                <Select.Option value="数学基础">数学基础</Select.Option>
-              </Select>
-            </Form.Item>
-            
-            <Form.Item
-              name="level"
-              label="等级"
-              rules={[{ required: true, message: '请选择等级' }]}
-              style={{ flex: 1 }}
-            >
-              <Select placeholder="请选择等级">
-                {Array.from({ length: 9 }, (_, i) => (
-                  <Select.Option key={i + 1} value={`L${i + 1}`}>L{i + 1}</Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-            
-            <Form.Item
-              name="type"
-              label="类型"
-              rules={[{ required: true, message: '请选择类型' }]}
-              style={{ flex: 1 }}
-            >
-              <Select placeholder="请选择类型">
-                <Select.Option value="text">文本</Select.Option>
-                <Select.Option value="video">视频</Select.Option>
-                <Select.Option value="audio">音频</Select.Option>
-                <Select.Option value="document">文档</Select.Option>
-              </Select>
-            </Form.Item>
-            
-            <Form.Item
-              name="difficulty"
-              label="难度"
-              rules={[{ required: true, message: '请选择难度' }]}
-              style={{ flex: 1 }}
-            >
-              <Select placeholder="请选择难度">
-                {[1, 2, 3, 4, 5].map(level => (
-                  <Select.Option key={level} value={level}>
-                    {'★'.repeat(level)}{'☆'.repeat(5 - level)}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </div>
-          
+
           <Form.Item
-            name="content"
-            label="内容"
-            rules={[{ required: true, message: '请输入内容' }]}
+            name="description"
+            label="描述"
           >
-            <TextArea rows={6} placeholder="请输入知识点内容" />
+            <TextArea rows={4} placeholder="请输入节点描述" />
           </Form.Item>
-          
-          <Form.Item
-            name="tags"
-            label="标签"
-            help="多个标签用逗号分隔"
-          >
-            <Input placeholder="请输入标签，用逗号分隔" />
-          </Form.Item>
-          
+
           <Form.Item
             name="status"
             label="状态"
             valuePropName="checked"
             initialValue={true}
           >
-            <Switch checkedChildren="启用" unCheckedChildren="禁用" />
+            <Switch
+              checkedChildren="启用"
+              unCheckedChildren="禁用"
+              onChange={(checked) => form.setFieldsValue({ status: checked ? 'ACTIVE' : 'INACTIVE' })}
+            />
           </Form.Item>
         </Form>
       </Modal>

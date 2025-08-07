@@ -4,3 +4,4 @@
 /lore-master-commands/docker/mysql-data/
 /lore-master-server/lore-master-web-*/logs/
 /logs/
+/.vscode/

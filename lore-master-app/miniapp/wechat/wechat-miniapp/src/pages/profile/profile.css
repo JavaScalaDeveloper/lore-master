@@ -482,6 +482,22 @@
   gap: 6px;
 }
 
+/* 学习目标提示文字 */
+.goal-hint {
+  font-size: 24rpx;
+  color: #1890ff;
+  margin-top: 8rpx;
+  opacity: 0.8;
+  font-style: italic;
+  animation: breathe 2s ease-in-out infinite;
+}
+
+/* 呼吸动画效果 */
+@keyframes breathe {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
 .goal-name {
   font-size: 22px;
   color: #333;

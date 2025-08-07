@@ -104,6 +104,19 @@ export const API_PATHS = {
       STATISTICS: '/api/admin/skill-catalog/statistics',
       IMPORT: '/api/admin/skill-catalog/import',
       EXPORT: '/api/admin/skill-catalog/export',
+    },
+    KNOWLEDGE_MAP: {
+      ADD_NODE: '/api/admin/knowledge-map/addNode',
+      DELETE_NODE: '/api/admin/knowledge-map/deleteNode',
+      UPDATE_NODE: '/api/admin/knowledge-map/updateNode',
+      GET_NODE_DETAIL: '/api/admin/knowledge-map/getNodeDetail',
+      GET_NODE_LIST: '/api/admin/knowledge-map/getNodeList',
+      GET_CHILD_NODES: '/api/admin/knowledge-map/getChildNodes',
+      GET_SKILL_TREE: '/api/admin/knowledge-map/getSkillTree',
+      GET_NODES_BY_LEVEL: '/api/admin/knowledge-map/getNodesByLevel',
+      GET_ROOT_NODES: '/api/admin/knowledge-map/getRootNodes',
+      UPDATE_NODE_SORT: '/api/admin/knowledge-map/updateNodeSort',
+      MOVE_NODE: '/api/admin/knowledge-map/moveNode',
     }
   },
   

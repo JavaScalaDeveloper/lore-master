@@ -1,5 +1,6 @@
 package com.lore.master.data.dto.admin;
 
+import com.lore.master.data.validation.CreateGroup;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -36,8 +37,9 @@ public class LearningSkillCatalogDTO {
 
     /**
      * 技能路径，用/分隔
+     * 创建时必填，更新时可选（由后端自动生成）
      */
-    @NotBlank(message = "技能路径不能为空")
+    @NotBlank(message = "技能路径不能为空", groups = CreateGroup.class)
     @Size(max = 200, message = "技能路径长度不能超过200个字符")
     private String skillPath;
 
