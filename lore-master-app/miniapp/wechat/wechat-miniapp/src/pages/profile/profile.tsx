@@ -817,11 +817,10 @@ const Profile = () => {
                   ) : currentLearningGoal ? (
                     <View className='goal-info'>
                       <Text className='goal-name'>{currentLearningGoal.skillName}</Text>
-                      <Text className='goal-path'>{currentLearningGoal.skillPath}</Text>
                       {currentLearningGoal.targetLevel && (
                         <Text className='goal-level'>目标等级: {currentLearningGoal.targetLevel}</Text>
                       )}
-                      <Text className='goal-hint'>点击查看学习路径图</Text>
+                      <Text className='goal-hint'>点击查看学习路径思维导图</Text>
                     </View>
                   ) : (
                     <Text className='goal-path'>暂未设置学习目标</Text>

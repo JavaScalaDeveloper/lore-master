@@ -9,9 +9,9 @@ import com.lore.master.data.repository.admin.AdminKnowledgeMapRepository;
 import com.lore.master.data.vo.admin.AdminKnowledgeMapResponse;
 import com.lore.master.data.vo.admin.AdminKnowledgeMapTreeResponse;
 import com.lore.master.service.admin.AdminKnowledgeMapService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,10 +28,10 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class AdminKnowledgeMapServiceImpl implements AdminKnowledgeMapService {
 
-    private final AdminKnowledgeMapRepository adminKnowledgeMapRepository;
+    @Autowired
+    private AdminKnowledgeMapRepository adminKnowledgeMapRepository;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 

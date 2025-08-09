@@ -15,10 +15,8 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>lore-master-api</module>
         <module>lore-master-common</module>
         <module>lore-master-data</module>
-        <module>lore-master-integration</module>
         <module>lore-master-service</module>
         <module>lore-master-web-admin</module>
         <module>lore-master-web-business</module>

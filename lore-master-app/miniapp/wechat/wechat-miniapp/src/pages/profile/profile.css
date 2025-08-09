@@ -6,13 +6,13 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  font-size: 22px; /* 继续放大默认字体大小 */
+  font-size: 26px; /* 调大默认字体大小 */
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   position: relative;
 }
 
 .profile-title {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: bold;
   margin-bottom: 40px;
 }
@@ -54,7 +54,7 @@
 }
 
 .user-id {
-  font-size: 14px;
+  font-size: 18px;
   color: #888;
 }
 
@@ -111,7 +111,7 @@
   background-color: transparent;
   color: #333;
   border: none;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 500;
   padding: 0;
   margin: 0;
@@ -133,7 +133,7 @@
 }
 
 .prompt-text {
-  font-size: 16px;
+  font-size: 20px;
   color: #666;
 }
 
@@ -198,14 +198,14 @@
 }
 
 .user-nickname {
-  font-size: 26px;
+  font-size: 30px;
   font-weight: 700;
   color: #2d3748;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .user-id-text {
-  font-size: 18px;
+  font-size: 22px;
   color: #667eea;
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
   padding: 6px 16px;
@@ -331,7 +331,7 @@
 }
 
 .nickname {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 700;
   color: #2d3748;
   margin-bottom: 8px;
@@ -339,7 +339,7 @@
 }
 
 .user-id {
-  font-size: 14px;
+  font-size: 18px;
   color: #667eea;
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
   padding: 6px 16px;
@@ -349,7 +349,7 @@
 }
 
 .not-login {
-  font-size: 18px;
+  font-size: 22px;
   color: #888;
   font-weight: 500;
 }
@@ -379,7 +379,7 @@
   border-radius: 50px;
   margin-top: 50px;
   padding: 14px 0;
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 500;
   letter-spacing: 1px;
   box-shadow: 0 4px 12px rgba(7, 193, 96, 0.3);
@@ -450,13 +450,13 @@
 }
 
 .function-name {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 600;
   color: #333;
 }
 
 .function-desc {
-  font-size: 20px;
+  font-size: 24px;
   color: #888;
 }
 
@@ -499,25 +499,22 @@
 }
 
 .goal-name {
-  font-size: 22px;
+  font-size: 26px;
   color: #333;
   font-weight: bold;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.goal-path {
+.goal-hint {
   font-size: 18px;
-  color: #666;
-  font-weight: 500;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-  padding: 4px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(102, 126, 234, 0.2);
-  font-family: 'Courier New', monospace;
+  color: #999;
+  font-weight: 400;
+  font-style: italic;
+  margin-top: 8px;
 }
 
 .goal-level {
-  font-size: 16px;
+  font-size: 20px;
   color: #4facfe;
   font-weight: 600;
   background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.1));
@@ -629,7 +626,7 @@
 }
 
 .progress-text-compact {
-  font-size: 18px;
+  font-size: 22px;
   color: #667eea;
   font-weight: 600;
   white-space: nowrap;
@@ -643,7 +640,7 @@
   border-radius: 50px;
   width: 80%;
   max-width: 300px;
-  font-size: 18px;
+  font-size: 22px;
   padding: 14px 0;
   transition: all 0.3s ease;
   font-weight: 500;
@@ -713,7 +710,7 @@
 }
 
 .stat-value {
-  font-size: 40px;
+  font-size: 44px;
   font-weight: 800;
   background: linear-gradient(135deg, #667eea, #764ba2);
   -webkit-background-clip: text;
@@ -728,7 +725,7 @@
 }
 
 .stat-label {
-  font-size: 19px;
+  font-size: 23px;
   color: #666;
   font-weight: 600;
   text-align: center;
@@ -811,7 +808,7 @@
 }
 
 .prompt-text {
-  font-size: 24px;
+  font-size: 28px;
   color: #666;
   font-weight: 500;
   text-align: center;
@@ -821,7 +818,7 @@
 /* 响应式设计 */
 @media (max-width: 480px) {
   .profile-container {
-    font-size: 20px;
+    font-size: 24px;
   }
 
   .user-avatar {
@@ -830,11 +827,11 @@
   }
 
   .user-nickname {
-    font-size: 22px;
+    font-size: 26px;
   }
 
   .user-id-text {
-    font-size: 16px;
+    font-size: 20px;
   }
 
   .avatar, .avatar-placeholder {
@@ -843,7 +840,7 @@
   }
 
   .nickname {
-    font-size: 20px;
+    font-size: 24px;
   }
 
   .stats-container {
@@ -855,27 +852,27 @@
   }
 
   .stat-value {
-    font-size: 34px;
+    font-size: 38px;
   }
 
   .stat-label {
-    font-size: 17px;
+    font-size: 21px;
   }
 
   .goal-name {
-    font-size: 20px;
+    font-size: 24px;
   }
 
-  .goal-path {
+  .goal-hint {
     font-size: 16px;
   }
 
   .goal-level {
-    font-size: 14px;
+    font-size: 18px;
   }
 
   .progress-text-compact {
-    font-size: 16px;
+    font-size: 20px;
   }
 
   .function-item {
@@ -889,11 +886,11 @@
   }
 
   .function-name {
-    font-size: 22px;
+    font-size: 26px;
   }
 
   .function-desc {
-    font-size: 18px;
+    font-size: 22px;
   }
 
   .login-prompt {
@@ -902,6 +899,6 @@
   }
 
   .prompt-text {
-    font-size: 22px;
+    font-size: 26px;
   }
 }

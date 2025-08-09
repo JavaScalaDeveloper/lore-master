@@ -1,0 +1,30 @@
+# 测试配置 - 禁用数据库连接
+server:
+  port: 8082
+
+spring:
+  application:
+    name: lore-master-consumer-test
+  
+  # 禁用数据库自动配置
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.lore.master: DEBUG
+    org.springframework: INFO
+    org.hibernate: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# 文件存储配置 - 暂时禁用
+file-storage:
+  strategy: mysql
+  max-file-size: 10485760
+  enable-deduplication: false
+  enable-access-log: false

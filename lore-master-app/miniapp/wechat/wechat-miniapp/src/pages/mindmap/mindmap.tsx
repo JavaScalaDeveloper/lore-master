@@ -83,8 +83,13 @@ const Mindmap = () => {
     // 获取屏幕尺寸
     getSystemInfo({
       success: (res) => {
-        setCanvasWidth(res.windowWidth)
-        setCanvasHeight(res.windowHeight - 100) // 减去导航栏高度
+        console.log('屏幕尺寸:', res)
+        // 减去导航栏和控制面板的高度，以及margin
+        const width = res.windowWidth - 40 // 减去左右margin
+        const height = res.windowHeight - 200 // 减去导航栏、控制面板和上下margin
+        setCanvasWidth(width)
+        setCanvasHeight(height)
+        console.log('设置Canvas尺寸:', { width, height })
       }
     })
   })
@@ -103,16 +108,9 @@ const Mindmap = () => {
 
       apiLog('获取知识图谱数据...', { skillCode: code })
 
-      // 根据技能编码映射到对应的知识图谱根节点
-      const skillToRootCodeMap: Record<string, string> = {
-        'java': 'java_expert',
-        'python': 'python_expert',
-        'frontend': 'frontend_expert',
-        // 可以根据需要添加更多映射
-      }
-
-      const rootCode = skillToRootCodeMap[code] || `${code}_expert`
-      console.log('映射的根节点编码:', rootCode)
+      // 直接使用技能编码作为根节点编码，不再添加_expert后缀
+      const rootCode = code
+      console.log('使用的根节点编码:', rootCode)
 
       // 调用消费者端知识图谱API
       const knowledgeMapUrl = `${API_CONFIG.baseUrl}/api/consumer/knowledge-map/getSkillTree?rootCode=${rootCode}`
@@ -144,8 +142,20 @@ const Mindmap = () => {
 
           // 计算节点位置
           setTimeout(() => {
-            calculateNodePositions(convertedData)
-            drawMindmap(convertedData)
+            const positions = calculateNodePositions(convertedData)
+            setNodePositions(positions)
+
+            // 确保初始偏移值在合理范围内
+            const clampedOffset = clampOffset(offsetX, offsetY, scale)
+            if (clampedOffset.x !== offsetX || clampedOffset.y !== offsetY) {
+              setOffsetX(clampedOffset.x)
+              setOffsetY(clampedOffset.y)
+            }
+
+            // 等待状态更新后再绘制
+            setTimeout(() => {
+              drawMindmap(convertedData, positions)
+            }, 50)
           }, 100)
         } else {
           console.error('知识图谱数据为空或无效')
@@ -224,7 +234,7 @@ const Mindmap = () => {
   }
 
   // 计算节点位置
-  const calculateNodePositions = (treeData: SkillTreeData) => {
+  const calculateNodePositions = (treeData: SkillTreeData): NodePosition[] => {
     const positions: NodePosition[] = []
     const centerX = canvasWidth / 2
     const centerY = canvasHeight / 2
@@ -238,7 +248,7 @@ const Mindmap = () => {
       if (nodeCount === 0) return
 
       nodes.forEach((node, index) => {
-        let x, y
+        let x: number, y: number
 
         if (level === 0) {
           // 根节点居中
@@ -298,41 +308,52 @@ const Mindmap = () => {
       calculatePosition(treeData.children, 1, centerX, centerY, 0, Math.PI * 2)
     }
 
-    setNodePositions(positions)
+    return positions
   }
 
   // 绘制思维导图
-  const drawMindmap = (treeData: SkillTreeData) => {
+  const drawMindmap = (treeData: SkillTreeData, positions?: NodePosition[]) => {
+    const positionsToUse = positions || nodePositions
+
     const canvas = createCanvasContext('mindmap-canvas')
 
     // 清空画布
     canvas.clearRect(0, 0, canvasWidth, canvasHeight)
 
-    // 设置画布变换
-    canvas.scale(scale, scale)
-    canvas.translate(offsetX, offsetY)
+    // 手动应用变换到坐标（微信小程序Canvas变换支持有限）
+    const transformedPositions = positionsToUse.map(pos => ({
+      ...pos,
+      x: (pos.x * scale) + offsetX,
+      y: (pos.y * scale) + offsetY,
+      width: pos.width * scale,
+      height: pos.height * scale,
+      radius: pos.radius * scale
+    }))
 
     // 绘制连接线
-    drawConnections(canvas, treeData)
+    drawConnections(canvas, treeData, transformedPositions)
 
     // 绘制节点
-    drawNodes(canvas)
+    drawNodes(canvas, transformedPositions)
 
     canvas.draw()
   }
 
   // 绘制连接线
-  const drawConnections = (canvas: any, treeData: SkillTreeData) => {
+  const drawConnections = (canvas: any, treeData: SkillTreeData, positions: NodePosition[]) => {
     const drawNodeConnections = (nodes: TreeNode[], parentPos?: NodePosition) => {
       nodes.forEach(node => {
-        const nodePos = nodePositions.find(pos => pos.node.nodeCode === node.nodeCode)
+        const nodePos = positions.find(pos => pos.node.nodeCode === node.nodeCode)
         if (!nodePos) return
 
         // 如果有父节点，绘制连接线
         if (parentPos) {
           canvas.setStrokeStyle(nodePos.color)
-          canvas.setLineWidth(3)
-          canvas.setLineCap('round')
+          const lineWidth = Math.max(1, 3 * (scale || 1))
+          canvas.setLineWidth(lineWidth)
+          if (typeof canvas.setLineCap === 'function') {
+            canvas.setLineCap('round')
+          }
           canvas.beginPath()
           canvas.moveTo(
             parentPos.x + parentPos.width / 2,
@@ -352,83 +373,71 @@ const Mindmap = () => {
       })
     }
 
-    if (treeData.children) {
-      drawNodeConnections(treeData.children)
+    // 找到根节点位置
+    const rootPos = positions.find(pos => pos.node.nodeCode === treeData.rootCode)
+
+    // 从根节点开始绘制连接线到子节点
+    if (treeData.children && rootPos) {
+      drawNodeConnections(treeData.children, rootPos)
     }
   }
 
   // 绘制节点
-  const drawNodes = (canvas: any) => {
-    nodePositions.forEach(pos => {
+  const drawNodes = (canvas: any, positions: NodePosition[]) => {
+    positions.forEach((pos) => {
       const { x, y, width, height, node, color, radius } = pos
       const centerX = x + width / 2
       const centerY = y + height / 2
 
-      // 绘制节点阴影
-      canvas.setShadowColor('rgba(0, 0, 0, 0.2)')
-      canvas.setShadowBlur(8)
-      canvas.setShadowOffsetX(2)
-      canvas.setShadowOffsetY(2)
-
-      // 绘制圆形节点背景
-      const gradient = canvas.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius)
-      gradient.addColorStop(0, color)
-      gradient.addColorStop(1, adjustColorBrightness(color, -30))
-
-      canvas.setFillStyle(gradient)
+      // 绘制圆形节点背景（微信小程序不支持阴影和渐变，使用简单填充）
+      canvas.setFillStyle(color)
       canvas.beginPath()
       canvas.arc(centerX, centerY, radius, 0, 2 * Math.PI)
       canvas.fill()
 
-      // 清除阴影
-      canvas.setShadowColor('transparent')
-      canvas.setShadowBlur(0)
-      canvas.setShadowOffsetX(0)
-      canvas.setShadowOffsetY(0)
-
       // 绘制节点边框
       canvas.setStrokeStyle('#ffffff')
-      canvas.setLineWidth(3)
+      const borderWidth = Math.max(1, 3 * (scale || 1))
+      canvas.setLineWidth(borderWidth)
       canvas.beginPath()
       canvas.arc(centerX, centerY, radius, 0, 2 * Math.PI)
       canvas.stroke()
 
-      // 绘制节点文字
+      // 绘制节点文字（使用微信小程序兼容的API）
       canvas.setFillStyle('#ffffff')
-      canvas.setFontSize(node.nodeType === 'ROOT' ? 16 : 12)
-      canvas.setTextAlign('center')
-      canvas.setTextBaseline('middle')
+      const baseFontSize = node.nodeType === 'ROOT' ? 16 : 12
 
       // 根据节点名称长度调整字体大小
       const textLength = node.nodeName.length
+      let fontSize = baseFontSize
       if (textLength > 8) {
-        canvas.setFontSize(10)
+        fontSize = 10
       } else if (textLength > 6) {
-        canvas.setFontSize(11)
+        fontSize = 11
       }
 
-      // 绘制节点名称
-      if (textLength > 10) {
-        // 长文本分两行显示
-        const firstLine = node.nodeName.substring(0, 8)
-        const secondLine = node.nodeName.substring(8)
-        canvas.fillText(firstLine, centerX, centerY - 8)
-        canvas.fillText(secondLine, centerX, centerY + 8)
-      } else {
-        canvas.fillText(node.nodeName, centerX, centerY - 5)
-      }
+      // 应用缩放到字体大小
+      const scaledFontSize = Math.max(8, fontSize * (scale || 1))
+      canvas.setFontSize(scaledFontSize)
 
-      // 绘制时长信息
-      canvas.setFontSize(9)
-      canvas.setFillStyle('rgba(255, 255, 255, 0.8)')
-      canvas.fillText(`${node.estimatedHours}h`, centerX, centerY + 15)
+      // 绘制节点名称（简化版本，先确保能显示）
+      try {
+        // 尝试设置文字对齐（如果支持的话）
+        if (typeof canvas.setTextAlign === 'function') {
+          canvas.setTextAlign('center')
+        }
+        if (typeof canvas.setTextBaseline === 'function') {
+          canvas.setTextBaseline('middle')
+        }
 
-      // 绘制难度等级标识
-      if (node.difficultyLevel) {
-        canvas.setFontSize(8)
-        canvas.setFillStyle('rgba(255, 255, 255, 0.6)')
-        const difficultyText = node.difficultyLevel.charAt(0).toUpperCase()
-        canvas.fillText(difficultyText, centerX + radius - 10, centerY - radius + 10)
+        canvas.fillText(node.nodeName, centerX, centerY)
+
+        // 绘制时长信息
+        const timeInfoFontSize = Math.max(6, 9 * (scale || 1))
+        canvas.setFontSize(timeInfoFontSize)
+        canvas.fillText(`${node.estimatedHours || 0}h`, centerX, centerY + (20 * (scale || 1)))
+      } catch (error) {
+        console.error('绘制文字时出错:', error)
       }
     })
   }
@@ -450,6 +459,18 @@ const Mindmap = () => {
   const [lastTouchCenter, setLastTouchCenter] = useState<{x: number, y: number}>({x: 0, y: 0})
   const [isDragging, setIsDragging] = useState<boolean>(false)
   const [lastTouchPos, setLastTouchPos] = useState<{x: number, y: number}>({x: 0, y: 0})
+
+  // 边界检查函数
+  const clampOffset = (offsetX: number, offsetY: number, scale: number) => {
+    // 根据缩放级别动态调整边界
+    const maxOffset = Math.max(canvasWidth, canvasHeight) * (0.5 + scale * 0.3)
+    const minOffset = -maxOffset
+
+    return {
+      x: Math.max(minOffset, Math.min(maxOffset, offsetX)),
+      y: Math.max(minOffset, Math.min(maxOffset, offsetY))
+    }
+  }
 
   // 计算两点间距离
   const getDistance = (touch1: any, touch2: any) => {
@@ -496,8 +517,13 @@ const Mindmap = () => {
       const deltaX = touches[0].x - lastTouchPos.x
       const deltaY = touches[0].y - lastTouchPos.y
 
-      setOffsetX(prev => prev + deltaX)
-      setOffsetY(prev => prev + deltaY)
+      // 计算新的偏移值并应用边界限制
+      const newOffsetX = offsetX + deltaX
+      const newOffsetY = offsetY + deltaY
+      const clampedOffset = clampOffset(newOffsetX, newOffsetY, scale)
+
+      setOffsetX(clampedOffset.x)
+      setOffsetY(clampedOffset.y)
 
       setLastTouchPos({
         x: touches[0].x,
@@ -518,6 +544,11 @@ const Mindmap = () => {
         const newScale = Math.max(0.5, Math.min(3, scale * scaleChange))
 
         setScale(newScale)
+
+        // 缩放后检查并调整偏移边界
+        const clampedOffset = clampOffset(offsetX, offsetY, newScale)
+        setOffsetX(clampedOffset.x)
+        setOffsetY(clampedOffset.y)
 
         // 重新绘制
         if (skillTreeData) {
@@ -612,6 +643,10 @@ const Mindmap = () => {
               onClick={() => {
                 const newScale = Math.max(0.5, scale - 0.1)
                 setScale(newScale)
+                // 缩放后检查并调整偏移边界
+                const clampedOffset = clampOffset(offsetX, offsetY, newScale)
+                setOffsetX(clampedOffset.x)
+                setOffsetY(clampedOffset.y)
                 if (skillTreeData) setTimeout(() => drawMindmap(skillTreeData), 16)
               }}
             >
@@ -623,6 +658,10 @@ const Mindmap = () => {
               onClick={() => {
                 const newScale = Math.min(3, scale + 0.1)
                 setScale(newScale)
+                // 缩放后检查并调整偏移边界
+                const clampedOffset = clampOffset(offsetX, offsetY, newScale)
+                setOffsetX(clampedOffset.x)
+                setOffsetY(clampedOffset.y)
                 if (skillTreeData) setTimeout(() => drawMindmap(skillTreeData), 16)
               }}
             >

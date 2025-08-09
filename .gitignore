@@ -5,3 +5,4 @@
 /lore-master-server/lore-master-web-*/logs/
 /logs/
 /.vscode/
+/lore-master-server/logs/*.log
