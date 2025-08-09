@@ -79,7 +79,7 @@ public class DataSourceConfig {
             @Qualifier("consumerDataSource") DataSource dataSource) {
         return builder
                 .dataSource(dataSource)
-                .packages("com.lore.master.data.entity.consumer", "com.lore.master.data.entity.business")
+                .packages("com.lore.master.data.entity.consumer")
                 .persistenceUnit("consumer")
                 .build();
     }

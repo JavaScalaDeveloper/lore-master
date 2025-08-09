@@ -85,6 +85,10 @@ export const API_ENDPOINTS = {
   // 课程相关
   COURSES_LIST: `${API_CONFIG.baseUrl}/api/courses/list`,
   COURSE_DETAIL: `${API_CONFIG.baseUrl}/api/courses/detail`,
+  COURSE_QUERY_LIST: `${API_CONFIG.baseUrl}/business/course/queryCourseList`,
+  COURSE_SEARCH: `${API_CONFIG.baseUrl}/business/course/searchCourses`,
+  COURSE_BY_CODE: `${API_CONFIG.baseUrl}/business/course/getCourseByCode`,
+  COURSE_BY_ID: `${API_CONFIG.baseUrl}/business/course/getCourseById`,
 
   // 学习相关
   LEARNING_PROGRESS: `${API_CONFIG.baseUrl}/api/learning/progress`,

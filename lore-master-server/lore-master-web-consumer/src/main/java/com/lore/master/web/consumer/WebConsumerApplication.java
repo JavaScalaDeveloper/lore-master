@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import com.lore.master.data.config.DataSourceConfig;
 import com.lore.master.data.config.ConsumerRepositoryConfig;
+import com.lore.master.data.config.BusinessRepositoryConfig;
 import com.lore.master.data.config.StorageRepositoryConfig;
 import com.lore.master.data.config.AdminRepositoryConfig;
 
@@ -29,7 +30,7 @@ import com.lore.master.data.config.AdminRepositoryConfig;
     "com.lore.master.data.entity.consumer",
     "com.lore.master.data.entity.business"
 })
-@Import({DataSourceConfig.class, ConsumerRepositoryConfig.class, StorageRepositoryConfig.class, AdminRepositoryConfig.class})
+@Import({DataSourceConfig.class, ConsumerRepositoryConfig.class, BusinessRepositoryConfig.class, StorageRepositoryConfig.class, AdminRepositoryConfig.class})
 @EnableJpaAuditing
 public class WebConsumerApplication {
 

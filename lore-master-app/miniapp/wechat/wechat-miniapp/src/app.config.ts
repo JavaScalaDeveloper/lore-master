@@ -50,7 +50,7 @@ export default defineAppConfig({
   },
   // 配置服务器域名
   request: {
-   合法域名: [
+    domainList: [
       'http://localhost:8082',
       'https://your-production-domain.com'
     ],

@@ -7,6 +7,12 @@ function App({ children }: PropsWithChildren<any>) {
   useLaunch(() => {
     console.log('App launched.')
     console.log('Hello World')
+
+    // 定义Taro组件库需要的常量
+    if (typeof window !== 'undefined') {
+      window.DEPRECATED_ADAPTER_COMPONENT = false;
+    }
+
     
     // 检查是否需要禁用Sentry
     if (process.env.DISABLE_SENTRY === 'true') {
