@@ -1,7 +1,7 @@
 package com.lore.master.service.business.impl;
 
 import cn.hutool.core.util.StrUtil;
-import com.lore.master.common.util.UserIdGenerator;
+import com.lore.master.service.config.UserIdGenerator;
 import com.lore.master.data.dto.UserRegisterRequest;
 import com.lore.master.data.entity.business.User;
 import com.lore.master.data.entity.business.UserAuthMethod;

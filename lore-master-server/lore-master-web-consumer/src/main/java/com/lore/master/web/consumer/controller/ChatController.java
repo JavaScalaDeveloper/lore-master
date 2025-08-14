@@ -96,13 +96,7 @@ public class ChatController {
 
 
 
-    /**
-     * 测试接口
-     */
-    @GetMapping("/test")
-    public Result<String> test() {
-        return Result.success("AI聊天服务正常运行！");
-    }
+
 
     /**
      * 获取WebSocket连接信息

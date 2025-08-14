@@ -1,4 +1,4 @@
-package com.lore.master.common.config;
+package com.lore.master.service.ai;
 
 import dev.langchain4j.community.model.dashscope.QwenChatModel;
 import dev.langchain4j.community.model.dashscope.QwenStreamingChatModel;
@@ -10,7 +10,6 @@ import dev.langchain4j.model.ollama.OllamaStreamingChatModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import java.time.Duration;
 
 /**
  * LangChain4j配置类

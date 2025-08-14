@@ -1,4 +1,4 @@
-package com.lore.master.common.config;
+package com.lore.master.service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

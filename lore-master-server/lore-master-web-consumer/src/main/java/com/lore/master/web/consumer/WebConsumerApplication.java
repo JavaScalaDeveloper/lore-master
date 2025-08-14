@@ -19,11 +19,7 @@ import com.lore.master.data.config.AdminRepositoryConfig;
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @ComponentScan(basePackages = {
     "com.lore.master.web.consumer",
-    "com.lore.master.service.consumer",
-    "com.lore.master.service.admin",
-    "com.lore.master.service.middleware",
-    "com.lore.master.service.business",
-    "com.lore.master.common"
+    "com.lore.master.service.*",
 })
 @EntityScan(basePackages = {
     "com.lore.master.data.entity.admin",

@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.lore.master.common.exception.BusinessException;
 import com.lore.master.common.result.ResultCode;
-import com.lore.master.common.util.UserIdGenerator;
+import com.lore.master.service.config.UserIdGenerator;
 import com.lore.master.data.dto.UserLoginRequest;
 import com.lore.master.data.entity.consumer.ConsumerUser;
 import com.lore.master.data.entity.consumer.ConsumerUserAuthMethod;
