@@ -1,13 +1,17 @@
 package com.lore.master.service.consumer.chat.impl;
 
-import com.lore.master.service.ai.AssistantServiceImpl;
+import com.lore.master.service.ai.AssistantServiceConf;
 import com.lore.master.service.consumer.chat.LLMChatService;
+import com.lore.master.service.consumer.chat.ConsumerChatMessageService;
+import com.lore.master.service.consumer.chat.UserChatMemoryService;
+import dev.langchain4j.memory.ChatMemory;
+import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.TokenStream;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 
 /**
@@ -19,31 +23,72 @@ import reactor.core.publisher.Flux;
 public class LLMChatServiceImpl implements LLMChatService {
 
     @Resource
-    private AssistantServiceImpl.Assistant assistant;
+    private AssistantServiceConf.Assistant assistant;
+
+    @Resource
+    private ConsumerChatMessageService chatMessageService;
+
+    @Resource
+    private UserChatMemoryService userChatMemoryService;
+
+    @Resource(name = "ollamaChatLanguageModel")
+    private ChatLanguageModel ollamaChatLanguageModel;
+
+    @Resource(name = "ollamaStreamingChatModel")
+    private StreamingChatLanguageModel ollamaStreamingChatModel;
 
     @Override
     public Flux<String> sendMessageStream(String message, String userId) {
         log.info("发送流式LLM请求: userId={}, message={}", userId, message);
 
         try {
+            // 1. 保存用户消息到数据库
+            chatMessageService.saveUserMessage(userId, message);
+
+            // 2. 获取用户的ChatMemory
+            ChatMemory chatMemory = userChatMemoryService.getUserChatMemory(userId);
+
+            // 3. 添加当前消息到ChatMemory
+            userChatMemoryService.addUserMessage(userId, message);
+
+            // 4. 创建带有ChatMemory的Assistant
+            AssistantServiceConf.Assistant assistantWithMemory = AiServices.builder(AssistantServiceConf.Assistant.class)
+                    .chatLanguageModel(ollamaChatLanguageModel)
+                    .streamingChatLanguageModel(ollamaStreamingChatModel)
+                    .chatMemory(chatMemory)
+                    .build();
+
+            // 5. 准备保存AI响应
+            StringBuilder responseBuilder = new StringBuilder();
+
             return Flux.create(sink -> {
                 try {
-                    TokenStream stream = assistant.stream(message);
+                    TokenStream stream = assistantWithMemory.stream(message);
                     stream.onPartialResponse(partialResponse -> {
                         log.debug("接收到部分响应: {}", partialResponse);
+                        responseBuilder.append(partialResponse);
                         sink.next(partialResponse);
                     })
                     .onCompleteResponse(completeResponse -> {
                         log.debug("流式响应完成");
+
+                        // 保存完整的AI响应到数据库
+                        String fullResponse = responseBuilder.toString();
+                        chatMessageService.saveAssistantMessage(userId, fullResponse, "ollama");
+
+                        // 添加AI响应到ChatMemory
+                        userChatMemoryService.addAssistantMessage(userId, fullResponse);
+
+                        log.info("AI响应完成并已保存: userId={}, responseLength={}", userId, fullResponse.length());
                         sink.complete();
                     })
                     .onError(error -> {
-                        log.error("流式响应出错: {}", error.getMessage(), error);
+                        log.error("流式响应出错: userId={}, error={}", userId, error.getMessage(), error);
                         sink.error(error);
                     })
                     .start();
                 } catch (Exception e) {
-                    log.error("启动流式响应失败: {}", e.getMessage(), e);
+                    log.error("启动流式响应失败: userId={}, error={}", userId, e.getMessage(), e);
                     sink.error(e);
                 }
             });
