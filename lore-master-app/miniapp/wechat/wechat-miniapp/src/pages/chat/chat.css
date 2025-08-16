@@ -78,9 +78,36 @@
 }
 
 .header-right {
-  width: 80px;
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+}
+
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  background: rgba(102, 126, 234, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.refresh-btn:hover {
+  background: rgba(102, 126, 234, 0.2);
+  transform: scale(1.1);
+}
+
+.refresh-icon {
+  font-size: 16px;
+  color: #667eea;
+}
+
+.ws-status {
+  display: flex;
   align-items: center;
   cursor: pointer;
   gap: 4px;
@@ -719,4 +746,42 @@
     font-size: 14px;
     padding: 10px 20px;
   }
+}
+
+/* 加载历史消息指示器 */
+.loading-history {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  margin: 10px 0;
+}
+
+.loading-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px 16px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 调试信息 */
+.debug-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  margin: 5px 0;
+}
+
+.debug-text {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.1);
+  padding: 4px 12px;
+  border-radius: 15px;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }

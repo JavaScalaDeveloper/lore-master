@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Qualifier;
+
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +37,7 @@ public class ConsumerChatMessageServiceImpl implements ConsumerChatMessageServic
         String userId = request.getUserId();
         String content = request.getContent();
         String sessionId = "session_" + userId; // 简化：每个用户一个会话
-        
+
         ConsumerChatMessage message = ConsumerChatMessage.builder()
                 .messageId(generateMessageId())
                 .userId(userId)
@@ -58,7 +59,7 @@ public class ConsumerChatMessageServiceImpl implements ConsumerChatMessageServic
     public ConsumerChatMessage saveAssistantMessage(ConsumerChatHistoryRequest request, String content, String modelName) {
         String userId = request.getUserId();
         String sessionId = "session_" + userId; // 简化：每个用户一个会话
-        
+
         ConsumerChatMessage message = ConsumerChatMessage.builder()
                 .messageId(generateMessageId())
                 .userId(userId)
@@ -84,7 +85,7 @@ public class ConsumerChatMessageServiceImpl implements ConsumerChatMessageServic
         String sessionId = "session_" + userId;
         Pageable pageable = PageRequest.of(0, maxMessages);
         List<ConsumerChatMessage> messages = consumerChatMessageRepository.findRecentMessages(userId, sessionId, pageable);
-        
+
         // 按时间正序返回（最早的在前面，符合ChatMemory的顺序）
         Collections.reverse(messages);
         log.debug("获取用户最近消息: userId={}, messageCount={}", userId, messages.size());
@@ -98,7 +99,7 @@ public class ConsumerChatMessageServiceImpl implements ConsumerChatMessageServic
         String userId = request.getUserId();
         String sessionId = "session_" + userId;
         Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
-        return consumerChatMessageRepository.findByUserIdAndSessionIdOrderByCreateTimeAsc(userId, sessionId, pageable);
+        return consumerChatMessageRepository.findByUserIdOrderByCreateTimeAsc(userId, pageable);
     }
 
     /**

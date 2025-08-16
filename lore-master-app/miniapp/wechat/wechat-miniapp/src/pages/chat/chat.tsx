@@ -11,18 +11,44 @@ const API_ENDPOINTS = {
   CHAT_STREAM: `${API_BASE_URL}/api/chat/stream`,
   CHAT_MINIAPP_STREAM: `${API_BASE_URL}/api/chat/miniapp-stream`,
   CHAT_SEND: `${API_BASE_URL}/api/chat/send`,
+  CHAT_HISTORY: `${API_BASE_URL}/api/chat/history`,
   WS_CHAT: `${WS_BASE_URL}/ws/chat`
 }
 
 // 工具函数
-const getApiHeaders = (token?: string) => {
+const getApiHeaders = (token?: string, contentType = 'application/x-www-form-urlencoded') => {
   const headers: Record<string, string> = {
-    'content-type': 'application/x-www-form-urlencoded',
+    'content-type': contentType,
   }
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
   }
   return headers
+}
+
+// 统一的API请求函数，自动添加登录态
+const apiRequest = async (options: any) => {
+  const token = getStorageSync('token')
+
+  if (!token && !options.skipAuth) {
+    throw new Error('未找到登录token，请重新登录')
+  }
+
+  const requestOptions = {
+    ...options,
+    header: {
+      ...options.header,
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    }
+  }
+
+  console.log('API请求:', {
+    url: options.url,
+    method: options.method,
+    hasToken: !!token
+  })
+
+  return request(requestOptions)
 }
 
 // 消息类型定义
@@ -39,6 +65,7 @@ const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([])
   const [inputText, setInputText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true)
   const [currentTypingId, setCurrentTypingId] = useState<string | null>(null)
   const [wsConnected, setWsConnected] = useState(false)
   const [wsConnecting, setWsConnecting] = useState(false)
@@ -55,6 +82,140 @@ const Chat = () => {
     return Date.now().toString() + Math.random().toString(36).substring(2, 11)
   }
 
+  // 检查登录状态
+  const checkLoginStatus = () => {
+    const token = getStorageSync('token')
+    const storedUserInfo = getStorageSync('userInfo')
+
+    console.log('检查登录状态:', {
+      hasToken: !!token,
+      hasUserInfo: !!storedUserInfo,
+      userId: storedUserInfo?.id || 'none'
+    })
+
+    if (!token) {
+      console.warn('未找到登录token')
+      showToast({
+        title: '请先登录',
+        icon: 'none',
+        duration: 3000
+      })
+      return false
+    }
+
+    return true
+  }
+
+  // 获取聊天历史
+  const loadChatHistory = async (showToastOnSuccess = false) => {
+    try {
+      console.log('开始加载聊天历史...')
+      setIsLoadingHistory(true)
+
+      // 获取token
+      const token = getStorageSync('token')
+      if (!token) {
+        console.log('未找到token，跳过加载聊天历史')
+        initializeWelcomeMessage()
+        setIsLoadingHistory(false)
+        return
+      }
+
+      const response = await apiRequest({
+        url: API_ENDPOINTS.CHAT_HISTORY,
+        method: 'POST',
+        header: {
+          'content-type': 'application/json'
+        },
+        data: {
+          page: 0,
+          size: 20 // 获取最近20条消息
+        }
+      })
+
+      console.log('聊天历史API响应:', response)
+
+      if (response.statusCode === 200 && response.data?.success) {
+        const historyMessages = response.data.data || []
+        console.log('获取到聊天历史:', historyMessages.length, '条')
+
+        // 转换历史消息格式
+        const convertedMessages: Message[] = historyMessages.map((msg: any) => ({
+          id: msg.messageId || generateId(),
+          type: msg.role === 'user' ? 'user' : 'ai',
+          content: msg.content,
+          timestamp: new Date(msg.createTime).getTime(),
+          isComplete: true
+        }))
+
+        // 如果有历史消息，设置到状态中
+        if (convertedMessages.length > 0) {
+          setMessages(convertedMessages)
+          console.log('已加载', convertedMessages.length, '条历史消息')
+
+          // 如果是手动刷新，显示成功提示
+          if (showToastOnSuccess) {
+            showToast({
+              title: `已加载${convertedMessages.length}条历史消息`,
+              icon: 'success',
+              duration: 2000
+            })
+          }
+        } else {
+          // 没有历史消息时显示欢迎消息
+          initializeWelcomeMessage()
+
+          // 如果是手动刷新，显示无历史消息提示
+          if (showToastOnSuccess) {
+            showToast({
+              title: '暂无聊天历史',
+              icon: 'none',
+              duration: 2000
+            })
+          }
+        }
+      } else {
+        console.error('获取聊天历史失败:', response.data?.message || '未知错误')
+        // 失败时显示欢迎消息
+        initializeWelcomeMessage()
+
+        // 显示错误提示（可选）
+        if (response.statusCode !== 200) {
+          showToast({
+            title: '加载聊天历史失败',
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      }
+    } catch (error) {
+      console.error('加载聊天历史出错:', error)
+      // 出错时显示欢迎消息
+      initializeWelcomeMessage()
+
+      // 显示网络错误提示
+      showToast({
+        title: '网络连接异常',
+        icon: 'none',
+        duration: 2000
+      })
+    } finally {
+      setIsLoadingHistory(false)
+    }
+  }
+
+  // 初始化欢迎消息
+  const initializeWelcomeMessage = () => {
+    const welcomeMessage: Message = {
+      id: generateId(),
+      type: 'ai',
+      content: '你好！我是AI测评助手 🎯\n\n我可以帮助你进行学习测评。请告诉我你想要测评哪个方面吧！',
+      timestamp: Date.now(),
+      isComplete: true
+    }
+    setMessages([welcomeMessage])
+  }
+
   useLoad(() => {
     console.log('聊天页面加载')
 
@@ -64,7 +225,16 @@ const Chat = () => {
       setUserInfo(storedUserInfo)
     }
 
-    initializeChat()
+    // 检查登录状态
+    if (!checkLoginStatus()) {
+      // 如果未登录，仍然显示欢迎消息，但不加载历史记录
+      initializeWelcomeMessage()
+      setIsLoadingHistory(false)
+      return
+    }
+
+    // 先尝试加载聊天历史，如果失败则显示欢迎消息
+    loadChatHistory()
 
     // 延迟初始化WebSocket，确保页面完全加载
     setTimeout(() => {
@@ -82,15 +252,18 @@ const Chat = () => {
     console.log('当前消息ID:', currentMessageIdRef.current)
 
     // 测试后端连接
-    request({
+    apiRequest({
       url: `${API_BASE_URL}/api/websocket/status`,
       method: 'GET',
+      skipAuth: true, // 这个接口可能不需要认证
       success: (res) => {
         console.log('后端WebSocket状态:', res.data)
       },
       fail: (err) => {
         console.error('无法获取后端WebSocket状态:', err)
       }
+    }).catch(err => {
+      console.error('测试后端连接失败:', err)
     })
   }
 
@@ -105,8 +278,33 @@ const Chat = () => {
       console.log(`初始化WebSocket连接 (尝试 ${reconnectAttemptsRef.current + 1}/${maxReconnectAttempts})`)
       setWsConnecting(true)
 
+      // 获取登录态信息
+      const token = getStorageSync('token')
+      const userId = getStorageSync('userId') || userInfo?.id
+
+      if (!token) {
+        console.warn('未找到token，WebSocket连接可能失败')
+        showToast({
+          title: '请先登录',
+          icon: 'none',
+          duration: 2000
+        })
+        setWsConnecting(false)
+        return
+      }
+
+      // 构建带有登录态信息的WebSocket URL
+      const wsUrl = `${API_ENDPOINTS.WS_CHAT}?token=${encodeURIComponent(token)}&userId=${encodeURIComponent(userId || '')}`
+      console.log('WebSocket连接URL:', wsUrl.replace(token, '***TOKEN***')) // 日志中隐藏token
+
       connectSocket({
-        url: API_ENDPOINTS.WS_CHAT,
+        url: wsUrl,
+        protocols: [], // 小程序WebSocket协议
+        header: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'User-Agent': 'WeChat-MiniProgram'
+        },
         success: () => {
           console.log('WebSocket连接请求成功')
         },
@@ -129,10 +327,32 @@ const Chat = () => {
           clearTimeout(reconnectTimeoutRef.current)
           reconnectTimeoutRef.current = null
         }
+
+        // 立即发送认证信息
+        const authMessage = {
+          type: 'auth',
+          token: token,
+          userId: userId || 'anonymous',
+          timestamp: Date.now()
+        }
+
+        console.log('发送WebSocket认证信息:', {
+          type: 'auth',
+          userId: userId || 'anonymous',
+          hasToken: !!token,
+          timestamp: authMessage.timestamp
+        })
+
+        sendSocketMessage({
+          data: JSON.stringify(authMessage)
+        })
+
+        console.log('WebSocket认证信息已发送')
       })
 
       // 监听消息
       onSocketMessage((res) => {
+        console.log('收到WebSocket消息:', res.data)
         handleWebSocketMessage(res.data)
       })
 
@@ -206,6 +426,25 @@ const Chat = () => {
   // 处理WebSocket消息
   const handleWebSocketMessage = (data: string) => {
     try {
+      // 处理认证响应
+      if (data.startsWith('[AUTH_SUCCESS]')) {
+        console.log('WebSocket认证成功:', data)
+        showToast({
+          title: '身份验证成功',
+          icon: 'success'
+        })
+        return
+      }
+
+      if (data.startsWith('[AUTH_FAILED]') || data.startsWith('[AUTH_ERROR]')) {
+        console.error('WebSocket认证失败:', data)
+        showToast({
+          title: '身份验证失败',
+          icon: 'error'
+        })
+        return
+      }
+
       const messageId = currentMessageIdRef.current
       if (!messageId) {
         console.log('收到WebSocket消息但没有当前消息ID:', data)
@@ -276,21 +515,16 @@ const Chat = () => {
     }
   }
 
-  // 初始化聊天
-  const initializeChat = () => {
-    const welcomeMessage: Message = {
-      id: generateId(),
-      type: 'ai',
-      content: '你好！我是AI测评助手 🎯\n\n我可以帮助你进行学习测评。请告诉我你想要测评哪个方面吧！',
-      timestamp: Date.now(),
-      isComplete: true
-    }
-    setMessages([welcomeMessage])
-  }
+
 
   // 发送消息
   const sendMessage = async () => {
     if (!inputText.trim()) return
+
+    // 检查登录状态
+    if (!checkLoginStatus()) {
+      return
+    }
 
     const userMessage: Message = {
       id: generateId(),
@@ -348,7 +582,13 @@ const Chat = () => {
   // 调用后端API - 多种流式响应方案
   const callBackendAPI = async (message: string, aiMessageId: string) => {
     const token = getStorageSync('token')
-    const userId = getStorageSync('userInfo')?.id || 'anonymous'
+    const storedUserInfo = getStorageSync('userInfo')
+    const userId = storedUserInfo?.id || userInfo?.id || getStorageSync('userId') || 'anonymous'
+
+    // 检查登录态
+    if (!token) {
+      throw new Error('未找到登录token，请重新登录')
+    }
 
     try {
       console.log('发送消息到后端', { message, userId, wsConnected })
@@ -407,14 +647,18 @@ const Chat = () => {
       // 设置当前消息ID，用于接收流式数据
       currentMessageIdRef.current = aiMessageId
 
-      // 发送消息到WebSocket
+      // 获取登录态信息
+      const token = getStorageSync('token')
+
+      // 发送消息到WebSocket，包含登录态信息
       const messageData = {
         message: message,
         userId: userId,
-        messageId: aiMessageId
+        messageId: aiMessageId,
+        token: token // 添加token到消息数据中
       }
 
-      console.log('发送WebSocket消息:', messageData)
+      console.log('发送WebSocket消息:', { ...messageData, token: '***TOKEN***' }) // 日志中隐藏token
 
       sendSocketMessage({
         data: JSON.stringify(messageData)
@@ -443,7 +687,7 @@ const Chat = () => {
   const fallbackToSyncAPI = async (message: string, userId: string, token: string, aiMessageId: string) => {
     console.log('使用备用同步API')
 
-    const response = await request({
+    const response = await apiRequest({
       url: API_ENDPOINTS.CHAT_SEND,
       method: 'POST',
       data: `message=${encodeURIComponent(message)}&userId=${encodeURIComponent(userId)}`,
@@ -556,17 +800,35 @@ const Chat = () => {
         <View className='header-title'>
           <Text className='title-text'>AI测评助手</Text>
         </View>
-        <View
-          className='header-right'
-          onClick={wsConnected ? undefined : reconnectWebSocket}
-          onLongPress={diagnoseWebSocketConnection}
-        >
-          <Text className='status-icon'>
-            {wsConnecting ? '🟡' : (wsConnected ? '🟢' : '🔴')}
-          </Text>
-          <Text className='status-text'>
-            {wsConnecting ? '连接中' : (wsConnected ? 'WS' : 'HTTP')}
-          </Text>
+        <View className='header-right'>
+          {/* 刷新聊天历史按钮 */}
+          <View
+            className='refresh-btn'
+            onClick={() => {
+              showToast({
+                title: '正在刷新聊天历史',
+                icon: 'loading',
+                duration: 1000
+              })
+              loadChatHistory(true)
+            }}
+            style={{ marginRight: '10px' }}
+          >
+            <Text className='refresh-icon'>🔄</Text>
+          </View>
+          {/* WebSocket状态 */}
+          <View
+            className='ws-status'
+            onClick={wsConnected ? undefined : reconnectWebSocket}
+            onLongPress={diagnoseWebSocketConnection}
+          >
+            <Text className='status-icon'>
+              {wsConnecting ? '🟡' : (wsConnected ? '🟢' : '🔴')}
+            </Text>
+            <Text className='status-text'>
+              {wsConnecting ? '连接中' : (wsConnected ? 'WS' : 'HTTP')}
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -577,6 +839,24 @@ const Chat = () => {
         ref={scrollViewRef}
         scrollIntoView={`msg-${messages.length - 1}`}
       >
+        {/* 加载历史消息指示器 */}
+        {isLoadingHistory && (
+          <View className='loading-history'>
+            <Text className='loading-text'>正在加载聊天历史...</Text>
+          </View>
+        )}
+
+        {/* 调试信息：显示消息数量和登录状态 */}
+        {!isLoadingHistory && (
+          <View className='debug-info'>
+            <Text className='debug-text'>
+              消息: {messages.length} 条 |
+              登录: {getStorageSync('token') ? '✓' : '✗'} |
+              WS: {wsConnected ? '✓' : '✗'}
+            </Text>
+          </View>
+        )}
+
         {messages.map((message, messageIndex) => (
           <View key={message.id} id={`msg-${messageIndex}`} className={`message-item ${message.type}`}>
             {message.type === 'ai' ? (

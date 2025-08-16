@@ -34,12 +34,18 @@ public interface ConsumerChatMessageRepository extends JpaRepository<ConsumerCha
             String userId, String sessionId, Pageable pageable);
 
     /**
+     * 根据用户ID和会话ID查询消息（分页，按时间正序）
+     */
+    List<ConsumerChatMessage> findByUserIdOrderByCreateTimeAsc(
+            String userId, Pageable pageable);
+
+    /**
      * 获取用户会话的最近N条消息（用于ChatMemory）
      */
     @Query("SELECT m FROM ConsumerChatMessage m WHERE m.userId = :userId AND m.sessionId = :sessionId " +
-           "ORDER BY m.createTime DESC")
-    List<ConsumerChatMessage> findRecentMessages(@Param("userId") String userId, 
-                                                 @Param("sessionId") String sessionId, 
+            "ORDER BY m.createTime DESC")
+    List<ConsumerChatMessage> findRecentMessages(@Param("userId") String userId,
+                                                 @Param("sessionId") String sessionId,
                                                  Pageable pageable);
 
     /**

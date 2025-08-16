@@ -208,15 +208,22 @@ public class JwtUtil {
             }
 
             DecodedJWT jwt = JWT.decode(token);
-            // 先尝试获取字符串格式的用户ID
+
+            // 根据JWT生成逻辑，username字段存储的是用户ID字符串
+            // generateToken(user.getId(), user.getUserId()) 中：
+            // - userId claim 存储的是 user.getId() (Long类型主键)
+            // - username claim 存储的是 user.getUserId() (String类型用户ID)
             String userIdStr = jwt.getClaim("username").asString();
             if (StrUtil.isNotBlank(userIdStr)) {
+                log.debug("从JWT token获取用户ID: {}", userIdStr);
                 return userIdStr;
             }
 
-            // 如果没有，则获取Long格式的用户ID并转换为字符串
+            // 如果username为空，尝试从userId字段获取并转换为字符串
             Long userId = jwt.getClaim("userId").asLong();
-            return userId != null ? userId.toString() : null;
+            String result = userId != null ? userId.toString() : null;
+            log.debug("从JWT token userId字段获取用户ID: {}", result);
+            return result;
         } catch (JWTDecodeException e) {
             log.warn("解析JWT token失败: {}", e.getMessage());
             return null;
