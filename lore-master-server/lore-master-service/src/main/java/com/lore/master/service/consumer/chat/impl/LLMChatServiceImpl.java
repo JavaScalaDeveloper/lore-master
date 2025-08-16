@@ -1,5 +1,6 @@
 package com.lore.master.service.consumer.chat.impl;
 
+import com.lore.master.data.dto.chat.ConsumerChatHistoryRequest;
 import com.lore.master.service.ai.AssistantServiceConf;
 import com.lore.master.service.consumer.chat.LLMChatService;
 import com.lore.master.service.consumer.chat.ConsumerChatMessageService;
@@ -42,8 +43,12 @@ public class LLMChatServiceImpl implements LLMChatService {
         log.info("发送流式LLM请求: userId={}, message={}", userId, message);
 
         try {
+
             // 1. 保存用户消息到数据库
-            chatMessageService.saveUserMessage(userId, message);
+            ConsumerChatHistoryRequest userMsgRequest = new ConsumerChatHistoryRequest();
+            userMsgRequest.setUserId(userId);
+            userMsgRequest.setContent(message);
+            chatMessageService.saveUserMessage(userMsgRequest);
 
             // 2. 获取用户的ChatMemory
             ChatMemory chatMemory = userChatMemoryService.getUserChatMemory(userId);
@@ -74,7 +79,9 @@ public class LLMChatServiceImpl implements LLMChatService {
 
                         // 保存完整的AI响应到数据库
                         String fullResponse = responseBuilder.toString();
-                        chatMessageService.saveAssistantMessage(userId, fullResponse, "ollama");
+                        ConsumerChatHistoryRequest assistantMsgRequest = new ConsumerChatHistoryRequest();
+                        assistantMsgRequest.setUserId(userId);
+                        chatMessageService.saveAssistantMessage(assistantMsgRequest, fullResponse, "ollama");
 
                         // 添加AI响应到ChatMemory
                         userChatMemoryService.addAssistantMessage(userId, fullResponse);

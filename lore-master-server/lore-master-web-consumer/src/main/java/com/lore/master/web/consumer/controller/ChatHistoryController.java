@@ -1,6 +1,10 @@
 package com.lore.master.web.consumer.controller;
 
+import com.lore.master.common.annotation.RequireLogin;
+import com.lore.master.common.context.UserContext;
 import com.lore.master.common.result.Result;
+import com.lore.master.data.dto.chat.ConsumerChatHistoryRequest;
+import com.lore.master.data.dto.chat.UserIdRequest;
 import com.lore.master.data.entity.consumer.ConsumerChatMessage;
 import com.lore.master.service.consumer.chat.ConsumerChatMessageService;
 import com.lore.master.service.consumer.chat.UserChatMemoryService;
@@ -27,16 +31,16 @@ public class ChatHistoryController {
     /**
      * 获取用户的聊天历史
      */
-    @GetMapping("/history")
+    @PostMapping("/history")
+    @RequireLogin
     public Result<List<ConsumerChatMessage>> getChatHistory(
-            @RequestParam String userId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "50") int size) {
+            @RequestBody ConsumerChatHistoryRequest request) {
         
-        log.info("获取用户聊天历史: userId={}, page={}, size={}", userId, page, size);
-        
+        String userId = UserContext.getCurrentUserId();
+        log.info("获取用户聊天历史: userId={}, page={}, size={}", userId, request.getPage(), request.getSize());
+        request.setUserId(userId);
         try {
-            List<ConsumerChatMessage> messages = chatMessageService.getUserMessages(userId, page, size);
+            List<ConsumerChatMessage> messages = chatMessageService.getUserMessages(request);
             log.info("获取到 {} 条聊天记录", messages.size());
             return Result.success(messages);
         } catch (Exception e) {
@@ -48,12 +52,16 @@ public class ChatHistoryController {
     /**
      * 获取用户消息总数
      */
-    @GetMapping("/count")
-    public Result<Long> getMessageCount(@RequestParam String userId) {
+    @PostMapping("/count")
+    @RequireLogin
+    public Result<Long> getMessageCount(@RequestBody UserIdRequest request) {
+        String userId = UserContext.getCurrentUserId();
         log.info("获取用户消息总数: userId={}", userId);
-        
+        request.setUserId(userId);
         try {
-            long count = chatMessageService.getUserMessageCount(userId);
+            ConsumerChatHistoryRequest consumerChatHistoryRequest = new ConsumerChatHistoryRequest();
+            consumerChatHistoryRequest.setUserId(userId);
+            long count = chatMessageService.getUserMessageCount(consumerChatHistoryRequest);
             return Result.success(count);
         } catch (Exception e) {
             log.error("获取消息总数失败: userId={}, error={}", userId, e.getMessage(), e);
@@ -64,12 +72,15 @@ public class ChatHistoryController {
     /**
      * 获取用户ChatMemory中的消息数量
      */
-    @GetMapping("/memory/count")
-    public Result<Integer> getMemoryMessageCount(@RequestParam String userId) {
+    @PostMapping("/memory/count")
+    @RequireLogin
+    public Result<Integer> getMemoryMessageCount(@RequestBody UserIdRequest request) {
+        String userId = UserContext.getCurrentUserId();
         log.info("获取用户ChatMemory消息数量: userId={}", userId);
-        
+        ConsumerChatHistoryRequest consumerChatHistoryRequest = new ConsumerChatHistoryRequest();
+        consumerChatHistoryRequest.setUserId(userId);
         try {
-            int count = userChatMemoryService.getUserMemoryMessageCount(userId);
+            int count = userChatMemoryService.getMemoryMessageCount(consumerChatHistoryRequest);
             return Result.success(count);
         } catch (Exception e) {
             log.error("获取ChatMemory消息数量失败: userId={}, error={}", userId, e.getMessage(), e);
@@ -81,11 +92,15 @@ public class ChatHistoryController {
      * 清除用户ChatMemory缓存
      */
     @PostMapping("/memory/clear")
-    public Result<String> clearMemoryCache(@RequestParam String userId) {
+    @RequireLogin
+    public Result<String> clearMemoryCache(@RequestBody UserIdRequest request) {
+        String userId = UserContext.getCurrentUserId();
         log.info("清除用户ChatMemory缓存: userId={}", userId);
-        
+        request.setUserId(userId);
+        ConsumerChatHistoryRequest consumerChatHistoryRequest = new ConsumerChatHistoryRequest();
+        consumerChatHistoryRequest.setUserId(userId);
         try {
-            userChatMemoryService.clearUserMemoryCache(userId);
+            userChatMemoryService.clearUserMemoryCache(consumerChatHistoryRequest);
             return Result.success("ChatMemory缓存已清除");
         } catch (Exception e) {
             log.error("清除ChatMemory缓存失败: userId={}, error={}", userId, e.getMessage(), e);

@@ -1,6 +1,7 @@
 package com.lore.master.web.consumer.controller;
 
 import com.lore.master.common.result.Result;
+import com.lore.master.data.dto.chat.ConsumerChatHistoryRequest;
 import com.lore.master.service.consumer.chat.EnhancedLLMChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,11 +30,12 @@ public class EnhancedChatController {
      */
     @PostMapping("/send")
     public Result<EnhancedLLMChatService.ChatResponse> sendEnhancedMessage(
-            @RequestParam String message,
-            @RequestParam(required = false, defaultValue = "default") String userId,
+            @RequestBody ConsumerChatHistoryRequest request,
             @RequestParam(required = false, defaultValue = "true") boolean enableFunctionCall,
             @RequestParam(required = false, defaultValue = "true") boolean enableRAG) {
         
+        String userId = request.getUserId();
+        String message = request.getContent();
         log.info("接收增强聊天请求: userId={}, message={}, FC={}, RAG={}", 
                 userId, message, enableFunctionCall, enableRAG);
         
@@ -54,11 +56,12 @@ public class EnhancedChatController {
      */
     @PostMapping(value = "/stream", produces = MediaType.TEXT_PLAIN_VALUE)
     public Flux<String> sendEnhancedMessageStream(
-            @RequestParam String message,
-            @RequestParam(required = false, defaultValue = "default") String userId,
+            @RequestBody ConsumerChatHistoryRequest request,
             @RequestParam(required = false, defaultValue = "true") boolean enableFunctionCall,
             @RequestParam(required = false, defaultValue = "true") boolean enableRAG) {
         
+        String userId = request.getUserId();
+        String message = request.getContent();
         log.info("接收流式增强聊天请求: userId={}, message={}, FC={}, RAG={}", 
                 userId, message, enableFunctionCall, enableRAG);
         
@@ -73,9 +76,10 @@ public class EnhancedChatController {
      */
     @PostMapping("/function-call")
     public Result<EnhancedLLMChatService.ChatResponse> functionCallDemo(
-            @RequestParam String message,
-            @RequestParam(required = false, defaultValue = "default") String userId) {
+            @RequestBody ConsumerChatHistoryRequest request) {
         
+        String userId = request.getUserId();
+        String message = request.getContent();
         log.info("Function Call演示: userId={}, message={}", userId, message);
         
         try {
@@ -94,9 +98,10 @@ public class EnhancedChatController {
      */
     @PostMapping("/rag")
     public Result<EnhancedLLMChatService.ChatResponse> ragDemo(
-            @RequestParam String message,
-            @RequestParam(required = false, defaultValue = "default") String userId) {
+            @RequestBody ConsumerChatHistoryRequest request) {
         
+        String userId = request.getUserId();
+        String message = request.getContent();
         log.info("RAG演示: userId={}, message={}", userId, message);
         
         try {

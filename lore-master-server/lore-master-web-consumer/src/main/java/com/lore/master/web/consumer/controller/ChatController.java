@@ -1,6 +1,7 @@
 package com.lore.master.web.consumer.controller;
 
 import com.lore.master.common.result.Result;
+import com.lore.master.data.dto.chat.ConsumerChatHistoryRequest;
 import com.lore.master.service.consumer.chat.LLMChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,10 +41,10 @@ public class ChatController {
      * 此接口主要用于Web前端或测试目的
      */
     @PostMapping(value = "/stream", produces = MediaType.TEXT_PLAIN_VALUE)
-    public Flux<String> sendMessageStream(
-            @RequestParam String message,
-            @RequestParam(required = false) String userId) {
+    public Flux<String> sendMessageStream(@RequestBody ConsumerChatHistoryRequest request) {
 
+        String userId = request.getUserId();
+        String message = request.getContent();
         log.info("接收HTTP流式聊天请求: userId={}, message={}", userId, message);
         log.warn("注意：小程序无法接收真正的HTTP流式数据，建议使用WebSocket");
 
@@ -54,10 +55,10 @@ public class ChatController {
      * 发送聊天消息（同步响应）
      */
     @PostMapping("/send")
-    public Result<Map<String, Object>> sendMessage(
-            @RequestParam String message,
-            @RequestParam(required = false) String userId) {
+    public Result<Map<String, Object>> sendMessage(@RequestBody ConsumerChatHistoryRequest request) {
 
+        String userId = request.getUserId();
+        String message = request.getContent();
         log.info("接收同步聊天请求: userId={}, message={}", userId, message);
 
         try {
@@ -94,39 +95,4 @@ public class ChatController {
         }
     }
 
-
-
-
-
-    /**
-     * 获取WebSocket连接信息
-     *
-     * 🚀 如需真正的流式响应，请使用WebSocket连接：
-     *
-     * 连接地址：ws://localhost:8082/ws/chat
-     * 消息格式：{"message": "用户消息", "userId": "用户ID", "messageId": "消息ID"}
-     *
-     * 配置文件：com.lore.master.web.consumer.config.WebSocketConfig
-     * 处理器：com.lore.master.web.consumer.handler.ChatWebSocketHandler
-     */
-    @GetMapping("/websocket-info")
-    public Result<Map<String, Object>> getWebSocketInfo() {
-        Map<String, Object> info = new HashMap<>();
-        info.put("endpoint", "ws://localhost:8082/ws/chat");
-        info.put("protocol", "WebSocket");
-        info.put("messageFormat", "JSON");
-        info.put("features", new String[]{
-            "真正的实时流式响应",
-            "双向通信",
-            "低延迟",
-            "支持小程序"
-        });
-        info.put("example", Map.of(
-            "message", "你好",
-            "userId", "user123",
-            "messageId", "msg456"
-        ));
-
-        return Result.success("WebSocket连接信息", info);
-    }
 }
