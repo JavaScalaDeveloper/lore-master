@@ -1,11 +1,16 @@
 package com.lore.master.service.business.impl;
 
+import com.lore.master.common.exception.BusinessException;
+import com.lore.master.common.result.ResultCode;
 import com.lore.master.data.dto.business.CourseQueryDTO;
+import com.lore.master.data.dto.business.CourseRequest;
 import com.lore.master.data.entity.business.BusinessCourse;
 import com.lore.master.data.repository.business.BusinessCourseRepository;
 import com.lore.master.data.vo.business.CourseVO;
 import com.lore.master.data.vo.business.CoursePageVO;
 import com.lore.master.service.business.BusinessCourseService;
+import com.lore.master.service.business.MarkdownProcessingService;
+import com.lore.master.service.business.impl.MarkdownProcessingServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -16,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +36,7 @@ import java.util.stream.Collectors;
 public class BusinessCourseServiceImpl implements BusinessCourseService {
 
     private final BusinessCourseRepository courseRepository;
+    private final MarkdownProcessingService markdownProcessingService;
 
     @Override
     public CoursePageVO getCourses(CourseQueryDTO queryDTO) {
@@ -338,6 +345,10 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
                 .contentUrl(course.getContentUrl())
                 .coverImageUrl(course.getCoverImageUrl())
                 .thumbnailUrl(course.getThumbnailUrl())
+                .contentMarkdown(course.getContentMarkdown())
+                .contentHtml(course.getContentHtml())
+                .contentUpdatedTime(course.getContentUpdatedTime())
+                .contentFileIds(course.getContentFileIds())
                 .publishTime(course.getPublishTime())
                 .createdTime(course.getCreatedTime());
 
@@ -395,6 +406,226 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
             }
         } else {
             return remainingMinutes + "分钟";
+        }
+    }
+
+    @Override
+    @Transactional("businessTransactionManager")
+    public CourseVO createCourse(CourseRequest request) {
+        log.info("创建课程，请求参数：{}", request);
+
+        // 参数校验
+        validateCourseRequest(request, false);
+
+        // 检查课程编码是否已存在
+        if (courseRepository.existsByCourseCodeAndIsDeletedFalse(request.getCourseCode())) {
+            throw new BusinessException(ResultCode.PARAM_ERROR, "课程编码已存在：" + request.getCourseCode());
+        }
+
+        // 创建课程实体
+        BusinessCourse course = new BusinessCourse();
+        copyRequestToEntity(request, course);
+        course.setCreatedBy("admin"); // TODO: 从当前登录用户获取
+        course.setUpdatedBy("admin");
+
+        // 保存课程
+        BusinessCourse savedCourse = courseRepository.save(course);
+
+        log.info("创建课程成功，课程ID：{}，课程编码：{}", savedCourse.getId(), savedCourse.getCourseCode());
+        return convertToVO(savedCourse, null);
+    }
+
+    @Override
+    @Transactional("businessTransactionManager")
+    public CourseVO updateCourse(CourseRequest request) {
+        log.info("更新课程，请求参数：{}", request);
+
+        // 参数校验
+        validateCourseRequest(request, true);
+
+        // 查找现有课程
+        Optional<BusinessCourse> optionalCourse = courseRepository.findByIdAndIsDeletedFalse(request.getId());
+        if (!optionalCourse.isPresent()) {
+            throw new BusinessException(ResultCode.PARAM_ERROR, "课程不存在，ID：" + request.getId());
+        }
+
+        BusinessCourse existingCourse = optionalCourse.get();
+
+        // 检查课程编码是否被其他课程使用
+        if (!existingCourse.getCourseCode().equals(request.getCourseCode())) {
+            if (courseRepository.existsByCourseCodeAndIsDeletedFalse(request.getCourseCode())) {
+                throw new BusinessException(ResultCode.PARAM_ERROR, "课程编码已存在：" + request.getCourseCode());
+            }
+        }
+
+        // 更新课程信息
+        copyRequestToEntity(request, existingCourse);
+        existingCourse.setUpdatedBy("admin"); // TODO: 从当前登录用户获取
+
+        // 保存更新
+        BusinessCourse updatedCourse = courseRepository.save(existingCourse);
+
+        log.info("更新课程成功，课程ID：{}，课程编码：{}", updatedCourse.getId(), updatedCourse.getCourseCode());
+        return convertToVO(updatedCourse, null);
+    }
+
+    @Override
+    @Transactional("businessTransactionManager")
+    public Boolean deleteCourse(Long courseId) {
+        log.info("删除课程，课程ID：{}", courseId);
+
+        if (courseId == null) {
+            throw new BusinessException(ResultCode.PARAM_ERROR, "课程ID不能为空");
+        }
+
+        // 查找课程
+        Optional<BusinessCourse> optionalCourse = courseRepository.findByIdAndIsDeletedFalse(courseId);
+        if (!optionalCourse.isPresent()) {
+            throw new BusinessException(ResultCode.PARAM_ERROR, "课程不存在，ID：" + courseId);
+        }
+
+        BusinessCourse course = optionalCourse.get();
+
+        // 检查是否有子课程
+        List<BusinessCourse> subCourses = courseRepository.findByParentCourseIdAndIsDeletedFalse(courseId);
+        if (!subCourses.isEmpty()) {
+            throw new BusinessException(ResultCode.PARAM_ERROR, "存在子课程，无法删除");
+        }
+
+        // 软删除
+        course.setIsDeleted(true);
+        course.setUpdatedBy("admin"); // TODO: 从当前登录用户获取
+        courseRepository.save(course);
+
+        log.info("删除课程成功，课程ID：{}", courseId);
+        return true;
+    }
+
+    /**
+     * 校验课程请求参数
+     */
+    private void validateCourseRequest(CourseRequest request, boolean isUpdate) {
+        if (isUpdate && request.getId() == null) {
+            throw new BusinessException(ResultCode.PARAM_ERROR, "更新课程时ID不能为空");
+        }
+
+        if (!StringUtils.hasText(request.getCourseCode())) {
+            throw new BusinessException(ResultCode.PARAM_ERROR, "课程编码不能为空");
+        }
+
+        if (!StringUtils.hasText(request.getTitle())) {
+            throw new BusinessException(ResultCode.PARAM_ERROR, "课程标题不能为空");
+        }
+
+        if (!StringUtils.hasText(request.getAuthor())) {
+            throw new BusinessException(ResultCode.PARAM_ERROR, "课程作者不能为空");
+        }
+
+        if (!StringUtils.hasText(request.getCourseType())) {
+            throw new BusinessException(ResultCode.PARAM_ERROR, "课程类型不能为空");
+        }
+
+        if (!StringUtils.hasText(request.getStatus())) {
+            throw new BusinessException(ResultCode.PARAM_ERROR, "课程状态不能为空");
+        }
+
+        // 普通课程必须有难度等级和内容类型
+        if ("NORMAL".equals(request.getCourseType())) {
+            if (!StringUtils.hasText(request.getDifficultyLevel())) {
+                throw new BusinessException(ResultCode.PARAM_ERROR, "普通课程必须指定难度等级");
+            }
+            if (!StringUtils.hasText(request.getContentType())) {
+                throw new BusinessException(ResultCode.PARAM_ERROR, "普通课程必须指定内容类型");
+            }
+        }
+    }
+
+    /**
+     * 将请求数据复制到实体
+     */
+    private void copyRequestToEntity(CourseRequest request, BusinessCourse entity) {
+        entity.setCourseCode(request.getCourseCode());
+        entity.setTitle(request.getTitle());
+        entity.setDescription(request.getDescription());
+        entity.setAuthor(request.getAuthor());
+        entity.setCourseType(request.getCourseType());
+        entity.setContentType(request.getContentType());
+        entity.setDifficultyLevel(request.getDifficultyLevel());
+        entity.setDifficultyLevels(request.getDifficultyLevels());
+        entity.setParentCourseId(request.getParentCourseId());
+        entity.setSortOrder(request.getSortOrder() != null ? request.getSortOrder() : 0);
+        entity.setStatus(request.getStatus());
+        entity.setKnowledgeNodeCode(request.getKnowledgeNodeCode());
+        entity.setKnowledgeNodePath(request.getKnowledgeNodePath());
+        entity.setKnowledgeNodeNamePath(request.getKnowledgeNodeNamePath());
+        entity.setTags(request.getTags());
+        entity.setDurationMinutes(request.getDurationMinutes());
+        entity.setContentUrl(request.getContentUrl());
+        entity.setCoverImageUrl(request.getCoverImageUrl());
+        entity.setThumbnailUrl(request.getThumbnailUrl());
+
+        // 处理Markdown内容
+        if (StringUtils.hasText(request.getContentMarkdown())) {
+            entity.setContentMarkdown(request.getContentMarkdown());
+
+            // 将Markdown转换为HTML
+            String htmlContent = markdownProcessingService.convertMarkdownToHtml(request.getContentMarkdown());
+            entity.setContentHtml(htmlContent);
+
+            // 提取文件引用
+            List<String> fileIds = markdownProcessingService.extractFileReferences(request.getContentMarkdown());
+            if (!fileIds.isEmpty()) {
+                entity.setContentFileIds(((MarkdownProcessingServiceImpl) markdownProcessingService).fileIdsToJson(fileIds));
+            }
+
+            entity.setContentUpdatedTime(LocalDateTime.now());
+        } else {
+            entity.setContentMarkdown(null);
+            entity.setContentHtml(null);
+            entity.setContentFileIds(null);
+            entity.setContentUpdatedTime(null);
+        }
+    }
+
+    @Override
+    @Transactional("businessTransactionManager")
+    public void incrementLikeCount(Long courseId, String userId) {
+        log.info("增加课程点赞数，courseId：{}，userId：{}", courseId, userId);
+
+        try {
+            Optional<BusinessCourse> optionalCourse = courseRepository.findByIdAndIsDeletedFalse(courseId);
+            if (optionalCourse.isPresent()) {
+                BusinessCourse course = optionalCourse.get();
+                course.setLikeCount(course.getLikeCount() + 1);
+                courseRepository.save(course);
+                log.info("课程点赞数增加成功，courseId：{}，新点赞数：{}", courseId, course.getLikeCount());
+            } else {
+                log.warn("课程不存在，无法增加点赞数，courseId：{}", courseId);
+            }
+        } catch (Exception e) {
+            log.error("增加课程点赞数失败，courseId：{}，userId：{}", courseId, userId, e);
+            throw e;
+        }
+    }
+
+    @Override
+    @Transactional("businessTransactionManager")
+    public void incrementCollectCount(Long courseId, String userId) {
+        log.info("增加课程收藏数，courseId：{}，userId：{}", courseId, userId);
+
+        try {
+            Optional<BusinessCourse> optionalCourse = courseRepository.findByIdAndIsDeletedFalse(courseId);
+            if (optionalCourse.isPresent()) {
+                BusinessCourse course = optionalCourse.get();
+                course.setCollectCount(course.getCollectCount() + 1);
+                courseRepository.save(course);
+                log.info("课程收藏数增加成功，courseId：{}，新收藏数：{}", courseId, course.getCollectCount());
+            } else {
+                log.warn("课程不存在，无法增加收藏数，courseId：{}", courseId);
+            }
+        } catch (Exception e) {
+            log.error("增加课程收藏数失败，courseId：{}，userId：{}", courseId, userId, e);
+            throw e;
         }
     }
 }

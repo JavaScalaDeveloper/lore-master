@@ -22,7 +22,10 @@ public class AdminKnowledgeMapResponse {
      * 节点名称
      */
     private String nodeName;
-    
+    /**
+     * 节点名称
+     */
+    private String nodeNameStr;
     /**
      * 节点类型
      */

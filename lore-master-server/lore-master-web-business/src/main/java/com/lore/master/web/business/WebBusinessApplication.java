@@ -12,8 +12,7 @@ import com.lore.master.data.config.StorageRepositoryConfig;
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @ComponentScan(basePackages = {
     "com.lore.master.web.business",
-    "com.lore.master.service.business",
-    "com.lore.master.service.middleware",
+    "com.lore.master.service.*",
     "com.lore.master.common"
 })
 @Import({DataSourceConfig.class, BusinessRepositoryConfig.class, StorageRepositoryConfig.class})

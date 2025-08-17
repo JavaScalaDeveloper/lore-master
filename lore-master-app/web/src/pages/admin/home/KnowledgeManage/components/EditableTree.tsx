@@ -1,26 +1,22 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   Tree,
   Input,
+  InputNumber,
   Button,
   Space,
   Dropdown,
   Modal,
   Form,
   Select,
-  InputNumber,
   message,
   Tooltip,
   Tag
 } from 'antd';
-import {
-  EditOutlined,
+import { EditOutlined,
   DeleteOutlined,
   PlusOutlined,
-  MoreOutlined,
-  DragOutlined,
-  SaveOutlined,
-  CloseOutlined
+  MoreOutlined
 } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
 import styles from './EditableTree.module.css';
@@ -28,6 +24,7 @@ import styles from './EditableTree.module.css';
 interface EditableTreeNode extends DataNode {
   nodeCode: string;
   nodeName: string;
+  nodeNameStr: string; // 后端返回的显示字段
   nodeType: string;
   levelDepth: number;
   levelType?: string;
@@ -86,38 +83,21 @@ const EditableTree: React.FC<EditableTreeProps> = ({
   const startEdit = (node: EditableTreeNode) => {
     setEditingNode(node.nodeCode);
     editForm.setFieldsValue({
+      nodeCode: node.nodeCode,
       nodeName: node.nodeName,
+      nodeType: node.nodeType,
       difficultyLevel: node.difficultyLevel,
       estimatedHours: node.estimatedHours,
       description: node.description
     });
-  };
-
-  // 保存编辑
-  const saveEdit = async () => {
-    try {
-      const values = await editForm.validateFields();
-      if (editingNode) {
-        await onNodeEdit(editingNode, values);
-        setEditingNode(null);
-        message.success('节点更新成功');
-      }
-    } catch (error) {
-      console.error('保存失败:', error);
-    }
-  };
-
-  // 取消编辑
-  const cancelEdit = () => {
-    setEditingNode(null);
-    editForm.resetFields();
+    setAddModalVisible(true); // 复用添加模态框进行编辑
   };
 
   // 删除节点
-  const deleteNode = (nodeCode: string, nodeName: string) => {
+  const deleteNode = (nodeCode: string, nodeNameStr: string) => {
     Modal.confirm({
       title: '确认删除',
-      content: `确定要删除节点"${nodeName}"吗？此操作不可恢复。`,
+      content: `确定要删除节点"${nodeNameStr}"吗？此操作不可恢复。`,
       okText: '确定',
       cancelText: '取消',
       onOk: async () => {
@@ -138,69 +118,80 @@ const EditableTree: React.FC<EditableTreeProps> = ({
     addForm.resetFields();
   };
 
-  // 确认添加节点
+  // 确认添加/编辑节点
   const handleAddNode = async () => {
     try {
-      const values = await addForm.validateFields();
-      onNodeAdd(selectedParentCode || undefined);
+      if (editingNode) {
+        // 编辑模式
+        const values = await editForm.validateFields();
+        await onNodeEdit(editingNode, values);
+        message.success('节点更新成功');
+      } else {
+        // 添加模式
+        const values = await addForm.validateFields();
+        onNodeAdd(selectedParentCode || undefined, values);
+        message.success('节点添加成功');
+      }
+      // 先关闭模态框，再重置状态
       setAddModalVisible(false);
-      message.success('节点添加成功');
+      setTimeout(() => {
+        setEditingNode(null);
+        editForm.resetFields();
+        addForm.resetFields();
+      }, 300);
     } catch (error) {
-      console.error('添加失败:', error);
+      console.error(editingNode ? '更新失败:' : '添加失败:', error);
+      message.error(editingNode ? '更新失败，请检查输入内容' : '添加失败，请检查输入内容');
     }
   };
 
   // 渲染节点操作按钮
   const renderNodeActions = (node: EditableTreeNode) => {
-    if (editingNode === node.nodeCode) {
-      return (
-        <Space size="small">
-          <Button
-            type="primary"
-            size="small"
-            icon={<SaveOutlined />}
-            onClick={saveEdit}
-            className={styles.saveButton}
-          >
-            保存
-          </Button>
-          <Button
-            size="small"
-            icon={<CloseOutlined />}
-            onClick={cancelEdit}
-            className={styles.cancelButton}
-          >
-            取消
-          </Button>
-        </Space>
-      );
-    }
 
     const menuItems = [
       {
         key: 'edit',
         label: '编辑',
-        icon: <EditOutlined />,
-        onClick: () => startEdit(node)
+        icon: <EditOutlined />
       },
       {
         key: 'add',
         label: '添加子节点',
-        icon: <PlusOutlined />,
-        onClick: () => showAddModal(node.nodeCode)
+        icon: <PlusOutlined />
       },
       {
         key: 'delete',
         label: '删除',
         icon: <DeleteOutlined />,
-        danger: true,
-        onClick: () => deleteNode(node.nodeCode, node.nodeName)
+        danger: true
       }
     ];
 
+    const handleMenuClick = ({ key }: { key: string }) => {
+      switch (key) {
+        case 'edit':
+          startEdit(node);
+          break;
+        case 'add':
+          showAddModal(node.nodeCode);
+          break;
+        case 'delete':
+          deleteNode(node.nodeCode, node.nodeNameStr || node.nodeName);
+          break;
+        default:
+          break;
+      }
+    };
+
     return (
       <Space size="small">
-        <Dropdown menu={{ items: menuItems }} trigger={['click']}>
+        <Dropdown
+          menu={{
+            items: menuItems,
+            onClick: handleMenuClick
+          }}
+          trigger={['click']}
+        >
           <Button size="small" icon={<MoreOutlined />} />
         </Dropdown>
       </Space>
@@ -212,52 +203,49 @@ const EditableTree: React.FC<EditableTreeProps> = ({
     if (editingNode === node.nodeCode) {
       return (
         <div className={styles.editForm}>
-          <Form form={editForm} layout="inline" style={{ flex: 1 }}>
-            <Form.Item name="nodeName" style={{ marginBottom: 0, flex: 1 }}>
-              <Input placeholder="节点名称" className={styles.editInput} />
-            </Form.Item>
-            <Form.Item name="difficultyLevel" style={{ marginBottom: 0 }}>
-              <Select className={styles.editSelect}>
-                <Select.Option value="初级">初级</Select.Option>
-                <Select.Option value="中级">中级</Select.Option>
-                <Select.Option value="高级">高级</Select.Option>
-                <Select.Option value="专家">专家</Select.Option>
-              </Select>
-            </Form.Item>
-            <Form.Item name="estimatedHours" style={{ marginBottom: 0 }}>
-              <InputNumber
-                placeholder="时长"
-                min={1}
-                max={9999}
-                className={styles.editNumber}
-                addonAfter="h"
-              />
-            </Form.Item>
-          </Form>
+          <span style={{ color: '#1890ff', fontWeight: 'bold' }}>
+            [编辑模式] {node.nodeNameStr || node.nodeName}
+          </span>
+          <Tag color="orange">编辑中...</Tag>
         </div>
       );
     }
 
+    // 为叶子节点添加特殊处理，确保生成有效的DOM结构
+    const nodeIcon = (
+      <span className={styles.nodeIcon}>{getNodeTypeIcon(node.nodeType)}</span>
+    );
+    const nodeName = (
+      <span className={`${styles.nodeName} ${node.nodeType === 'ROOT' ? styles.root : ''}`}>
+        {node.nodeNameStr || node.nodeName}
+      </span>
+    );
+    const difficultyTag = (
+      <Tag
+        color={getDifficultyColor(node.difficultyLevel)}
+        className={styles.difficultyTag}
+      >
+        {node.difficultyLevel}
+      </Tag>
+    );
+    const hoursTag = (
+      <Tag color="blue" className={styles.hoursTag}>
+        {node.estimatedHours}h
+      </Tag>
+    );
+    const descriptionIcon = node.description ? (
+      <Tooltip title={node.description}>
+        <span className={styles.descriptionIcon}>ℹ️</span>
+      </Tooltip>
+    ) : null;
+
     return (
       <div className={styles.nodeContent}>
-        <span className={styles.nodeIcon}>{getNodeTypeIcon(node.nodeType)}</span>
-        <span className={`${styles.nodeName} ${node.nodeType === 'ROOT' ? styles.root : ''}`}>
-          {node.nodeName}
-        </span>
-        <Tag
-          color={getDifficultyColor(node.difficultyLevel)}
-          className={styles.difficultyTag}
-        >
-          {node.difficultyLevel}
-        </Tag>
-        <Tag color="blue" className={styles.hoursTag}>
-          {node.estimatedHours}h
-        </Tag>
-        {node.description && (
-          <Tooltip title={node.description}>
-            <span className={styles.descriptionIcon}>ℹ️</span>
-          </Tooltip>
-        )}
+        {nodeIcon}
+        {nodeName}
+        {difficultyTag}
+        {hoursTag}
+        {descriptionIcon}
       </div>
     );
   };
@@ -265,7 +253,6 @@ const EditableTree: React.FC<EditableTreeProps> = ({
   // 转换树数据，添加自定义渲染
   const convertTreeData = (nodes: EditableTreeNode[]): DataNode[] => {
     return nodes.map(node => ({
-      ...node,
       key: node.nodeCode,
       title: (
         <div className={styles.treeNode}>
@@ -275,7 +262,11 @@ const EditableTree: React.FC<EditableTreeProps> = ({
           </div>
         </div>
       ),
-      children: node.children ? convertTreeData(node.children) : undefined
+      children: node.children ? convertTreeData(node.children) : undefined,
+      // 只传递DataNode需要的属性，避免nodeName等属性污染DOM事件系统
+      isLeaf: node.nodeType === 'LEAF',
+      selectable: true,
+      disabled: false
     }));
   };
 
@@ -290,35 +281,48 @@ const EditableTree: React.FC<EditableTreeProps> = ({
           const { dragNode, node, dropPosition } = info;
           // 处理拖拽移动逻辑
           try {
-            await onNodeMove(
-              dragNode.key as string,
-              node.key as string,
-              dropPosition
-            );
-            message.success('节点移动成功');
+            if (dragNode && node && dragNode.key && node.key) {
+              await onNodeMove(
+                dragNode.key as string,
+                node.key as string,
+                dropPosition
+              );
+              message.success('节点移动成功');
+            } else {
+              console.error('无效的拖拽操作: 缺少必要的节点信息');
+              message.error('无效的拖拽操作');
+            }
           } catch (error) {
             console.error('移动失败:', error);
+            message.error('节点移动失败');
           }
         }}
       />
 
-      {/* 添加节点模态框 */}
+      {/* 添加/编辑节点模态框 */}
       <Modal
-        title="添加节点"
+        title={editingNode ? "编辑节点" : "添加节点"}
         open={addModalVisible}
         onOk={handleAddNode}
-        onCancel={() => setAddModalVisible(false)}
+        onCancel={() => {
+          setAddModalVisible(false);
+          setTimeout(() => {
+            setEditingNode(null);
+            editForm.resetFields();
+            addForm.resetFields();
+          }, 300);
+        }}
         okText="确定"
         cancelText="取消"
         className={styles.addModal}
       >
-        <Form form={addForm} layout="vertical">
+        <Form form={editingNode ? editForm : addForm} layout="vertical">
           <Form.Item
             name="nodeCode"
             label="节点编码"
             rules={[{ required: true, message: '请输入节点编码' }]}
           >
-            <Input placeholder="请输入节点编码" />
+            <Input placeholder="请输入节点编码" disabled={!!editingNode} />
           </Form.Item>
           <Form.Item
             name="nodeName"
@@ -352,13 +356,19 @@ const EditableTree: React.FC<EditableTreeProps> = ({
           <Form.Item
             name="estimatedHours"
             label="预估时长(小时)"
-            rules={[{ required: true, message: '请输入预估时长' }]}
+            rules={[
+              { required: true, message: '请输入预估时长' },
+              { type: 'number', min: 1, max: 9999, message: '请输入1-9999之间的数字' }
+            ]}
           >
             <InputNumber
-              min={1}
-              max={9999}
               placeholder="请输入预估时长"
               style={{ width: '100%' }}
+              min={1}
+              max={9999}
+              controls={true}
+              keyboard={true}
+              stringMode={false}
             />
           </Form.Item>
           <Form.Item name="description" label="描述">

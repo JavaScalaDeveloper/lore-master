@@ -13,12 +13,14 @@ import {
   QuestionCircleOutlined,
   TrophyOutlined,
   FileTextOutlined,
-  ExperimentOutlined
+  ExperimentOutlined,
+  PlayCircleOutlined
 } from '@ant-design/icons';
 import Overview from './Overview/index';
 import UserManage from './UserManage';
 import CareerTargetManage from './CareerTargetManage/index';
 import KnowledgeManage from './KnowledgeManage/index';
+import CourseManage from './CourseManage/index';
 import QuestionManage from './QuestionManage/index';
 import SubjectManage from './SubjectManage/index';
 import LevelManage from './LevelManage/index';
@@ -47,6 +49,11 @@ const menuItems = [
     key: 'knowledge',
     icon: <DatabaseOutlined />,
     label: '知识点管理',
+  },
+  {
+    key: 'course',
+    icon: <PlayCircleOutlined />,
+    label: '课程管理',
   },
   {
     key: 'question',
@@ -109,6 +116,8 @@ const Home: React.FC = () => {
         return <CareerTargetManage />;
       case 'knowledge':
         return <KnowledgeManage />;
+      case 'course':
+        return <CourseManage />;
       case 'question':
         return <QuestionManage />;
       case 'subject':

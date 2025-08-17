@@ -8,6 +8,9 @@ export default defineAppConfig({
     'pages/mindmap/mindmap',
     'pages/mindmap/debug',
     'pages/mindmap/test-api',
+    'pages/course/collection/collection',
+    'pages/course/article/article',
+    'pages/course/video/video',
   ],
   window: {
     backgroundTextStyle: 'light',

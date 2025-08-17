@@ -40,7 +40,12 @@ public class AdminKnowledgeMapTreeResponse {
          * 节点名称
          */
         private String nodeName;
-        
+
+        /**
+         * 节点名称字符串（用于前端显示）
+         */
+        private String nodeNameStr;
+
         /**
          * 节点类型
          */

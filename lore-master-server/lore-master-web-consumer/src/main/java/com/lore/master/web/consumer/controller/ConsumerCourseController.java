@@ -7,6 +7,7 @@ import com.lore.master.data.vo.business.CourseVO;
 import com.lore.master.service.business.BusinessCourseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -257,19 +258,59 @@ public class ConsumerCourseController {
      */
     @PostMapping("/getRecommendedCourses")
     public ApiResponse<CoursePageVO> getRecommendedCourses(@RequestBody PageQueryDTO queryDTO) {
-        
+
         log.info("获取推荐课程，参数：{}", queryDTO);
-        
+
         try {
             CoursePageVO result = courseService.getRecommendedCourses(
-                    queryDTO.getUserId(), 
-                    queryDTO.getPage(), 
+                    queryDTO.getUserId(),
+                    queryDTO.getPage(),
                     queryDTO.getSize()
             );
             return ApiResponse.success("查询成功", result);
         } catch (Exception e) {
             log.error("获取推荐课程失败，参数：{}", queryDTO, e);
             return ApiResponse.error("查询失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 点赞/取消点赞课程
+     */
+    @PostMapping("/like/{courseId}")
+    public ApiResponse<Boolean> likeCourse(@PathVariable Long courseId, @RequestBody(required = false) PageQueryDTO queryDTO) {
+
+        String userId = queryDTO != null ? queryDTO.getUserId() : "miniapp_user";
+        log.info("点赞课程，courseId：{}，userId：{}", courseId, userId);
+
+        try {
+            // 这里简化处理，实际应该有用户点赞记录表
+            // 暂时只是增加点赞数
+            courseService.incrementLikeCount(courseId, userId);
+            return ApiResponse.success("点赞成功", true);
+        } catch (Exception e) {
+            log.error("点赞课程失败，courseId：{}，userId：{}", courseId, userId, e);
+            return ApiResponse.error("点赞失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 收藏/取消收藏课程
+     */
+    @PostMapping("/collect/{courseId}")
+    public ApiResponse<Boolean> collectCourse(@PathVariable Long courseId, @RequestBody(required = false) PageQueryDTO queryDTO) {
+
+        String userId = queryDTO != null ? queryDTO.getUserId() : "miniapp_user";
+        log.info("收藏课程，courseId：{}，userId：{}", courseId, userId);
+
+        try {
+            // 这里简化处理，实际应该有用户收藏记录表
+            // 暂时只是增加收藏数
+            courseService.incrementCollectCount(courseId, userId);
+            return ApiResponse.success("收藏成功", true);
+        } catch (Exception e) {
+            log.error("收藏课程失败，courseId：{}，userId：{}", courseId, userId, e);
+            return ApiResponse.error("收藏失败：" + e.getMessage());
         }
     }
 }

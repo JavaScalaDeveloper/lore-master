@@ -30,6 +30,13 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
+        <!-- CommonMark for Markdown processing -->
+        <dependency>
+            <groupId>org.commonmark</groupId>
+            <artifactId>commonmark</artifactId>
+            <version>0.21.0</version>
+        </dependency>
+
         <!--LangChain4j Core -->
         <dependency>
             <groupId>dev.langchain4j</groupId>

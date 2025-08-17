@@ -1,52 +1,44 @@
 import React, { useEffect, useState } from 'react';
 import {
+  Card,
   Table,
   Button,
   Space,
   Modal,
   Form,
   Input,
+  InputNumber,
   Select,
-  Switch,
   message,
   Popconfirm,
   Tag,
-  Card,
-  Tree,
   Tabs,
   Typography,
-  Divider,
   Row,
   Col,
-  InputNumber,
   Tooltip,
-  Spin
+  Spin,
+  Tree
 } from 'antd';
 import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
-  FolderOutlined,
-  FileTextOutlined,
   EyeOutlined,
-  NodeIndexOutlined,
-  TableOutlined,
   ReloadOutlined,
-  ArrowUpOutlined,
-  ArrowDownOutlined
+  NodeIndexOutlined,
+  TableOutlined
 } from '@ant-design/icons';
 import { adminApi } from '../../../../utils/request';
-import EditableTree from './components/EditableTree';
 
-const { Title, Paragraph } = Typography;
+const { Title } = Typography;
 const { TextArea } = Input;
-const { TabPane } = Tabs;
 
 // 知识图谱节点接口
 interface KnowledgeMapNode {
   id: number;
   nodeCode: string;
-  nodeName: string;
+  nodeNameStr: string; // 后端返回的显示字段
   nodeType: 'ROOT' | 'LEVEL' | 'BRANCH' | 'LEAF';
   parentCode?: string;
   rootCode: string;
@@ -68,7 +60,7 @@ interface KnowledgeMapNode {
 // 树形节点接口
 interface TreeNode {
   nodeCode: string;
-  nodeName: string;
+  nodeNameStr: string; // 后端返回的显示字段
   nodeType: string;
   levelDepth: number;
   levelType?: string;
@@ -86,17 +78,14 @@ interface SkillTreeResponse {
   children: TreeNode[];
 }
 
-// 查询请求接口
+// 查询参数接口
 interface QueryRequest {
+  pageNum: number;
+  pageSize: number;
   rootCode?: string;
   nodeType?: string;
-  levelDepth?: number;
-  levelType?: string;
   difficultyLevel?: string;
   status?: string;
-  keyword?: string;
-  pageNum?: number;
-  pageSize?: number;
 }
 
 const KnowledgeManage: React.FC = () => {
@@ -185,7 +174,6 @@ const KnowledgeManage: React.FC = () => {
   const handleAdd = () => {
     setEditingItem(null);
     form.resetFields();
-    // 设置默认值
     form.setFieldsValue({
       nodeType: 'LEAF',
       difficultyLevel: 'BEGINNER',
@@ -221,55 +209,6 @@ const KnowledgeManage: React.FC = () => {
     }
   };
 
-  // 树形视图专用的处理函数
-  const handleNodeEdit = async (nodeCode: string, data: any) => {
-    try {
-      const result = await adminApi.post('/api/admin/knowledge-map/updateNode', {
-        nodeCode,
-        ...data
-      });
-      if (result.success) {
-        fetchSkillTree();
-        fetchKnowledgeList();
-      } else {
-        message.error(result.message || '更新失败');
-      }
-    } catch (error) {
-      message.error('更新失败');
-    }
-  };
-
-  const handleNodeDelete = async (nodeCode: string) => {
-    await handleDelete(nodeCode);
-  };
-
-  const handleAddChildNode = (parentCode?: string) => {
-    setEditingItem(null);
-    form.resetFields();
-    if (parentCode) {
-      form.setFieldsValue({ parentCode });
-    }
-    setModalVisible(true);
-  };
-
-  const handleNodeMove = async (nodeCode: string, newParentCode: string, newSortOrder: number) => {
-    try {
-      const result = await adminApi.post('/api/admin/knowledge-map/moveNode', {
-        nodeCode,
-        newParentCode,
-        newSortOrder
-      });
-      if (result.success) {
-        fetchSkillTree();
-        fetchKnowledgeList();
-      } else {
-        message.error(result.message || '移动失败');
-      }
-    } catch (error) {
-      message.error('移动失败');
-    }
-  };
-
   // 提交表单
   const handleSubmit = async (values: any) => {
     try {
@@ -300,67 +239,62 @@ const KnowledgeManage: React.FC = () => {
     }
   };
 
-  // 状态切换
-  const handleStatusChange = async (nodeCode: string, status: string) => {
-    try {
-      const result = await adminApi.post('/api/admin/knowledge-map/updateNode', {
-        nodeCode,
-        status
-      });
-      if (result.success) {
-        message.success(`${status === 'ACTIVE' ? '启用' : '禁用'}成功`);
-        fetchKnowledgeList();
-      } else {
-        message.error(result.message || '状态更新失败');
-      }
-    } catch (error) {
-      message.error('状态更新失败');
+  // 获取节点类型图标
+  const getNodeTypeIcon = (type: string) => {
+    switch (type) {
+      case 'ROOT': return '🎯';
+      case 'LEVEL': return '📁';
+      case 'BRANCH': return '🌿';
+      case 'LEAF': return '📄';
+      default: return '📄';
     }
   };
 
-  // 获取节点类型图标
-  const getNodeTypeIcon = (nodeType: string) => {
-    const iconMap = {
-      ROOT: <FolderOutlined style={{ color: '#722ed1' }} />,
-      LEVEL: <FolderOutlined style={{ color: '#1890ff' }} />,
-      BRANCH: <FolderOutlined style={{ color: '#52c41a' }} />,
-      LEAF: <FileTextOutlined style={{ color: '#faad14' }} />
-    };
-    return iconMap[nodeType as keyof typeof iconMap] || <FileTextOutlined />;
-  };
-
   // 获取节点类型标签
-  const getNodeTypeTag = (nodeType: string) => {
+  const getNodeTypeTag = (type: string) => {
     const typeMap = {
-      ROOT: { color: 'purple', text: '根节点' },
-      LEVEL: { color: 'blue', text: '层级节点' },
-      BRANCH: { color: 'green', text: '分支节点' },
-      LEAF: { color: 'orange', text: '叶子节点' }
+      'ROOT': { color: 'red', text: '根节点' },
+      'LEVEL': { color: 'blue', text: '层级节点' },
+      'BRANCH': { color: 'green', text: '分支节点' },
+      'LEAF': { color: 'orange', text: '叶子节点' }
     };
-    const config = typeMap[nodeType as keyof typeof typeMap];
+    const config = typeMap[type as keyof typeof typeMap] || { color: 'default', text: type };
     return <Tag color={config.color}>{config.text}</Tag>;
   };
 
-  // 获取难度等级颜色
-  const getDifficultyColor = (level: string) => {
-    const colorMap = {
-      BEGINNER: 'green',
-      INTERMEDIATE: 'orange',
-      ADVANCED: 'red',
-      EXPERT: 'purple'
+  // 获取难度等级标签
+  const getDifficultyTag = (level: string) => {
+    const levelMap = {
+      'BEGINNER': { color: 'green', text: '初级' },
+      'INTERMEDIATE': { color: 'orange', text: '中级' },
+      'ADVANCED': { color: 'red', text: '高级' },
+      'EXPERT': { color: 'purple', text: '专家' }
     };
-    return colorMap[level as keyof typeof colorMap] || 'default';
+    const config = levelMap[level as keyof typeof levelMap] || { color: 'default', text: level };
+    return <Tag color={config.color}>{config.text}</Tag>;
   };
 
-  // 获取难度等级文本
-  const getDifficultyText = (level: string) => {
-    const textMap = {
-      BEGINNER: '初级',
-      INTERMEDIATE: '中级',
-      ADVANCED: '高级',
-      EXPERT: '专家'
-    };
-    return textMap[level as keyof typeof textMap] || level;
+  // 转换树形数据为Antd Tree组件格式
+  const convertToTreeData = (nodes: TreeNode[]): any[] => {
+    return nodes.map(node => ({
+      key: node.nodeCode,
+      title: (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span>{getNodeTypeIcon(node.nodeType)}</span>
+          <span>{node.nodeNameStr }</span>
+          {node.difficultyLevel && getDifficultyTag(node.difficultyLevel)}
+          {node.estimatedHours && (
+            <Tag color="blue">{node.estimatedHours}h</Tag>
+          )}
+          {node.description && (
+            <Tooltip title={node.description}>
+              <span style={{ color: '#1890ff', cursor: 'help' }}>ℹ️</span>
+            </Tooltip>
+          )}
+        </div>
+      ),
+      children: node.children ? convertToTreeData(node.children) : undefined
+    }));
   };
 
   // 表格列定义
@@ -373,8 +307,8 @@ const KnowledgeManage: React.FC = () => {
     },
     {
       title: '节点名称',
-      dataIndex: 'nodeName',
-      key: 'nodeName',
+      dataIndex: 'nodeNameStr',
+      key: 'nodeNameStr',
       render: (text: string, record: KnowledgeMapNode) => (
         <Space>
           {getNodeTypeIcon(record.nodeType)}
@@ -397,44 +331,27 @@ const KnowledgeManage: React.FC = () => {
       ),
     },
     {
-      title: '层级类型',
-      dataIndex: 'levelType',
-      key: 'levelType',
-      render: (levelType: string) => levelType ? (
-        <Tag color="green">{levelType}</Tag>
-      ) : '-',
-    },
-    {
       title: '难度等级',
       dataIndex: 'difficultyLevel',
       key: 'difficultyLevel',
-      render: (level: string) => (
-        <Tag color={getDifficultyColor(level)}>
-          {getDifficultyText(level)}
-        </Tag>
-      ),
+      render: (level: string) => getDifficultyTag(level),
     },
     {
       title: '预估时长',
       dataIndex: 'estimatedHours',
       key: 'estimatedHours',
-      render: (hours: number) => `${hours}小时`,
-    },
-    {
-      title: '排序',
-      dataIndex: 'sortOrder',
-      key: 'sortOrder',
+      render: (hours: number) => (
+        <Tag color="cyan">{hours}小时</Tag>
+      ),
     },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string, record: KnowledgeMapNode) => (
-        <Switch
-          checked={status === 'ACTIVE'}
-          onChange={(checked) => handleStatusChange(record.nodeCode, checked ? 'ACTIVE' : 'INACTIVE')}
-          size="small"
-        />
+      render: (status: string) => (
+        <Tag color={status === 'ACTIVE' ? 'green' : 'red'}>
+          {status === 'ACTIVE' ? '启用' : '禁用'}
+        </Tag>
       ),
     },
     {
@@ -479,216 +396,188 @@ const KnowledgeManage: React.FC = () => {
     },
   ];
 
-  // 转换树形数据
-  const convertToTreeData = (treeData: SkillTreeResponse | null): any[] => {
-    if (!treeData) return [];
-
-    const convertNode = (node: TreeNode): any => ({
-      title: (
-        <Space>
-          {getNodeTypeIcon(node.nodeType)}
-          <span>{node.nodeName}</span>
-          {node.difficultyLevel && (
-            <Tag color={getDifficultyColor(node.difficultyLevel)}>
-              {getDifficultyText(node.difficultyLevel)}
-            </Tag>
-          )}
-          {node.estimatedHours && (
-            <Tag color="blue">{node.estimatedHours}h</Tag>
-          )}
-        </Space>
-      ),
-      key: node.nodeCode,
-      children: node.children?.map(convertNode) || []
-    });
-
-    return treeData.children?.map(convertNode) || [];
-  };
-
-  // 转换为可编辑树形数据
-  const convertToEditableTreeData = (treeData: SkillTreeResponse | null): any[] => {
-    if (!treeData) return [];
-
-    const convertNode = (node: TreeNode, parentCode?: string): any => ({
-      nodeCode: node.nodeCode,
-      nodeName: node.nodeName,
-      nodeType: node.nodeType,
-      levelDepth: node.levelDepth,
-      levelType: node.levelType,
-      difficultyLevel: node.difficultyLevel || '初级',
-      estimatedHours: node.estimatedHours || 0,
-      description: node.description,
-      parentCode: parentCode,
-      sortOrder: node.sortOrder,
-      key: node.nodeCode,
-      children: node.children ? node.children.map(child => convertNode(child, node.nodeCode)) : undefined,
-    });
-
-    return treeData.children ? treeData.children.map(child => convertNode(child, treeData.rootCode)) : [];
-  };
-
   return (
-    <div>
-      <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Title level={2} style={{ margin: 0 }}>知识图谱管理</Title>
-        <Space>
-          <Button icon={<ReloadOutlined />} onClick={() => {
-            fetchKnowledgeList();
-            fetchRootNodes();
-          }}>
-            刷新
-          </Button>
-          <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-            添加节点
-          </Button>
-        </Space>
-      </div>
-
-      {/* 标签页 */}
-      <Tabs activeKey={activeTab} onChange={setActiveTab}>
-        <TabPane tab={<span><TableOutlined />列表视图</span>} key="list">
-          {/* 筛选条件 */}
-          <Card style={{ marginBottom: 16 }}>
-            <Row gutter={16}>
-              <Col span={6}>
-                <span style={{ marginRight: 8 }}>根节点：</span>
-                <Select
-                  value={queryParams.rootCode}
-                  onChange={(value) => setQueryParams({...queryParams, rootCode: value})}
-                  style={{ width: '100%' }}
-                  placeholder="选择根节点"
-                >
-                  <Select.Option value="">全部</Select.Option>
-                  {rootNodes.map(node => (
-                    <Select.Option key={node.nodeCode} value={node.nodeCode}>
-                      {node.nodeName}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Col>
-              <Col span={6}>
-                <span style={{ marginRight: 8 }}>节点类型：</span>
-                <Select
-                  value={queryParams.nodeType}
-                  onChange={(value) => setQueryParams({...queryParams, nodeType: value})}
-                  style={{ width: '100%' }}
-                  placeholder="选择节点类型"
-                >
-                  <Select.Option value="">全部</Select.Option>
-                  <Select.Option value="ROOT">根节点</Select.Option>
-                  <Select.Option value="LEVEL">层级节点</Select.Option>
-                  <Select.Option value="BRANCH">分支节点</Select.Option>
-                  <Select.Option value="LEAF">叶子节点</Select.Option>
-                </Select>
-              </Col>
-              <Col span={6}>
-                <span style={{ marginRight: 8 }}>难度等级：</span>
-                <Select
-                  value={queryParams.difficultyLevel}
-                  onChange={(value) => setQueryParams({...queryParams, difficultyLevel: value})}
-                  style={{ width: '100%' }}
-                  placeholder="选择难度等级"
-                >
-                  <Select.Option value="">全部</Select.Option>
-                  <Select.Option value="BEGINNER">初级</Select.Option>
-                  <Select.Option value="INTERMEDIATE">中级</Select.Option>
-                  <Select.Option value="ADVANCED">高级</Select.Option>
-                  <Select.Option value="EXPERT">专家</Select.Option>
-                </Select>
-              </Col>
-              <Col span={6}>
-                <Button type="primary" onClick={fetchKnowledgeList}>
-                  查询
-                </Button>
-              </Col>
-            </Row>
-          </Card>
-
-          {/* 知识图谱列表 */}
-          <Card>
-            <Table
-              columns={columns}
-              dataSource={knowledgeList}
-              rowKey="nodeCode"
-              loading={loading}
-              pagination={{
-                current: queryParams.pageNum,
-                pageSize: queryParams.pageSize,
-                total: knowledgeList.length,
-                showSizeChanger: true,
-                showQuickJumper: true,
-                showTotal: (total) => `共 ${total} 条记录`,
-                onChange: (page, size) => setQueryParams({
-                  ...queryParams,
-                  pageNum: page,
-                  pageSize: size
-                })
+    <div style={{ padding: '24px' }}>
+      <Card>
+        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Title level={3} style={{ margin: 0 }}>知识图谱管理</Title>
+          <Space>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={handleAdd}
+            >
+              添加节点
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                fetchKnowledgeList();
+                if (selectedRootCode && activeTab === 'tree') {
+                  fetchSkillTree();
+                }
               }}
-            />
-          </Card>
-        </TabPane>
+            >
+              刷新
+            </Button>
+          </Space>
+        </div>
 
-        <TabPane tab={<span><NodeIndexOutlined />树形视图</span>} key="tree">
-          <Card>
-            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <span style={{ marginRight: 8 }}>选择技能树：</span>
-                <Select
-                  value={selectedRootCode}
-                  onChange={setSelectedRootCode}
-                  style={{ width: 300 }}
-                  placeholder="选择要查看的技能树"
-                >
-                  {rootNodes.map(node => (
-                    <Select.Option key={node.nodeCode} value={node.nodeCode}>
-                      {node.nodeName}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </div>
-              <Space>
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => handleAddChildNode()}
-                  disabled={!selectedRootCode}
-                >
-                  添加子节点
-                </Button>
-                <Button
-                  icon={<ReloadOutlined />}
-                  onClick={() => {
-                    if (selectedRootCode) {
-                      fetchSkillTree();
-                    }
-                  }}
-                >
-                  刷新
-                </Button>
-              </Space>
-            </div>
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          items={[
+            {
+              key: 'list',
+              label: (
+                <span>
+                  <TableOutlined />
+                  列表视图
+                </span>
+              ),
+              children: (
+                <>
+                  {/* 搜索筛选区域 */}
+                  <Card size="small" style={{ marginBottom: 16 }}>
+                    <Row gutter={16}>
+                      <Col span={6}>
+                        <Select
+                          value={queryParams.rootCode}
+                          onChange={(value) => setQueryParams({...queryParams, rootCode: value})}
+                          style={{ width: '100%' }}
+                          placeholder="选择根节点"
+                          allowClear
+                        >
+                          {rootNodes.map(node => (
+                            <Select.Option key={node.nodeCode} value={node.nodeCode}>
+                              {node.nodeNameStr}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Col>
+                      <Col span={6}>
+                        <Select
+                          value={queryParams.nodeType}
+                          onChange={(value) => setQueryParams({...queryParams, nodeType: value})}
+                          style={{ width: '100%' }}
+                          placeholder="选择节点类型"
+                          allowClear
+                        >
+                          <Select.Option value="ROOT">根节点</Select.Option>
+                          <Select.Option value="LEVEL">层级节点</Select.Option>
+                          <Select.Option value="BRANCH">分支节点</Select.Option>
+                          <Select.Option value="LEAF">叶子节点</Select.Option>
+                        </Select>
+                      </Col>
+                      <Col span={6}>
+                        <Select
+                          value={queryParams.difficultyLevel}
+                          onChange={(value) => setQueryParams({...queryParams, difficultyLevel: value})}
+                          style={{ width: '100%' }}
+                          placeholder="选择难度等级"
+                          allowClear
+                        >
+                          <Select.Option value="BEGINNER">初级</Select.Option>
+                          <Select.Option value="INTERMEDIATE">中级</Select.Option>
+                          <Select.Option value="ADVANCED">高级</Select.Option>
+                          <Select.Option value="EXPERT">专家</Select.Option>
+                        </Select>
+                      </Col>
+                      <Col span={6}>
+                        <Button
+                          type="primary"
+                          onClick={fetchKnowledgeList}
+                          style={{ width: '100%' }}
+                        >
+                          查询
+                        </Button>
+                      </Col>
+                    </Row>
+                  </Card>
 
-            <Spin spinning={treeLoading}>
-              {skillTreeData ? (
-                <div>
-                  <Title level={4}>{skillTreeData.rootName}</Title>
-                  <EditableTree
-                    treeData={convertToEditableTreeData(skillTreeData)}
-                    onNodeEdit={handleNodeEdit}
-                    onNodeDelete={handleNodeDelete}
-                    onNodeAdd={handleAddChildNode}
-                    onNodeMove={handleNodeMove}
+                  {/* 知识图谱列表 */}
+                  <Table
+                    columns={columns}
+                    dataSource={knowledgeList}
+                    rowKey="nodeCode"
+                    loading={loading}
+                    pagination={{
+                      current: queryParams.pageNum,
+                      pageSize: queryParams.pageSize,
+                      total: knowledgeList.length,
+                      showSizeChanger: true,
+                      showQuickJumper: true,
+                      showTotal: (total) => `共 ${total} 条记录`,
+                      onChange: (page, size) => setQueryParams({
+                        ...queryParams,
+                        pageNum: page,
+                        pageSize: size
+                      })
+                    }}
                   />
-                </div>
-              ) : (
-                <div style={{ textAlign: 'center', padding: '50px 0', color: '#999' }}>
-                  请选择要查看的技能树
-                </div>
-              )}
-            </Spin>
-          </Card>
-        </TabPane>
-      </Tabs>
+                </>
+              )
+            },
+            {
+              key: 'tree',
+              label: (
+                <span>
+                  <NodeIndexOutlined />
+                  树形视图
+                </span>
+              ),
+              children: (
+                <Card>
+                  <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <span style={{ marginRight: 8 }}>选择技能树：</span>
+                      <Select
+                        value={selectedRootCode}
+                        onChange={setSelectedRootCode}
+                        style={{ width: 300 }}
+                        placeholder="选择要查看的技能树"
+                      >
+                        {rootNodes.map(node => (
+                          <Select.Option key={node.nodeCode} value={node.nodeCode}>
+                            {node.nodeNameStr}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </div>
+                    <Button
+                      icon={<ReloadOutlined />}
+                      onClick={() => {
+                        if (selectedRootCode) {
+                          fetchSkillTree();
+                        }
+                      }}
+                    >
+                      刷新
+                    </Button>
+                  </div>
+
+                  <Spin spinning={treeLoading}>
+                    {skillTreeData ? (
+                      <div>
+                        <Title level={4}>{skillTreeData.rootName}</Title>
+                        <Tree
+                          showLine
+                          defaultExpandAll
+                          treeData={convertToTreeData(skillTreeData.children)}
+                        />
+                      </div>
+                    ) : (
+                      <div style={{ textAlign: 'center', padding: '50px 0', color: '#999' }}>
+                        请选择要查看的技能树
+                      </div>
+                    )}
+                  </Spin>
+                </Card>
+              )
+            }
+          ]}
+        />
+      </Card>
 
       {/* 添加/编辑模态框 */}
       <Modal
@@ -697,7 +586,6 @@ const KnowledgeManage: React.FC = () => {
         onCancel={() => setModalVisible(false)}
         onOk={() => form.submit()}
         width={800}
-        forceRender={false}
       >
         <Form
           form={form}
@@ -716,7 +604,7 @@ const KnowledgeManage: React.FC = () => {
             </Col>
             <Col span={12}>
               <Form.Item
-                name="nodeName"
+                name="nodeNameStr"
                 label="节点名称"
                 rules={[{ required: true, message: '请输入节点名称' }]}
               >
@@ -755,9 +643,20 @@ const KnowledgeManage: React.FC = () => {
               <Form.Item
                 name="levelDepth"
                 label="层级深度"
-                rules={[{ required: true, message: '请输入层级深度' }]}
+                rules={[
+                  { required: true, message: '请输入层级深度' },
+                  { type: 'number', min: 1, max: 10, message: '请输入1-10之间的数字' }
+                ]}
               >
-                <InputNumber min={1} max={10} placeholder="层级深度" style={{ width: '100%' }} />
+                <InputNumber
+                  min={1}
+                  max={10}
+                  placeholder="层级深度"
+                  style={{ width: '100%' }}
+                  controls={true}
+                  keyboard={true}
+                  stringMode={false}
+                />
               </Form.Item>
             </Col>
             <Col span={8}>
@@ -772,9 +671,19 @@ const KnowledgeManage: React.FC = () => {
               <Form.Item
                 name="sortOrder"
                 label="排序序号"
-                rules={[{ required: true, message: '请输入排序序号' }]}
+                rules={[
+                  { required: true, message: '请输入排序序号' },
+                  { type: 'number', min: 0, message: '请输入有效的数字' }
+                ]}
               >
-                <InputNumber min={0} placeholder="排序序号" style={{ width: '100%' }} />
+                <InputNumber
+                  min={0}
+                  placeholder="排序序号"
+                  style={{ width: '100%' }}
+                  controls={true}
+                  keyboard={true}
+                  stringMode={false}
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -798,9 +707,19 @@ const KnowledgeManage: React.FC = () => {
               <Form.Item
                 name="estimatedHours"
                 label="预估时长(小时)"
-                rules={[{ required: true, message: '请输入预估时长' }]}
+                rules={[
+                  { required: true, message: '请输入预估时长' },
+                  { type: 'number', min: 0, message: '请输入有效的数字' }
+                ]}
               >
-                <InputNumber min={0} placeholder="预估学习时长" style={{ width: '100%' }} />
+                <InputNumber
+                  min={0}
+                  placeholder="预估学习时长"
+                  style={{ width: '100%' }}
+                  controls={true}
+                  keyboard={true}
+                  stringMode={false}
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -808,8 +727,15 @@ const KnowledgeManage: React.FC = () => {
           <Form.Item
             name="skillCatalogCode"
             label="技能目录编码"
+            rules={[{ whitespace: true }]}
           >
-            <Input placeholder="请输入技能目录编码" />
+            <Input
+              id="skillCatalogCodeInput"
+              placeholder="请输入技能目录编码"
+              autoComplete="off"
+              spellCheck={false}
+              onBlur={() => {}}
+            />
           </Form.Item>
 
           <Form.Item
@@ -817,19 +743,6 @@ const KnowledgeManage: React.FC = () => {
             label="描述"
           >
             <TextArea rows={4} placeholder="请输入节点描述" />
-          </Form.Item>
-
-          <Form.Item
-            name="status"
-            label="状态"
-            valuePropName="checked"
-            initialValue={true}
-          >
-            <Switch
-              checkedChildren="启用"
-              unCheckedChildren="禁用"
-              onChange={(checked) => form.setFieldsValue({ status: checked ? 'ACTIVE' : 'INACTIVE' })}
-            />
           </Form.Item>
         </Form>
       </Modal>

@@ -153,6 +153,26 @@ public class CourseVO {
     private String thumbnailUrl;
 
     /**
+     * 课程Markdown格式内容详情
+     */
+    private String contentMarkdown;
+
+    /**
+     * 课程HTML格式内容（由Markdown转换而来）
+     */
+    private String contentHtml;
+
+    /**
+     * 内容最后更新时间
+     */
+    private LocalDateTime contentUpdatedTime;
+
+    /**
+     * 内容中引用的文件ID列表（JSON格式）
+     */
+    private String contentFileIds;
+
+    /**
      * 发布时间
      */
     private LocalDateTime publishTime;

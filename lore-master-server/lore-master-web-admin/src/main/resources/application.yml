@@ -6,6 +6,12 @@ server:
       charset: UTF-8
       enabled: true
       force: true
+# 微信小程序配置
+wechat:
+  miniapp:
+    appid: xxx
+    # 开发环境可直接填写secret，生产环境建议使用环境变量
+    secret: xxx
 
 spring:
   application:

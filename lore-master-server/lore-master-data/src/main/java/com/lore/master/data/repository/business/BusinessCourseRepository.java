@@ -23,6 +23,16 @@ public interface BusinessCourseRepository extends JpaRepository<BusinessCourse, 
     Optional<BusinessCourse> findByCourseCodeAndIsDeletedFalse(String courseCode);
 
     /**
+     * 检查课程编码是否存在
+     */
+    boolean existsByCourseCodeAndIsDeletedFalse(String courseCode);
+
+    /**
+     * 根据ID查找课程
+     */
+    Optional<BusinessCourse> findByIdAndIsDeletedFalse(Long id);
+
+    /**
      * 根据状态查找课程（分页）
      */
     Page<BusinessCourse> findByStatusAndIsDeletedFalseOrderByPublishTimeDesc(String status, Pageable pageable);
@@ -57,6 +67,11 @@ public interface BusinessCourseRepository extends JpaRepository<BusinessCourse, 
      * 根据父课程ID查找子课程
      */
     List<BusinessCourse> findByParentCourseIdAndIsDeletedFalseOrderBySortOrderAscCreatedTimeAsc(Long parentCourseId);
+
+    /**
+     * 根据父课程ID查找子课程（用于删除检查）
+     */
+    List<BusinessCourse> findByParentCourseIdAndIsDeletedFalse(Long parentCourseId);
 
     /**
      * 根据作者查找课程（分页）

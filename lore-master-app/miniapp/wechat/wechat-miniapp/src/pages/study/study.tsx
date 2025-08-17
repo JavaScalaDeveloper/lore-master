@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useLoad, request, showToast, showLoading, hideLoading } from '@tarojs/taro'
+import { useLoad, request, showToast, showLoading, hideLoading, navigateTo } from '@tarojs/taro'
 import { View, Text, Input, Button, ScrollView, Picker } from '@tarojs/components'
 import { buildApiUrl, getApiHeaders } from '../../config/api'
 import './study.css'
@@ -169,6 +169,51 @@ export default function Study() {
     return num.toString()
   }
 
+  // 处理课程卡片点击
+  const handleCourseClick = (course: CourseVO) => {
+    console.log('=== 开始处理课程点击 ===')
+    console.log('点击课程:', course)
+    console.log('课程ID:', course.id)
+    console.log('课程标题:', course.title)
+    console.log('课程类型:', course.courseType)
+    console.log('内容类型:', course.contentType)
+
+    // 先显示一个简单的提示
+    showToast({
+      title: `点击了课程: ${course.title}`,
+      icon: 'none',
+      duration: 2000
+    })
+
+    // 简化跳转逻辑，先测试基本功能
+    setTimeout(() => {
+      if (course.courseType === 'COLLECTION') {
+        console.log('准备跳转到合集页面')
+        const url = `/pages/course/collection/collection?courseId=${course.id}&title=${encodeURIComponent(course.title)}`
+        console.log('跳转URL:', url)
+        navigateTo({ url })
+      } else if (course.contentType === 'ARTICLE') {
+        console.log('准备跳转到图文页面')
+        const url = `/pages/course/article/article?courseId=${course.id}&title=${encodeURIComponent(course.title)}`
+        console.log('跳转URL:', url)
+        navigateTo({ url })
+      } else if (course.contentType === 'VIDEO') {
+        console.log('准备跳转到视频页面')
+        const url = `/pages/course/video/video?courseId=${course.id}&title=${encodeURIComponent(course.title)}`
+        console.log('跳转URL:', url)
+        navigateTo({ url })
+      } else {
+        console.log('不支持的课程类型')
+        showToast({
+          title: '暂不支持此类型内容',
+          icon: 'none'
+        })
+      }
+    }, 500)
+
+    console.log('=== 课程点击处理完成 ===')
+  }
+
   return (
     <View className='study-container'>
       {/* 搜索框 */}
@@ -183,7 +228,7 @@ export default function Study() {
           />
           <Button
             className='search-btn'
-            onClick={handleSearch}
+            onTap={handleSearch}
             disabled={loading}
           >
             搜索
@@ -269,6 +314,26 @@ export default function Study() {
           <View className='course-grid'>
             {courses.map((course) => (
               <View key={course.id} className='course-card'>
+                {/* 简单的点击测试区域 */}
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 10,
+                    backgroundColor: 'rgba(0,0,0,0.01)'
+                  }}
+                  onTap={() => {
+                    console.log('透明层被点击！', course.id, course.title)
+                    showToast({
+                      title: `点击了: ${course.title}`,
+                      icon: 'none'
+                    })
+                    handleCourseClick(course)
+                  }}
+                />
                 {/* 课程封面 */}
                 <View className='course-cover'>
                   <View className='cover-placeholder'>
@@ -342,6 +407,29 @@ export default function Study() {
                       {course.contentType === 'VIDEO' ? '视频' : course.contentType === 'ARTICLE' ? '图文' : '未知'}
                     </Text>
                   </View>
+
+                  {/* 测试按钮 */}
+                  <Button
+                    className='test-btn'
+                    onTap={(e) => {
+                      e.stopPropagation()
+                      console.log('测试按钮被点击！')
+                      showToast({
+                        title: '测试按钮点击成功！',
+                        icon: 'success'
+                      })
+                      handleCourseClick(course)
+                    }}
+                    style={{
+                      marginTop: '10rpx',
+                      backgroundColor: '#007aff',
+                      color: 'white',
+                      fontSize: '24rpx',
+                      padding: '10rpx'
+                    }}
+                  >
+                    点击测试
+                  </Button>
                 </View>
               </View>
             ))}

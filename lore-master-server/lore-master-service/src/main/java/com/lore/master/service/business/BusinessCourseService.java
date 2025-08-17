@@ -1,6 +1,7 @@
 package com.lore.master.service.business;
 
 import com.lore.master.data.dto.business.CourseQueryDTO;
+import com.lore.master.data.dto.business.CourseRequest;
 import com.lore.master.data.vo.business.CourseVO;
 import com.lore.master.data.vo.business.CoursePageVO;
 
@@ -127,11 +128,51 @@ public interface BusinessCourseService {
 
     /**
      * 获取推荐课程（基于用户学习目标或历史）
-     * 
+     *
      * @param userId 用户ID
      * @param page 页码
      * @param size 每页大小
      * @return 推荐课程列表
      */
     CoursePageVO getRecommendedCourses(String userId, Integer page, Integer size);
+
+    /**
+     * 创建课程
+     *
+     * @param request 课程请求数据
+     * @return 创建的课程详情
+     */
+    CourseVO createCourse(CourseRequest request);
+
+    /**
+     * 更新课程
+     *
+     * @param request 课程请求数据
+     * @return 更新后的课程详情
+     */
+    CourseVO updateCourse(CourseRequest request);
+
+    /**
+     * 删除课程
+     *
+     * @param courseId 课程ID
+     * @return 是否删除成功
+     */
+    Boolean deleteCourse(Long courseId);
+
+    /**
+     * 增加点赞数
+     *
+     * @param courseId 课程ID
+     * @param userId 用户ID
+     */
+    void incrementLikeCount(Long courseId, String userId);
+
+    /**
+     * 增加收藏数
+     *
+     * @param courseId 课程ID
+     * @param userId 用户ID
+     */
+    void incrementCollectCount(Long courseId, String userId);
 }

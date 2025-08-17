@@ -1,7 +1,6 @@
 package com.lore.master.web.admin;
 
-import com.lore.master.data.config.AdminRepositoryConfig;
-import com.lore.master.data.config.DataSourceConfig;
+import com.lore.master.data.config.*;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -14,10 +13,15 @@ import org.springframework.context.annotation.Import;
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @ComponentScan(basePackages = {
         "com.lore.master.web.admin",
-        "com.lore.master.service.admin",
+        "com.lore.master.service.*",
         "com.lore.master.common"
 })
-@Import({DataSourceConfig.class, AdminRepositoryConfig.class})
+@Import({DataSourceConfig.class
+        , AdminRepositoryConfig.class
+        , ConsumerRepositoryConfig.class
+        , BusinessRepositoryConfig.class
+        , StorageRepositoryConfig.class
+})
 public class WebAdminApplication {
 
     public static void main(String[] args) {

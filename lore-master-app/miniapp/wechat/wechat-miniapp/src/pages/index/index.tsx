@@ -32,8 +32,8 @@ export default function Index() {
   const features = [
     { id: 1, title: '开始测评', subtitle: '了解你的水平', icon: '🎯' },
     { id: 2, title: '指定目标', subtitle: '制定学习计划', icon: '🎪' },
-    { id: 3, title: '学习报告', subtitle: '查看进度统计', icon: '📊' },
-    { id: 4, title: '学习社区', subtitle: '与他人交流', icon: '👥' },
+    // { id: 3, title: '学习报告', subtitle: '查看进度统计', icon: '📊' },
+    // { id: 4, title: '学习社区', subtitle: '与他人交流', icon: '👥' },
   ];
 
   // 推荐课程数据

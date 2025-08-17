@@ -17,7 +17,12 @@ public class AdminKnowledgeMapRequest {
      * 节点名称
      */
     private String nodeName;
-    
+
+    /**
+     * 节点名称字符串（前端传递的显示字段）
+     */
+    private String nodeNameStr;
+
     /**
      * 节点类型：ROOT-根节点，LEVEL-层级节点，BRANCH-分支节点，LEAF-叶子节点
      */

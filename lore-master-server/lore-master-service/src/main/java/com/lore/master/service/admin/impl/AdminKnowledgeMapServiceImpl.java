@@ -42,6 +42,9 @@ public class AdminKnowledgeMapServiceImpl implements AdminKnowledgeMapService {
         AdminKnowledgeMapResponse response = new AdminKnowledgeMapResponse();
         BeanUtils.copyProperties(entity, response);
 
+        // 将nodeName的值赋给nodeNameStr字段
+        response.setNodeNameStr(entity.getNodeName());
+
         if (entity.getCreatedTime() != null) {
             response.setCreatedTime(entity.getCreatedTime().format(FORMATTER));
         }
@@ -68,6 +71,11 @@ public class AdminKnowledgeMapServiceImpl implements AdminKnowledgeMapService {
 
         // 参数校验
         validateAddNodeRequest(request);
+
+        // 如果前端传递了nodeNameStr，将其赋值给nodeName
+        if (StringUtils.hasText(request.getNodeNameStr())) {
+            request.setNodeName(request.getNodeNameStr());
+        }
 
         // 检查节点编码是否已存在
         if (adminKnowledgeMapRepository.existsByNodeCode(request.getNodeCode())) {
@@ -128,6 +136,11 @@ public class AdminKnowledgeMapServiceImpl implements AdminKnowledgeMapService {
 
         if (!StringUtils.hasText(request.getNodeCode())) {
             throw new BusinessException(ResultCode.PARAM_ERROR, "节点编码不能为空");
+        }
+
+        // 如果前端传递了nodeNameStr，将其赋值给nodeName
+        if (StringUtils.hasText(request.getNodeNameStr())) {
+            request.setNodeName(request.getNodeNameStr());
         }
 
         // 查找现有节点
@@ -239,7 +252,8 @@ public class AdminKnowledgeMapServiceImpl implements AdminKnowledgeMapService {
         if (!StringUtils.hasText(request.getNodeCode())) {
             throw new BusinessException(ResultCode.PARAM_ERROR, "节点编码不能为空");
         }
-        if (!StringUtils.hasText(request.getNodeName())) {
+        // 节点名称校验：优先检查nodeNameStr，如果没有则检查nodeName
+        if (!StringUtils.hasText(request.getNodeNameStr()) && !StringUtils.hasText(request.getNodeName())) {
             throw new BusinessException(ResultCode.PARAM_ERROR, "节点名称不能为空");
         }
         if (!StringUtils.hasText(request.getNodeType())) {
@@ -397,6 +411,7 @@ public class AdminKnowledgeMapServiceImpl implements AdminKnowledgeMapService {
                 AdminKnowledgeMapTreeResponse.TreeNode treeNode = new AdminKnowledgeMapTreeResponse.TreeNode();
                 treeNode.setNodeCode(node.getNodeCode());
                 treeNode.setNodeName(node.getNodeName());
+                treeNode.setNodeNameStr(node.getNodeNameStr()); // 设置nodeNameStr字段
                 treeNode.setNodeType(node.getNodeType());
                 treeNode.setLevelDepth(node.getLevelDepth());
                 treeNode.setLevelType(node.getLevelType());

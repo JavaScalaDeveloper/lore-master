@@ -156,6 +156,30 @@ public class BusinessCourse {
     private String thumbnailUrl;
 
     /**
+     * 课程Markdown格式内容详情
+     */
+    @Column(name = "content_markdown", columnDefinition = "LONGTEXT")
+    private String contentMarkdown;
+
+    /**
+     * 课程HTML格式内容（由Markdown转换而来）
+     */
+    @Column(name = "content_html", columnDefinition = "LONGTEXT")
+    private String contentHtml;
+
+    /**
+     * 内容最后更新时间
+     */
+    @Column(name = "content_updated_time")
+    private LocalDateTime contentUpdatedTime;
+
+    /**
+     * 内容中引用的文件ID列表（JSON格式）
+     */
+    @Column(name = "content_file_ids", columnDefinition = "TEXT")
+    private String contentFileIds;
+
+    /**
      * 发布时间
      */
     @Column(name = "publish_time")
