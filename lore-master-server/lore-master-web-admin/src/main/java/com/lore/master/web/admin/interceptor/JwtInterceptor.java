@@ -125,19 +125,21 @@ public class JwtInterceptor implements HandlerInterceptor {
      * 写入错误响应
      */
     private void writeErrorResponse(HttpServletResponse response, int code, String message) throws IOException {
-        response.setStatus(200); // HTTP状态码设为200，业务错误码在响应体中
+        response.setStatus(code); // 设置HTTP状态码为实际的错误码（如401）
         response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
-        
+
         // 设置跨域头
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         response.setHeader("Access-Control-Allow-Headers", "*");
         response.setHeader("Access-Control-Allow-Credentials", "true");
-        
+
         Result<String> result = Result.error(code, message);
         String jsonResult = JSON.toJSONString(result);
-        
+
+        log.info("返回认证失败响应: status={}, message={}", code, message);
+
         try (PrintWriter writer = response.getWriter()) {
             writer.write(jsonResult);
             writer.flush();

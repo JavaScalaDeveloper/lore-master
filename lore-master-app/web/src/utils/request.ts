@@ -57,14 +57,31 @@ class HttpClient {
         this.addResponseInterceptor(async (response) => {
             // 处理401未授权
             if (response.status === 401) {
+                console.warn('🚨 检测到401状态码，用户登录已过期');
+
                 // 清除token
                 localStorage.removeItem('adminToken');
                 localStorage.removeItem('userToken');
                 localStorage.removeItem('tokenType');
+                localStorage.removeItem('userInfo');
 
-                // 跳转到登录页
-                if (window.location.pathname !== '/login') {
-                    window.location.href = '/login';
+                // 触发登录状态变化事件
+                window.dispatchEvent(new Event('loginStateChange'));
+
+                // 根据当前路径判断跳转到哪个登录页
+                const currentPath = window.location.pathname;
+                let loginPath = '/admin/login'; // 默认跳转到管理端登录页
+
+                if (currentPath.startsWith('/consumer') || currentPath === '/') {
+                    loginPath = '/consumer'; // C端用户回到首页重新登录
+                } else if (currentPath.startsWith('/business')) {
+                    loginPath = '/business'; // 业务端回到首页重新登录
+                }
+
+                // 避免重复跳转
+                if (currentPath !== loginPath) {
+                    console.log(`🔄 登录已过期，即将跳转到: ${loginPath}`);
+                    window.location.href = loginPath;
                 }
             }
 
@@ -263,6 +280,29 @@ adminApi.addRequestInterceptor((config) => {
         ...config,
         baseURL: baseURL,
     };
+});
+
+// 为管理端API添加特定的401处理
+adminApi.addResponseInterceptor(async (response) => {
+    if (response.status === 401) {
+        console.warn('🚨 管理端API检测到401状态码，管理员登录已过期');
+
+        // 清除管理端相关的token
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('tokenType');
+        localStorage.removeItem('userInfo');
+
+        // 触发登录状态变化事件
+        window.dispatchEvent(new Event('loginStateChange'));
+
+        // 强制跳转到管理端登录页
+        const currentPath = window.location.pathname;
+        if (!currentPath.startsWith('/admin/login')) {
+            console.log('🔄 管理员登录已过期，即将跳转到管理端登录页');
+            window.location.href = '/admin/login';
+        }
+    }
+    return response;
 });
 
 export const consumerApi = new HttpClient();
