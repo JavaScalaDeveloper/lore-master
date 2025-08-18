@@ -22,6 +22,12 @@ export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
     ],
     defineConstants: {
       'process.env.DISABLE_SENTRY': JSON.stringify(true),
+      'ENABLE_INNER_HTML': JSON.stringify(true),
+      'ENABLE_ADJACENT_HTML': JSON.stringify(true),
+      'ENABLE_SIZE_APIS': JSON.stringify(true),
+      'ENABLE_TEMPLATE_CONTENT': JSON.stringify(true),
+      'ENABLE_CLONE_NODE': JSON.stringify(true),
+      'ENABLE_CONTAINS': JSON.stringify(true),
     },
     copy: {
       patterns: [
@@ -36,7 +42,7 @@ export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
     framework: 'react',
     compiler: 'webpack5',
     cache: {
-      enable: false // Webpack 持久化缓存配置，建议开启。默认配置请参考：https://docs.taro.zone/docs/config-detail#cache
+      enable: true // Webpack 持久化缓存配置，建议开启。默认配置请参考：https://docs.taro.zone/docs/config-detail#cache
     },
     mini: {
       postcss: {

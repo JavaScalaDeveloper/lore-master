@@ -196,3 +196,86 @@
   font-size: 24rpx;
   color: #666;
 }
+
+/* HTML 内容样式 */
+.content-html.taro_html {
+  line-height: 1.6;
+  color: #333;
+}
+
+/* 重写 Taro HTML 样式以适配小程序 */
+.content-html .h1 {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin: 24rpx 0 16rpx 0;
+  line-height: 1.3;
+}
+
+.content-html .h2 {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin: 20rpx 0 12rpx 0;
+  line-height: 1.3;
+}
+
+.content-html .h3 {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin: 16rpx 0 10rpx 0;
+  line-height: 1.3;
+}
+
+.content-html .p {
+  font-size: 26rpx;
+  color: #333;
+  line-height: 1.6;
+  margin: 12rpx 0;
+}
+
+.content-html .pre {
+  background: #f6f8fa;
+  border: 1rpx solid #e1e4e8;
+  border-radius: 6rpx;
+  padding: 16rpx;
+  margin: 16rpx 0;
+  overflow-x: auto;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+.content-html .code {
+  background: #f6f8fa;
+  border: 1rpx solid #e1e4e8;
+  border-radius: 3rpx;
+  padding: 2rpx 6rpx;
+  font-size: 24rpx;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+.content-html .ul,
+.content-html .ol {
+  margin: 12rpx 0;
+  padding-left: 32rpx;
+}
+
+.content-html .li {
+  font-size: 26rpx;
+  color: #333;
+  line-height: 1.6;
+  margin: 6rpx 0;
+}
+
+.content-html .strong {
+  font-weight: bold;
+}
+
+.content-html .em {
+  font-style: italic;
+}
+
+.content-html .a {
+  color: #0366d6;
+  text-decoration: underline;
+}

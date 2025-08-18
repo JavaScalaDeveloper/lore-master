@@ -23,6 +23,8 @@ interface CourseVO {
   subCourseCount?: number
 }
 
+
+
 interface CoursePageVO {
   courses: CourseVO[]
   currentPage: number
@@ -44,14 +46,16 @@ export default function Study() {
   const [selectedType, setSelectedType] = useState('')
   const [selectedContent, setSelectedContent] = useState('')
 
+
+
   // 筛选选项
   const levelOptions = ['', 'L1', 'L2', 'L3', 'L4', 'L5']
   const typeOptions = ['', '普通', '合集']
   const contentOptions = ['', '图文', '视频']
 
-  const levelLabels = ['全部等级', 'L1', 'L2', 'L3', 'L4', 'L5']
-  const typeLabels = ['全部类型', '普通', '合集']
-  const contentLabels = ['全部内容', '图文', '视频']
+  const levelLabels = ['全部', 'L1', 'L2', 'L3', 'L4', 'L5']
+  const typeLabels = ['全部', '普通', '合集']
+  const contentLabels = ['全部', '图文', '视频']
 
   useLoad(() => {
     console.log('Study page loaded.')
@@ -161,55 +165,71 @@ export default function Study() {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
   }
 
-  // 格式化数字
-  const formatNumber = (num: number) => {
-    if (num >= 10000) {
-      return `${(num / 10000).toFixed(1)}万`
-    }
-    return num.toString()
-  }
 
-  // 处理课程卡片点击
+
+  // 处理课程卡片点击 - 跳转到详情页面
   const handleCourseClick = (course: CourseVO) => {
-    console.log('=== 开始处理课程点击 ===')
-    console.log('点击课程:', course)
-    console.log('课程ID:', course.id)
+    console.log('=== 点击课程卡片 ===')
+    console.log('课程对象完整信息:', JSON.stringify(course, null, 2))
+    console.log('课程编码:', course.courseCode)
     console.log('课程标题:', course.title)
     console.log('课程类型:', course.courseType)
     console.log('内容类型:', course.contentType)
+    console.log('课程ID:', course.id)
 
-    // 先显示一个简单的提示
+    // 显示跳转提示
     showToast({
-      title: `点击了课程: ${course.title}`,
-      icon: 'none',
-      duration: 2000
+      title: `正在打开: ${course.title}`,
+      icon: 'loading',
+      duration: 1500
     })
 
-    // 简化跳转逻辑，先测试基本功能
-    setTimeout(() => {
+    try {
+      let url = ''
+
+      // 根据课程类型确定跳转URL，使用courseCode而不是courseId
       if (course.courseType === 'COLLECTION') {
-        console.log('准备跳转到合集页面')
-        const url = `/pages/course/collection/collection?courseId=${course.id}&title=${encodeURIComponent(course.title)}`
-        console.log('跳转URL:', url)
-        navigateTo({ url })
+        console.log('跳转到合集页面')
+        url = `/pages/course/collection/collection?courseCode=${course.courseCode}&title=${encodeURIComponent(course.title)}`
       } else if (course.contentType === 'ARTICLE') {
-        console.log('准备跳转到图文页面')
-        const url = `/pages/course/article/article?courseId=${course.id}&title=${encodeURIComponent(course.title)}`
-        console.log('跳转URL:', url)
-        navigateTo({ url })
+        console.log('跳转到图文页面')
+        url = `/pages/course/article/article?courseCode=${course.courseCode}&title=${encodeURIComponent(course.title)}`
       } else if (course.contentType === 'VIDEO') {
-        console.log('准备跳转到视频页面')
-        const url = `/pages/course/video/video?courseId=${course.id}&title=${encodeURIComponent(course.title)}`
-        console.log('跳转URL:', url)
-        navigateTo({ url })
+        console.log('跳转到视频页面')
+        url = `/pages/course/video/video?courseCode=${course.courseCode}&title=${encodeURIComponent(course.title)}`
       } else {
         console.log('不支持的课程类型')
         showToast({
           title: '暂不支持此类型内容',
           icon: 'none'
         })
+        return
       }
-    }, 500)
+
+      console.log('跳转URL:', url)
+
+      // 执行跳转
+      navigateTo({
+        url,
+        success: (res) => {
+          console.log('跳转成功:', res)
+        },
+        fail: (err) => {
+          console.error('跳转失败:', err)
+          showToast({
+            title: '跳转失败，请重试',
+            icon: 'error'
+          })
+        }
+      })
+
+    } catch (error) {
+      console.error('处理跳转时发生错误:', error)
+      showToast({
+        title: '发生错误，请重试',
+        icon: 'error'
+      })
+    }
 
     console.log('=== 课程点击处理完成 ===')
   }
@@ -311,125 +331,48 @@ export default function Study() {
             <Text className='empty-desc'>试试调整搜索条件或筛选条件</Text>
           </View>
         ) : (
-          <View className='course-grid'>
-            {courses.map((course) => (
-              <View key={course.id} className='course-card'>
-                {/* 简单的点击测试区域 */}
-                <View
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    zIndex: 10,
-                    backgroundColor: 'rgba(0,0,0,0.01)'
-                  }}
-                  onTap={() => {
-                    console.log('透明层被点击！', course.id, course.title)
-                    showToast({
-                      title: `点击了: ${course.title}`,
-                      icon: 'none'
-                    })
-                    handleCourseClick(course)
-                  }}
-                />
-                {/* 课程封面 */}
-                <View className='course-cover'>
-                  <View className='cover-placeholder'>
-                    <Text className='placeholder-text'>
-                      {course.contentType === 'VIDEO' ? '📹' : '📄'}
-                    </Text>
-                  </View>
-
-                  {/* 课程类型标签 */}
-                  <View className={`type-tag ${course.courseType.toLowerCase()}`}>
-                    {course.courseType === 'COLLECTION' && (
-                      <Text className='type-text'>合集</Text>
-                    )}
-                  </View>
-
-                  {/* 难度等级标签 */}
-                  <View className='level-tag'>
-                    <Text className='level-text'>{course.difficultyLevel}</Text>
-                  </View>
+          <View className='course-list-container'>
+            {courses.map((course, index) => (
+              <View
+                key={course.id}
+                className='course-list-item'
+                onTap={() => {
+                  console.log('=== 列表项点击事件触发 ===')
+                  console.log('点击的课程索引:', index)
+                  console.log('点击的课程编码:', course.courseCode)
+                  console.log('点击的课程标题:', course.title)
+                  handleCourseClick(course)
+                }}
+              >
+                {/* 左侧图标 */}
+                <View className='course-icon'>
+                  <Text className='icon-text'>
+                    {course.contentType === 'VIDEO' ? '📹' : '📄'}
+                  </Text>
+                  {course.courseType === 'COLLECTION' && (
+                    <Text className='collection-badge'>合集</Text>
+                  )}
                 </View>
 
-                {/* 课程信息 */}
-                <View className='course-info'>
-                  <Text className='course-title' numberOfLines={2}>
-                    {course.title}
-                  </Text>
-
+                {/* 中间内容 */}
+                <View className='course-content'>
+                  <View className='title-row'>
+                    <Text className='course-title' numberOfLines={1}>
+                      {course.title}
+                    </Text>
+                    <View className='title-meta'>
+                      <Text className='level-tag'>{course.difficultyLevel}</Text>
+                      <Text className='time-text'>{formatTime(course.publishTime)}</Text>
+                    </View>
+                  </View>
                   <Text className='course-desc' numberOfLines={2}>
                     {course.description}
                   </Text>
+                </View>
 
-                  {/* 作者和时间 */}
-                  <View className='course-meta'>
-                    <View className='meta-item'>
-                      <Text className='meta-label'>作者：</Text>
-                      <Text className='meta-value'>{course.author}</Text>
-                    </View>
-                    <View className='meta-item'>
-                      <Text className='meta-label'>时间：</Text>
-                      <Text className='meta-value'>{formatTime(course.publishTime)}</Text>
-                    </View>
-                  </View>
-
-                  {/* 统计信息 */}
-                  <View className='course-stats'>
-                    <View className='stat-item'>
-                      <Text className='stat-icon'>👁</Text>
-                      <Text className='stat-text'>{formatNumber(course.viewCount)}</Text>
-                    </View>
-                    <View className='stat-item'>
-                      <Text className='stat-icon'>👍</Text>
-                      <Text className='stat-text'>{formatNumber(course.likeCount)}</Text>
-                    </View>
-                    <View className='stat-item'>
-                      <Text className='stat-icon'>⭐</Text>
-                      <Text className='stat-text'>{formatNumber(course.collectCount)}</Text>
-                    </View>
-
-                    {/* 合集子课程数量 */}
-                    {course.courseType === 'COLLECTION' && course.subCourseCount && (
-                      <View className='stat-item'>
-                        <Text className='stat-icon'>📚</Text>
-                        <Text className='stat-text'>{course.subCourseCount}课</Text>
-                      </View>
-                    )}
-                  </View>
-
-                  {/* 内容类型标识 */}
-                  <View className='content-type'>
-                    <Text className={`content-tag ${course.contentType?.toLowerCase() || 'unknown'}`}>
-                      {course.contentType === 'VIDEO' ? '视频' : course.contentType === 'ARTICLE' ? '图文' : '未知'}
-                    </Text>
-                  </View>
-
-                  {/* 测试按钮 */}
-                  <Button
-                    className='test-btn'
-                    onTap={(e) => {
-                      e.stopPropagation()
-                      console.log('测试按钮被点击！')
-                      showToast({
-                        title: '测试按钮点击成功！',
-                        icon: 'success'
-                      })
-                      handleCourseClick(course)
-                    }}
-                    style={{
-                      marginTop: '10rpx',
-                      backgroundColor: '#007aff',
-                      color: 'white',
-                      fontSize: '24rpx',
-                      padding: '10rpx'
-                    }}
-                  >
-                    点击测试
-                  </Button>
+                {/* 右侧箭头 */}
+                <View className='course-arrow'>
+                  <Text className='arrow-text'>›</Text>
                 </View>
               </View>
             ))}

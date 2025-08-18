@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
-import { useRouter, request, showToast, showLoading, hideLoading } from '@tarojs/taro'
-import { View, Text, ScrollView, Button, RichText } from '@tarojs/components'
-import { buildApiUrl, getApiHeaders } from '../../../config/api'
+import { useRouter, showToast, showLoading, hideLoading } from '@tarojs/taro'
+import { View, Text, ScrollView, Button } from '@tarojs/components'
+import { request } from '../../../utils/request'
 import './article.css'
+
+// 导入 Taro HTML 样式
+import '@tarojs/taro/html.css'
 
 // 课程详情数据类型
 interface CourseDetailVO {
@@ -31,14 +34,26 @@ export default function Article() {
   const [liked, setLiked] = useState(false)
   const [collected, setCollected] = useState(false)
 
-  const courseId = router.params.courseId
+  const courseCode = router.params.courseCode
   const title = router.params.title ? decodeURIComponent(router.params.title) : '图文详情'
 
+  // 添加调试日志
+  console.log('Article页面参数:', router.params)
+  console.log('获取到的courseCode:', courseCode)
+  console.log('获取到的title:', title)
+
   useEffect(() => {
-    if (courseId) {
+    if (courseCode) {
+      console.log('开始加载课程详情，courseCode:', courseCode)
       loadCourseDetail()
+    } else {
+      console.error('courseCode为空，无法加载课程详情')
+      showToast({
+        title: '课程参数错误',
+        icon: 'error'
+      })
     }
-  }, [courseId])
+  }, [courseCode])
 
   // 加载课程详情
   const loadCourseDetail = async () => {
@@ -46,23 +61,21 @@ export default function Article() {
       setLoading(true)
       showLoading({ title: '加载中...' })
 
-      // 调用getCourseById接口获取课程详情
+      // 调用getCourseByCode接口获取课程详情
+      console.log('准备调用API，courseCode:', courseCode)
       const response = await request({
-        url: buildApiUrl('/api/consumer/course/getCourseById'),
+        url: '/api/consumer/course/getCourseByCode',
         method: 'POST',
         data: {
-          courseId: parseInt(courseId),
-          userId: 'miniapp_user', // TODO: 获取真实用户ID
-          includeSubCourses: false
-        },
-        header: getApiHeaders(),
-        timeout: 30000
+          courseCode: courseCode,
+          userId: 'miniapp_user'
+        }
       })
 
       console.log('课程详情响应:', response)
 
-      if (response && response.data && response.data.success) {
-        const courseDetail = response.data.data
+      if (response && response.success) {
+        const courseDetail = response.data
 
         if (courseDetail.contentType === 'ARTICLE') {
           setCourse(courseDetail)
@@ -74,7 +87,7 @@ export default function Article() {
           })
         }
       } else {
-        const errorMsg = response?.data?.message || '加载失败'
+        const errorMsg = response?.message || '加载失败'
         showToast({
           title: errorMsg,
           icon: 'error'
@@ -96,17 +109,16 @@ export default function Article() {
 
   // 点赞
   const handleLike = async () => {
+    if (!course) return
+
     try {
       const response = await request({
-        url: buildApiUrl(`/api/consumer/course/like/${courseId}`),
+        url: `/api/consumer/course/like/${course.id}`,
         method: 'POST',
-        data: {
-          userId: 'miniapp_user' // TODO: 获取真实用户ID
-        },
-        header: getApiHeaders()
+        data: {}
       })
 
-      if (response && response.data && response.data.success) {
+      if (response && response.success) {
         setLiked(!liked)
         if (course) {
           setCourse({
@@ -130,17 +142,16 @@ export default function Article() {
 
   // 收藏
   const handleCollect = async () => {
+    if (!course) return
+
     try {
       const response = await request({
-        url: buildApiUrl(`/api/consumer/course/collect/${courseId}`),
+        url: `/api/consumer/course/collect/${course.id}`,
         method: 'POST',
-        data: {
-          userId: 'miniapp_user' // TODO: 获取真实用户ID
-        },
-        header: getApiHeaders()
+        data: {}
       })
 
-      if (response && response.data && response.data.success) {
+      if (response && response.success) {
         setCollected(!collected)
         if (course) {
           setCourse({
@@ -254,9 +265,10 @@ export default function Article() {
         )}
 
         {course.contentHtml ? (
-          <View className='content-html'>
-            <RichText nodes={course.contentHtml} />
-          </View>
+          <View
+            className='taro_html content-html'
+            dangerouslySetInnerHTML={{ __html: course.contentHtml }}
+          />
         ) : course.contentMarkdown ? (
           <View className='content-markdown'>
             <Text className='markdown-text'>{course.contentMarkdown}</Text>

@@ -41,14 +41,26 @@ export default function Collection() {
   const [collection, setCollection] = useState<CollectionDetailVO | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const courseId = router.params.courseId
+  const courseCode = router.params.courseCode
   const title = router.params.title ? decodeURIComponent(router.params.title) : '合集详情'
 
+  // 添加调试日志
+  console.log('Collection页面参数:', router.params)
+  console.log('获取到的courseCode:', courseCode)
+  console.log('获取到的title:', title)
+
   useEffect(() => {
-    if (courseId) {
+    if (courseCode) {
+      console.log('开始加载合集详情，courseCode:', courseCode)
       loadCollectionDetail()
+    } else {
+      console.error('courseCode为空，无法加载合集详情')
+      showToast({
+        title: '课程参数错误',
+        icon: 'error'
+      })
     }
-  }, [courseId])
+  }, [courseCode])
 
   // 加载合集详情
   const loadCollectionDetail = async () => {
@@ -56,13 +68,13 @@ export default function Collection() {
       setLoading(true)
       showLoading({ title: '加载中...' })
 
-      // 调用getCourseById接口获取课程详情
+      // 调用getCourseByCode接口获取课程详情
+      console.log('准备调用API，courseCode:', courseCode)
       const response = await request({
-        url: buildApiUrl('/api/consumer/course/getCourseById'),
+        url: buildApiUrl('/api/consumer/course/getCourseByCode'),
         method: 'POST',
         data: {
-          courseId: parseInt(courseId),
-          userId: 'miniapp_user', // TODO: 获取真实用户ID
+          courseCode: courseCode,
           includeSubCourses: true
         },
         header: getApiHeaders(),

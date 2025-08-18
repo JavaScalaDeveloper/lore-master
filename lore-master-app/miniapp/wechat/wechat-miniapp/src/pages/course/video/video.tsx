@@ -32,14 +32,26 @@ export default function VideoPage() {
   const [collected, setCollected] = useState(false)
   const [videoProgress, setVideoProgress] = useState(0)
 
-  const courseId = router.params.courseId
+  const courseCode = router.params.courseCode
   const title = router.params.title ? decodeURIComponent(router.params.title) : '视频详情'
 
+  // 添加调试日志
+  console.log('Video页面参数:', router.params)
+  console.log('获取到的courseCode:', courseCode)
+  console.log('获取到的title:', title)
+
   useEffect(() => {
-    if (courseId) {
+    if (courseCode) {
+      console.log('开始加载视频详情，courseCode:', courseCode)
       loadCourseDetail()
+    } else {
+      console.error('courseCode为空，无法加载视频详情')
+      showToast({
+        title: '课程参数错误',
+        icon: 'error'
+      })
     }
-  }, [courseId])
+  }, [courseCode])
 
   // 加载课程详情
   const loadCourseDetail = async () => {
@@ -47,13 +59,13 @@ export default function VideoPage() {
       setLoading(true)
       showLoading({ title: '加载中...' })
 
-      // 调用getCourseById接口获取课程详情
+      // 调用getCourseByCode接口获取课程详情
+      console.log('准备调用API，courseCode:', courseCode)
       const response = await request({
-        url: buildApiUrl('/api/consumer/course/getCourseById'),
+        url: buildApiUrl('/api/consumer/course/getCourseByCode'),
         method: 'POST',
         data: {
-          courseId: parseInt(courseId),
-          userId: 'miniapp_user', // TODO: 获取真实用户ID
+          courseCode: courseCode,
           includeSubCourses: false
         },
         header: getApiHeaders(),
@@ -106,13 +118,13 @@ export default function VideoPage() {
 
   // 点赞
   const handleLike = async () => {
+    if (!course) return
+
     try {
       const response = await request({
-        url: buildApiUrl(`/api/consumer/course/like/${courseId}`),
+        url: buildApiUrl(`/api/consumer/course/like/${course.id}`),
         method: 'POST',
-        data: {
-          userId: 'miniapp_user' // TODO: 获取真实用户ID
-        },
+        data: {},
         header: getApiHeaders()
       })
 
@@ -140,13 +152,13 @@ export default function VideoPage() {
 
   // 收藏
   const handleCollect = async () => {
+    if (!course) return
+
     try {
       const response = await request({
-        url: buildApiUrl(`/api/consumer/course/collect/${courseId}`),
+        url: buildApiUrl(`/api/consumer/course/collect/${course.id}`),
         method: 'POST',
-        data: {
-          userId: 'miniapp_user' // TODO: 获取真实用户ID
-        },
+        data: {},
         header: getApiHeaders()
       })
 

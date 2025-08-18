@@ -1,4 +1,4 @@
-export default defineAppConfig({
+export default {
   pages: [
     'pages/index/index',
     'pages/study/study',
@@ -66,4 +66,4 @@ export default defineAppConfig({
       'desc': '你的位置信息将用于小程序定位'
     }
   }
-})
+}
