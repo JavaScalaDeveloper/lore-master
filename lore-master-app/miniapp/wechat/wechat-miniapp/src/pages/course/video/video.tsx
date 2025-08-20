@@ -33,25 +33,27 @@ export default function VideoPage() {
   const [videoProgress, setVideoProgress] = useState(0)
 
   const courseCode = router.params.courseCode
+  const courseId = router.params.courseId
   const title = router.params.title ? decodeURIComponent(router.params.title) : '视频详情'
 
   // 添加调试日志
   console.log('Video页面参数:', router.params)
   console.log('获取到的courseCode:', courseCode)
+  console.log('获取到的courseId:', courseId)
   console.log('获取到的title:', title)
 
   useEffect(() => {
-    if (courseCode) {
-      console.log('开始加载视频详情，courseCode:', courseCode)
+    if (courseCode || courseId) {
+      console.log('开始加载视频详情，courseCode:', courseCode, 'courseId:', courseId)
       loadCourseDetail()
     } else {
-      console.error('courseCode为空，无法加载视频详情')
+      console.error('courseCode和courseId都为空，无法加载视频详情')
       showToast({
         title: '课程参数错误',
         icon: 'error'
       })
     }
-  }, [courseCode])
+  }, [courseCode, courseId])
 
   // 加载课程详情
   const loadCourseDetail = async () => {
@@ -59,18 +61,36 @@ export default function VideoPage() {
       setLoading(true)
       showLoading({ title: '加载中...' })
 
-      // 调用getCourseByCode接口获取课程详情
-      console.log('准备调用API，courseCode:', courseCode)
-      const response = await request({
-        url: buildApiUrl('/api/consumer/course/getCourseByCode'),
-        method: 'POST',
-        data: {
-          courseCode: courseCode,
-          includeSubCourses: false
-        },
-        header: getApiHeaders(),
-        timeout: 30000
-      })
+      let response
+
+      // 根据参数类型选择不同的API
+      if (courseCode) {
+        console.log('准备调用getCourseByCode API，courseCode:', courseCode)
+        response = await request({
+          url: buildApiUrl('/api/consumer/course/getCourseByCode'),
+          method: 'POST',
+          data: {
+            courseCode: courseCode,
+            includeSubCourses: false
+          },
+          header: getApiHeaders(),
+          timeout: 30000
+        })
+      } else if (courseId) {
+        console.log('准备调用getCourseById API，courseId:', courseId)
+        response = await request({
+          url: buildApiUrl('/api/consumer/course/getCourseById'),
+          method: 'POST',
+          data: {
+            courseId: parseInt(courseId),
+            includeSubCourses: false
+          },
+          header: getApiHeaders(),
+          timeout: 30000
+        })
+      } else {
+        throw new Error('缺少课程参数')
+      }
 
       console.log('课程详情响应:', response)
 

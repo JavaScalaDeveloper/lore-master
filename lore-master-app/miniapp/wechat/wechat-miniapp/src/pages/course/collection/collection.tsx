@@ -119,13 +119,17 @@ export default function Collection() {
 
   // 处理子课程点击
   const handleSubCourseClick = (course: CourseVO) => {
+    console.log('点击子课程:', course)
+    console.log('子课程编码:', course.courseCode)
+    console.log('子课程ID:', course.id)
+
     if (course.contentType === 'ARTICLE') {
       navigateTo({
-        url: `/pages/course/article/article?courseId=${course.id}&title=${encodeURIComponent(course.title)}`
+        url: `/pages/course/article/article?courseCode=${course.courseCode}&title=${encodeURIComponent(course.title)}`
       })
     } else if (course.contentType === 'VIDEO') {
       navigateTo({
-        url: `/pages/course/video/video?courseId=${course.id}&title=${encodeURIComponent(course.title)}`
+        url: `/pages/course/video/video?courseCode=${course.courseCode}&title=${encodeURIComponent(course.title)}`
       })
     }
   }

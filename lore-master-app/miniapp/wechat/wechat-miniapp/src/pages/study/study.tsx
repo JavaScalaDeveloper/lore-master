@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useLoad, request, showToast, showLoading, hideLoading, navigateTo } from '@tarojs/taro'
 import { View, Text, Input, Button, ScrollView, Picker } from '@tarojs/components'
 import { buildApiUrl, getApiHeaders } from '../../config/api'
@@ -40,6 +40,7 @@ export default function Study() {
   const [loading, setLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(0)
   const [hasMore, setHasMore] = useState(true)
+  const loadMoreTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // 筛选条件
   const [selectedLevel, setSelectedLevel] = useState('')
@@ -85,11 +86,7 @@ export default function Study() {
         contentType: selectedContent === '图文' ? 'ARTICLE' : selectedContent === '视频' ? 'VIDEO' : undefined
       }
 
-      console.log('请求参数:', queryParams)
-
-      // 检查API配置是否正确
       const apiUrl = buildApiUrl('/api/consumer/course/queryCourseList')
-      console.log('API URL:', apiUrl)
 
       const response = await request({
         url: apiUrl,
@@ -99,8 +96,6 @@ export default function Study() {
         // 添加超时设置
         timeout: 30000
       })
-
-      console.log('API响应:', response)
 
       if (response && response.data && response.data.success) {
         const pageData: CoursePageVO = response.data.data
@@ -154,9 +149,32 @@ export default function Study() {
 
   // 加载更多
   const loadMore = () => {
-    if (hasMore && !loading) {
-      loadCourses(false)
+    // 清除之前的定时器
+    if (loadMoreTimerRef.current) {
+      clearTimeout(loadMoreTimerRef.current)
     }
+
+    // 防抖处理
+    loadMoreTimerRef.current = setTimeout(() => {
+      if (hasMore && !loading) {
+        loadCourses(false)
+      }
+    }, 300)
+  }
+
+  // 滚动事件处理
+  const handleScroll = (e: any) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.detail
+
+    // 当滚动到距离底部150rpx以内时触发加载更多
+    if (scrollHeight - scrollTop - clientHeight <= 150) {
+      loadMore()
+    }
+  }
+
+  // 滚动到底部事件处理
+  const handleScrollToLower = () => {
+    loadMore()
   }
 
   // 格式化时间
@@ -322,8 +340,12 @@ export default function Study() {
       <ScrollView
         className='course-list'
         scrollY
-        onScrollToLower={loadMore}
-        lowerThreshold={100}
+        onScrollToLower={handleScrollToLower}
+        onScroll={handleScroll}
+        lowerThreshold={50}
+        enableBackToTop
+        enhanced
+        showScrollbar={false}
       >
         {courses.length === 0 && !loading ? (
           <View className='empty-state'>
@@ -361,7 +383,7 @@ export default function Study() {
                       {course.title}
                     </Text>
                     <View className='title-meta'>
-                      <Text className='level-tag'>{course.difficultyLevel}</Text>
+                      <Text className={`level-tag ${course.difficultyLevel}`}>{course.difficultyLevel}</Text>
                       <Text className='time-text'>{formatTime(course.publishTime)}</Text>
                     </View>
                   </View>
@@ -383,6 +405,22 @@ export default function Study() {
         {loading && courses.length > 0 && (
           <View className='loading-more'>
             <Text className='loading-text'>加载中...</Text>
+          </View>
+        )}
+
+        {/* 手动加载更多按钮 */}
+        {hasMore && !loading && courses.length > 0 && (
+          <View className='load-more-btn-container'>
+            <Button
+              className='load-more-btn'
+              onTap={() => {
+                if (hasMore && !loading) {
+                  loadCourses(false)
+                }
+              }}
+            >
+              加载更多
+            </Button>
           </View>
         )}
 

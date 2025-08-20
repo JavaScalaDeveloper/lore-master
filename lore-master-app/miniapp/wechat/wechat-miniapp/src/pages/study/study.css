@@ -2,7 +2,9 @@
 .study-container {
   padding: 16rpx;
   background-color: #f5f5f5;
-  min-height: 100vh;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 基本样式 */
@@ -130,6 +132,7 @@
 .course-list {
   flex: 1;
   padding: 20rpx;
+  height: 0; /* 重要：配合flex:1使用，确保ScrollView有明确高度 */
 }
 
 .empty-state {
@@ -220,10 +223,10 @@
 /* 标题行 */
 .title-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 12rpx;
-  margin-bottom: 2rpx;
+  gap: 16rpx;
+  margin-bottom: 8rpx;
 }
 
 .course-content .course-title {
@@ -238,25 +241,55 @@
 /* 标题右侧元信息 */
 .title-meta {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2rpx;
+  flex-direction: row;
+  align-items: center;
+  gap: 12rpx;
   flex-shrink: 0;
 }
 
 .level-tag {
   font-size: 20rpx;
-  color: #667eea;
-  background: rgba(102, 126, 234, 0.1);
-  padding: 2rpx 8rpx;
-  border-radius: 6rpx;
-  font-weight: 500;
+  color: #fff;
+  padding: 4rpx 10rpx;
+  border-radius: 10rpx;
+  font-weight: 600;
+  min-width: 50rpx;
+  text-align: center;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.5rpx;
+}
+
+/* 不同等级的颜色 */
+.level-tag.L1 {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+}
+
+.level-tag.L2 {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+}
+
+.level-tag.L3 {
+  background: linear-gradient(135deg, #fa8c16 0%, #ffa940 100%);
+}
+
+.level-tag.L4 {
+  background: linear-gradient(135deg, #f5222d 0%, #ff4d4f 100%);
+}
+
+.level-tag.L5 {
+  background: linear-gradient(135deg, #722ed1 0%, #9254de 100%);
+}
+
+/* 默认样式（如果等级不匹配） */
+.level-tag:not(.L1):not(.L2):not(.L3):not(.L4):not(.L5) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .time-text {
   font-size: 20rpx;
   color: #999;
-  margin-top: 2rpx;
+  font-weight: 400;
+  white-space: nowrap;
 }
 
 .course-content .course-desc {
@@ -353,22 +386,7 @@
   font-weight: bold;
 }
 
-/* 难度标签 */
-.level-tag {
-  position: absolute;
-  top: 20rpx;
-  right: 20rpx;
-  padding: 8rpx 16rpx;
-  background: rgba(0, 0, 0, 0.6);
-  border-radius: 20rpx;
-  backdrop-filter: blur(10rpx);
-}
 
-.level-text {
-  color: #fff;
-  font-size: 22rpx;
-  font-weight: bold;
-}
 
 /* 课程信息 */
 .course-info {
@@ -493,6 +511,34 @@
   font-size: 26rpx;
   color: #ccc;
 }
+
+/* 加载更多按钮 */
+.load-more-btn-container {
+  display: flex;
+  justify-content: center;
+  padding: 30rpx;
+}
+
+.load-more-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 50rpx;
+  padding: 20rpx 60rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+}
+
+.load-more-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 2rpx 8rpx rgba(102, 126, 234, 0.4);
+}
+
+
+
+
 
 /* 响应式适配 */
 @media (max-width: 750rpx) {
