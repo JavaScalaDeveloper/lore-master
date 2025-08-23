@@ -73,7 +73,7 @@ export default function Article() {
           method: 'POST',
           data: {
             courseCode: courseCode,
-            userId: 'miniapp_user'
+            includeSubCourses: false
           }
         })
       } else if (courseId) {
@@ -83,7 +83,7 @@ export default function Article() {
           method: 'POST',
           data: {
             courseId: parseInt(courseId),
-            userId: 'miniapp_user'
+            includeSubCourses: false
           }
         })
       } else {

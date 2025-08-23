@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useRouter, request, showToast, showLoading, hideLoading } from '@tarojs/taro'
+import { useRouter, request, showToast, showLoading, hideLoading, getStorageSync } from '@tarojs/taro'
 import { View, Text, ScrollView, Button, Video } from '@tarojs/components'
 import { buildApiUrl, getApiHeaders } from '../../../config/api'
 import './video.css'
@@ -63,6 +63,14 @@ export default function VideoPage() {
 
       let response
 
+      // 获取token
+      let token = ''
+      try {
+        token = getStorageSync('token')
+      } catch (error) {
+        console.warn('获取token失败:', error)
+      }
+
       // 根据参数类型选择不同的API
       if (courseCode) {
         console.log('准备调用getCourseByCode API，courseCode:', courseCode)
@@ -73,7 +81,7 @@ export default function VideoPage() {
             courseCode: courseCode,
             includeSubCourses: false
           },
-          header: getApiHeaders(),
+          header: getApiHeaders(token),
           timeout: 30000
         })
       } else if (courseId) {
@@ -85,7 +93,7 @@ export default function VideoPage() {
             courseId: parseInt(courseId),
             includeSubCourses: false
           },
-          header: getApiHeaders(),
+          header: getApiHeaders(token),
           timeout: 30000
         })
       } else {

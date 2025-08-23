@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useRouter, request, showToast, showLoading, hideLoading, navigateTo } from '@tarojs/taro'
+import { useRouter, request, showToast, showLoading, hideLoading, navigateTo, getStorageSync } from '@tarojs/taro'
 import { View, Text, ScrollView, Button } from '@tarojs/components'
 import { buildApiUrl, getApiHeaders } from '../../../config/api'
 import './collection.css'
@@ -68,6 +68,14 @@ export default function Collection() {
       setLoading(true)
       showLoading({ title: '加载中...' })
 
+      // 获取token
+      let token = ''
+      try {
+        token = getStorageSync('token')
+      } catch (error) {
+        console.warn('获取token失败:', error)
+      }
+
       // 调用getCourseByCode接口获取课程详情
       console.log('准备调用API，courseCode:', courseCode)
       const response = await request({
@@ -77,7 +85,7 @@ export default function Collection() {
           courseCode: courseCode,
           includeSubCourses: true
         },
-        header: getApiHeaders(),
+        header: getApiHeaders(token),
         timeout: 30000
       })
 

@@ -30,6 +30,7 @@ interface RecentLearningCourse {
   description: string;
   author: string;
   courseType: string;
+  contentType?: string; // 添加内容类型属性
   coverImageUrl: string;
   difficultyLevel: string;
   estimatedMinutes: number;
@@ -228,10 +229,45 @@ export default function Index() {
       confirmText: '继续学习',
       success: (res) => {
         if (res.confirm) {
-          Taro.showToast({
-            title: '即将跳转到课程页面',
-            icon: 'success'
-          });
+          // 根据课程类型和内容类型跳转到对应页面
+          try {
+            let url = ''
+
+            if (course.courseType === 'COLLECTION') {
+              url = `/pages/course/collection/collection?courseCode=${course.courseCode}&title=${encodeURIComponent(course.title)}`
+            } else if (course.contentType === 'ARTICLE') {
+              url = `/pages/course/article/article?courseCode=${course.courseCode}&title=${encodeURIComponent(course.title)}`
+            } else if (course.contentType === 'VIDEO') {
+              url = `/pages/course/video/video?courseCode=${course.courseCode}&title=${encodeURIComponent(course.title)}`
+            } else {
+              Taro.showToast({
+                title: '暂不支持此类型内容',
+                icon: 'none'
+              })
+              return
+            }
+
+            console.log('跳转到课程页面:', url)
+            Taro.navigateTo({
+              url,
+              success: () => {
+                console.log('跳转成功')
+              },
+              fail: (err) => {
+                console.error('跳转失败:', err)
+                Taro.showToast({
+                  title: '跳转失败，请重试',
+                  icon: 'error'
+                })
+              }
+            })
+          } catch (error) {
+            console.error('处理跳转时发生错误:', error)
+            Taro.showToast({
+              title: '发生错误，请重试',
+              icon: 'error'
+            })
+          }
         }
       }
     });
