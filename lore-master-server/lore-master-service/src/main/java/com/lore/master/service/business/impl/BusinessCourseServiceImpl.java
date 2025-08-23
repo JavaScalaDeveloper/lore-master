@@ -5,12 +5,14 @@ import com.lore.master.common.result.ResultCode;
 import com.lore.master.data.dto.business.CourseQueryDTO;
 import com.lore.master.data.dto.business.CourseRequest;
 import com.lore.master.data.entity.business.BusinessCourse;
+import com.lore.master.data.entity.consumer.ConsumerUserCourseLearningRecord;
 import com.lore.master.data.repository.business.BusinessCourseRepository;
+import com.lore.master.data.repository.consumer.ConsumerUserCourseLearningRecordRepository;
 import com.lore.master.data.vo.business.CourseVO;
 import com.lore.master.data.vo.business.CoursePageVO;
+import com.lore.master.data.vo.business.RecentLearningCourseVO;
 import com.lore.master.service.business.BusinessCourseService;
 import com.lore.master.service.business.MarkdownProcessingService;
-import com.lore.master.service.business.impl.MarkdownProcessingServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -21,10 +23,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Optional;
+
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -37,6 +42,7 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
 
     private final BusinessCourseRepository courseRepository;
     private final MarkdownProcessingService markdownProcessingService;
+    private final ConsumerUserCourseLearningRecordRepository learningRecordRepository;
 
     @Override
     public CoursePageVO getCourses(CourseQueryDTO queryDTO) {
@@ -626,6 +632,127 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
         } catch (Exception e) {
             log.error("增加课程收藏数失败，courseId：{}，userId：{}", courseId, userId, e);
             throw e;
+        }
+    }
+
+    @Override
+    @Transactional
+    public void saveLearningRecord(String userId, String courseCode) {
+        if (userId == null || courseCode == null) {
+            log.warn("保存学习记录失败：用户ID或课程编码为空");
+            return;
+        }
+
+        log.info("保存用户学习记录，userId：{}，courseCode：{}", userId, courseCode);
+
+        try {
+            LocalDate today = LocalDate.now();
+
+            // 查找是否已有学习记录（根据用户ID和课程编码）
+            Optional<ConsumerUserCourseLearningRecord> existingRecord = learningRecordRepository
+                    .findByUserIdAndCourseCode(userId, courseCode);
+
+            ConsumerUserCourseLearningRecord record;
+            if (existingRecord.isPresent()) {
+                // 更新现有记录
+                record = existingRecord.get();
+                record.setLearningDuration(record.getLearningDuration() + 60); // 增加1分钟学习时长
+                record.setLearningDate(today); // 更新学习日期为今天
+                log.info("更新现有学习记录，recordId：{}", record.getId());
+            } else {
+                // 创建新记录
+                record = new ConsumerUserCourseLearningRecord();
+                record.setUserId(userId);
+                record.setCourseCode(courseCode);
+                record.setLearningDuration(60); // 初始1分钟学习时长
+                record.setProgressPercent(0);
+                record.setIsCompleted(0);
+                record.setLearningDate(today);
+                log.info("创建新学习记录");
+            }
+
+            // 保存记录
+            learningRecordRepository.save(record);
+            log.info("用户学习记录保存成功，userId：{}，courseCode：{}", userId, courseCode);
+
+        } catch (Exception e) {
+            log.error("保存用户学习记录失败，userId：{}，courseCode：{}", userId, courseCode, e);
+            // 不抛出异常，避免影响主业务流程
+        }
+    }
+
+    @Override
+    public List<RecentLearningCourseVO> getRecentLearningCourses(String userId, int limit) {
+        if (userId == null) {
+            log.warn("获取用户最近学习课程失败：用户ID为空");
+            return List.of();
+        }
+
+        log.info("获取用户最近学习课程，userId：{}，limit：{}", userId, limit);
+
+        try {
+            // 获取用户最近的学习记录
+            List<ConsumerUserCourseLearningRecord> learningRecords = learningRecordRepository
+                    .findTop10ByUserIdOrderByCreatedTimeDesc(userId);
+
+            if (learningRecords.isEmpty()) {
+                log.info("用户暂无学习记录，userId：{}", userId);
+                return List.of();
+            }
+
+            // 限制返回数量
+            List<ConsumerUserCourseLearningRecord> limitedRecords = learningRecords.stream()
+                    .limit(limit)
+                    .toList();
+
+            // 根据课程编码获取课程信息并组装返回数据
+            List<RecentLearningCourseVO> result = new ArrayList<>();
+            for (ConsumerUserCourseLearningRecord record : limitedRecords) {
+                try {
+                    // 根据课程编码查找课程
+                    Optional<BusinessCourse> courseOptional = courseRepository
+                            .findByCourseCodeAndIsDeletedFalse(record.getCourseCode());
+
+                    if (courseOptional.isPresent()) {
+                        BusinessCourse course = courseOptional.get();
+
+                        RecentLearningCourseVO courseVO = RecentLearningCourseVO.builder()
+                                .id(course.getId())
+                                .courseCode(course.getCourseCode())
+                                .title(course.getTitle())
+                                .description(course.getDescription())
+                                .author(course.getAuthor())
+                                .courseType(course.getCourseType())
+                                .coverImageUrl(course.getCoverImageUrl())
+                                .difficultyLevel(course.getDifficultyLevel())
+                                .estimatedMinutes(course.getDurationMinutes())
+                                .viewCount(course.getViewCount())
+                                .likeCount(course.getLikeCount())
+                                .collectCount(course.getCollectCount())
+                                .status(course.getStatus())
+                                .learningDuration(record.getLearningDuration())
+                                .progressPercent(record.getProgressPercent())
+                                .isCompleted(record.getIsCompleted())
+                                .lastLearningDate(record.getLearningDate())
+                                .learningRecordCreatedTime(record.getCreatedTime())
+                                .learningRecordUpdatedTime(record.getUpdatedTime())
+                                .build();
+
+                        result.add(courseVO);
+                    } else {
+                        log.warn("课程不存在，courseCode：{}", record.getCourseCode());
+                    }
+                } catch (Exception e) {
+                    log.error("处理学习记录失败，courseCode：{}", record.getCourseCode(), e);
+                }
+            }
+
+            log.info("获取用户最近学习课程成功，userId：{}，返回数量：{}", userId, result.size());
+            return result;
+
+        } catch (Exception e) {
+            log.error("获取用户最近学习课程失败，userId：{}", userId, e);
+            return List.of();
         }
     }
 }

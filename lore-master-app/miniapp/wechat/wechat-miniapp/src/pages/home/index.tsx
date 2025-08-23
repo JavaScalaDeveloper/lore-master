@@ -1,6 +1,6 @@
 import { View, Text, Input, Swiper, SwiperItem, Image } from '@tarojs/components';
 import { useEffect, useState } from 'react';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import { get, post } from '../../utils/request';
 import './index.css';
 
@@ -22,9 +22,33 @@ interface ApiResponse<T> {
   data: T;
 }
 
+// 最近学习课程数据类型
+interface RecentLearningCourse {
+  id: number;
+  courseCode: string;
+  title: string;
+  description: string;
+  author: string;
+  courseType: string;
+  coverImageUrl: string;
+  difficultyLevel: string;
+  estimatedMinutes: number;
+  viewCount: number;
+  likeCount: number;
+  collectCount: number;
+  status: string;
+  learningDuration: number;
+  progressPercent: number;
+  isCompleted: number;
+  lastLearningDate: string;
+  learningRecordCreatedTime: string;
+  learningRecordUpdatedTime: string;
+}
+
 export default function Index() {
   const [searchValue, setSearchValue] = useState('');
   const [recommendations, setRecommendations] = useState<CarouselBanner[]>([]);
+  const [recentCourses, setRecentCourses] = useState<RecentLearningCourse[]>([]);
   const [loading, setLoading] = useState(true);
 
   // 获取轮播图数据
@@ -84,9 +108,42 @@ export default function Index() {
   };
 
   // 页面加载时获取数据
+  // 获取用户最近学习的课程
+  const loadRecentLearningCourses = async () => {
+    try {
+      const response = await post<RecentLearningCourse[]>('/api/consumer/course/getRecentLearningCourses', {});
+
+      if (response.success && response.data) {
+        setRecentCourses(response.data);
+        console.log('获取最近学习课程成功:', response.data);
+      } else {
+        console.error('获取最近学习课程失败:', response.message);
+        // 如果是用户未登录，不显示错误提示
+        if (response.message && response.message.includes('用户未登录')) {
+          console.log('用户未登录，显示空状态');
+        }
+        setRecentCourses([]);
+      }
+    } catch (error) {
+      console.error('获取最近学习课程异常:', error);
+      // 如果是登录过期的错误，不需要额外处理，request.ts已经处理了
+      if (error.message && error.message.includes('登录已过期')) {
+        return;
+      }
+      setRecentCourses([]);
+    }
+  };
+
   useEffect(() => {
     loadCarouselBanners();
+    loadRecentLearningCourses();
   }, []);
+
+  // 页面显示时刷新最近学习记录
+  useDidShow(() => {
+    console.log('页面显示，刷新最近学习记录');
+    loadRecentLearningCourses();
+  });
 
   // 功能图标数据
   const features = [
@@ -94,36 +151,7 @@ export default function Index() {
     { id: 2, title: '指定目标', subtitle: '制定学习计划', icon: '🎪' },
   ];
 
-  // 推荐课程数据
-  const courses = [
-    {
-      id: 1,
-      title: '🇬🇧 英语基础课程',
-      description: '从零开始，轻松掌握英语基础知识，包含发音、语法、词汇等核心内容',
-      image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=100&h=100&fit=crop&crop=center',
-      level: '初级',
-      duration: '30天',
-      students: '1.2万'
-    },
-    {
-      id: 2,
-      title: '🔢 数学提高课程',
-      description: '系统提升数学解题能力，涵盖代数、几何、概率等重要知识点',
-      image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=100&h=100&fit=crop&crop=center',
-      level: '中级',
-      duration: '45天',
-      students: '8.5千'
-    },
-    {
-      id: 3,
-      title: '💻 编程入门课程',
-      description: '零基础学编程，掌握编程思维和基础语法，开启技术之路',
-      image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=100&h=100&fit=crop&crop=center',
-      level: '入门',
-      duration: '60天',
-      students: '2.1万'
-    },
-  ];
+
 
   // 处理轮播图点击
   const handleBannerClick = async (banner: CarouselBanner) => {
@@ -185,14 +213,19 @@ export default function Index() {
     }
   };
 
-  // 处理课程点击
-  const handleCourseClick = (course) => {
+
+
+  // 处理最近学习课程点击
+  const handleRecentCourseClick = (course: RecentLearningCourse) => {
+    const learningTimeText = formatLearningTime(course.learningDuration);
+    const lastLearningText = formatDate(course.lastLearningDate);
+
     Taro.showModal({
       title: course.title,
-      content: `${course.description}\n\n难度：${course.level}\n时长：${course.duration}\n学员：${course.students}人`,
+      content: `${course.description}\n\n作者：${course.author}\n难度：${course.difficultyLevel}\n学习时长：${learningTimeText}\n最近学习：${lastLearningText}`,
       showCancel: true,
       cancelText: '稍后再看',
-      confirmText: '立即学习',
+      confirmText: '继续学习',
       success: (res) => {
         if (res.confirm) {
           Taro.showToast({
@@ -202,6 +235,43 @@ export default function Index() {
         }
       }
     });
+  };
+
+  // 格式化学习时长
+  const formatLearningTime = (seconds: number): string => {
+    if (seconds < 60) {
+      return `${seconds}秒`;
+    } else if (seconds < 3600) {
+      const minutes = Math.floor(seconds / 60);
+      return `${minutes}分钟`;
+    } else {
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      return `${hours}小时${minutes}分钟`;
+    }
+  };
+
+  // 格式化日期
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    const now = new Date();
+
+    // 获取日期部分（忽略时间）
+    const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const nowOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    const diffTime = nowOnly.getTime() - dateOnly.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      return '今天';
+    } else if (diffDays === 1) {
+      return '昨天';
+    } else if (diffDays < 7) {
+      return `${diffDays}天前`;
+    } else {
+      return date.toLocaleDateString('zh-CN');
+    }
   };
 
   return (
@@ -286,29 +356,52 @@ export default function Index() {
         </View>
       </View>
 
-      {/* 推荐课程列表卡片 */}
+      {/* 最近学习课程列表卡片 */}
       <View className='card'>
-        <View className='card-title'>📚 热门课程</View>
-        <View className='courses-container'>
-          {courses.map(course => (
-            <View
-              className='course-item'
-              key={course.id}
-              onClick={() => handleCourseClick(course)}
-            >
-              <Image src={course.image} className='course-image' mode='aspectFill' />
-              <View className='course-info'>
-                <Text className='course-title'>{course.title}</Text>
-                <Text className='course-description'>{course.description}</Text>
-                <View className='course-meta'>
-                  <Text className='course-level'>{course.level}</Text>
-                  <Text className='course-duration'>{course.duration}</Text>
-                  <Text className='course-students'>{course.students}人学习</Text>
+        <View className='card-title'>📚 最近学习</View>
+        {recentCourses.length > 0 ? (
+          <View className='courses-container'>
+            {recentCourses.map(course => (
+              <View
+                className='course-item'
+                key={course.id}
+                onClick={() => handleRecentCourseClick(course)}
+              >
+                <Image
+                  src={course.coverImageUrl || 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=100&h=100&fit=crop&crop=center'}
+                  className='course-image'
+                  mode='aspectFill'
+                />
+                <View className='course-info'>
+                  <View className='course-title-row'>
+                    <Text className='course-title'>{course.title}</Text>
+                    <View className='course-meta-inline'>
+                      <Text className='meta-item'>{course.difficultyLevel || '初级'}</Text>
+                      <Text className='meta-item'>{formatLearningTime(course.learningDuration)}</Text>
+                      <Text className='meta-item'>{formatDate(course.lastLearningDate)}</Text>
+                    </View>
+                  </View>
+                  <Text className='course-description'>{course.description}</Text>
                 </View>
               </View>
+            ))}
+          </View>
+        ) : (
+          <View className='empty-state'>
+            <Text className='empty-text'>暂无学习记录</Text>
+            <Text className='empty-hint'>登录后开始学习课程，这里会显示您的学习历史</Text>
+            <View
+              className='empty-action'
+              onClick={() => {
+                Taro.switchTab({
+                  url: '/pages/profile/profile'
+                })
+              }}
+            >
+              <Text className='empty-action-text'>去登录</Text>
             </View>
-          ))}
-        </View>
+          </View>
+        )}
       </View>
     </View>
   );

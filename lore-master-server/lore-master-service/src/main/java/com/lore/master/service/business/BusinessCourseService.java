@@ -4,6 +4,7 @@ import com.lore.master.data.dto.business.CourseQueryDTO;
 import com.lore.master.data.dto.business.CourseRequest;
 import com.lore.master.data.vo.business.CourseVO;
 import com.lore.master.data.vo.business.CoursePageVO;
+import com.lore.master.data.vo.business.RecentLearningCourseVO;
 
 import java.util.List;
 
@@ -120,11 +121,28 @@ public interface BusinessCourseService {
 
     /**
      * 增加课程观看次数
-     * 
+     *
      * @param courseId 课程ID
      * @param userId 用户ID（可选）
      */
     void incrementViewCount(Long courseId, String userId);
+
+    /**
+     * 保存用户学习记录
+     *
+     * @param userId 用户ID
+     * @param courseCode 课程编码
+     */
+    void saveLearningRecord(String userId, String courseCode);
+
+    /**
+     * 获取用户最近学习的课程
+     *
+     * @param userId 用户ID
+     * @param limit 限制数量
+     * @return 最近学习的课程列表
+     */
+    List<RecentLearningCourseVO> getRecentLearningCourses(String userId, int limit);
 
     /**
      * 获取推荐课程（基于用户学习目标或历史）

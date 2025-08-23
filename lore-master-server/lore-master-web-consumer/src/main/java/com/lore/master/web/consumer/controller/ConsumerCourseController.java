@@ -1,9 +1,12 @@
 package com.lore.master.web.consumer.controller;
 
+import com.lore.master.common.annotation.RequireLogin;
+import com.lore.master.common.context.UserContext;
 import com.lore.master.data.dto.business.*;
 import com.lore.master.data.vo.business.ApiResponse;
 import com.lore.master.data.vo.business.CoursePageVO;
 import com.lore.master.data.vo.business.CourseVO;
+import com.lore.master.data.vo.business.RecentLearningCourseVO;
 import com.lore.master.service.business.BusinessCourseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,22 +49,57 @@ public class ConsumerCourseController {
     /**
      * 根据课程编码获取课程详情
      */
+    @RequireLogin
     @PostMapping("/getCourseByCode")
     public ApiResponse<CourseVO> getCourseByCode(@RequestBody CourseDetailQueryDTO queryDTO) {
-        
+
         log.info("根据课程编码获取课程详情，参数：{}", queryDTO);
-        
+
         try {
-            CourseVO result = courseService.getCourseByCode(queryDTO.getCourseCode(), queryDTO.getUserId());
-            
-            // 增加观看次数
-            if (result != null) {
-                courseService.incrementViewCount(result.getId(), queryDTO.getUserId());
+            // 从UserContext获取当前登录用户ID
+            String currentUserId = UserContext.getCurrentUserId();
+            log.info("从UserContext获取到用户ID: {}", currentUserId);
+
+            // 使用UserContext中的userId，如果没有则使用请求参数中的userId
+            String effectiveUserId = currentUserId != null ? currentUserId : queryDTO.getUserId();
+
+            CourseVO result = courseService.getCourseByCode(queryDTO.getCourseCode(), effectiveUserId);
+
+            // 增加观看次数和保存学习记录
+            if (result != null && effectiveUserId != null) {
+                courseService.incrementViewCount(result.getId(), effectiveUserId);
+
+                // 保存用户学习记录
+                courseService.saveLearningRecord(effectiveUserId, result.getCourseCode());
+                log.info("已保存用户学习记录，用户ID: {}, 课程编码: {}", effectiveUserId, result.getCourseCode());
             }
-            
+
             return ApiResponse.success("查询成功", result);
         } catch (Exception e) {
             log.error("查询课程详情失败，参数：{}", queryDTO, e);
+            return ApiResponse.error("查询失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取用户最近学习的课程
+     */
+    @RequireLogin
+    @PostMapping("/getRecentLearningCourses")
+    public ApiResponse<List<RecentLearningCourseVO>> getRecentLearningCourses() {
+        log.info("获取用户最近学习的课程");
+
+        try {
+            // 从UserContext获取当前登录用户ID
+            String currentUserId = UserContext.getCurrentUserId();
+            if (currentUserId == null) {
+                return ApiResponse.error("用户未登录");
+            }
+
+            List<RecentLearningCourseVO> recentCourses = courseService.getRecentLearningCourses(currentUserId, 3);
+            return ApiResponse.success("查询成功", recentCourses);
+        } catch (Exception e) {
+            log.error("获取用户最近学习课程失败", e);
             return ApiResponse.error("查询失败：" + e.getMessage());
         }
     }
@@ -277,19 +315,25 @@ public class ConsumerCourseController {
     /**
      * 点赞/取消点赞课程
      */
+    @RequireLogin
     @PostMapping("/like/{courseId}")
     public ApiResponse<Boolean> likeCourse(@PathVariable Long courseId, @RequestBody(required = false) PageQueryDTO queryDTO) {
 
-        String userId = queryDTO != null ? queryDTO.getUserId() : "miniapp_user";
-        log.info("点赞课程，courseId：{}，userId：{}", courseId, userId);
+        // 从UserContext获取当前登录用户ID
+        String currentUserId = UserContext.getCurrentUserId();
+        if (currentUserId == null) {
+            return ApiResponse.error("用户未登录");
+        }
+
+        log.info("点赞课程，courseId：{}，userId：{}", courseId, currentUserId);
 
         try {
             // 这里简化处理，实际应该有用户点赞记录表
             // 暂时只是增加点赞数
-            courseService.incrementLikeCount(courseId, userId);
+            courseService.incrementLikeCount(courseId, currentUserId);
             return ApiResponse.success("点赞成功", true);
         } catch (Exception e) {
-            log.error("点赞课程失败，courseId：{}，userId：{}", courseId, userId, e);
+            log.error("点赞课程失败，courseId：{}，userId：{}", courseId, currentUserId, e);
             return ApiResponse.error("点赞失败：" + e.getMessage());
         }
     }
@@ -297,19 +341,25 @@ public class ConsumerCourseController {
     /**
      * 收藏/取消收藏课程
      */
+    @RequireLogin
     @PostMapping("/collect/{courseId}")
     public ApiResponse<Boolean> collectCourse(@PathVariable Long courseId, @RequestBody(required = false) PageQueryDTO queryDTO) {
 
-        String userId = queryDTO != null ? queryDTO.getUserId() : "miniapp_user";
-        log.info("收藏课程，courseId：{}，userId：{}", courseId, userId);
+        // 从UserContext获取当前登录用户ID
+        String currentUserId = UserContext.getCurrentUserId();
+        if (currentUserId == null) {
+            return ApiResponse.error("用户未登录");
+        }
+
+        log.info("收藏课程，courseId：{}，userId：{}", courseId, currentUserId);
 
         try {
             // 这里简化处理，实际应该有用户收藏记录表
             // 暂时只是增加收藏数
-            courseService.incrementCollectCount(courseId, userId);
+            courseService.incrementCollectCount(courseId, currentUserId);
             return ApiResponse.success("收藏成功", true);
         } catch (Exception e) {
-            log.error("收藏课程失败，courseId：{}，userId：{}", courseId, userId, e);
+            log.error("收藏课程失败，courseId：{}，userId：{}", courseId, currentUserId, e);
             return ApiResponse.error("收藏失败：" + e.getMessage());
         }
     }

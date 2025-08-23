@@ -153,9 +153,9 @@
   flex-direction: column;
   align-items: center;
   padding: 28px 20px;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
   border-radius: 20px;
-  box-shadow: 0 6px 24px rgba(240, 147, 251, 0.35);
+  box-shadow: 0 6px 24px rgba(66, 153, 225, 0.35);
   transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
@@ -181,7 +181,7 @@
 
 .feature-item:hover {
   transform: translateY(-6px) scale(1.03);
-  box-shadow: 0 12px 36px rgba(240, 147, 251, 0.45);
+  box-shadow: 0 12px 36px rgba(66, 153, 225, 0.45);
 }
 
 .feature-icon {
@@ -274,13 +274,38 @@
   gap: 8px;
 }
 
+.course-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  gap: 12px;
+}
+
 .course-title {
   font-size: 30px;
   font-weight: 700;
   color: #2d3748;
-  margin-bottom: 6px;
   line-height: 1.3;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  min-width: 0;
+}
+
+.course-meta-inline {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.meta-item {
+  font-size: 18px;
+  color: #718096;
+  background: rgba(113, 128, 150, 0.1);
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 500;
 }
 
 .course-description {
@@ -434,12 +459,25 @@
     height: 80px;
   }
 
+  .course-title-row {
+    gap: 8px;
+  }
+
   .course-title {
     font-size: 28px;
   }
 
   .course-description {
     font-size: 19px;
+  }
+
+  .course-meta-inline {
+    gap: 6px;
+  }
+
+  .meta-item {
+    font-size: 14px;
+    padding: 2px 5px;
   }
 
   .course-meta {
@@ -452,4 +490,48 @@
     font-size: 17px;
     padding: 5px 10px;
   }
+}
+
+/* 空状态样式 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.empty-text {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.empty-hint {
+  font-size: 14px;
+  color: #999;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.empty-action {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.empty-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.empty-action-text {
+  font-size: 16px;
+  font-weight: 500;
 }
