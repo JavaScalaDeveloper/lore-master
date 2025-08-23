@@ -29,7 +29,7 @@
   background-color: rgba(255, 255, 255, 0.95);
   border-radius: 26px;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
-  font-size: 17px;
+  font-size: 22px;
   border: none;
   backdrop-filter: blur(15px);
   position: relative;
@@ -64,7 +64,7 @@
 }
 
 .card-title {
-  font-size: 26px;
+  font-size: 36px;
   font-weight: 700;
   margin-bottom: 20px;
   color: #2d3748;
@@ -126,7 +126,7 @@
 }
 
 .swiper-title {
-  font-size: 22px;
+  font-size: 32px;
   font-weight: 700;
   margin-bottom: 6px;
   line-height: 1.3;
@@ -134,7 +134,7 @@
 }
 
 .swiper-subtitle {
-  font-size: 16px;
+  font-size: 24px;
   opacity: 0.9;
   line-height: 1.4;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
@@ -195,7 +195,7 @@
 }
 
 .feature-title {
-  font-size: 17px;
+  font-size: 26px;
   font-weight: 700;
   color: #ffffff;
   text-align: center;
@@ -204,7 +204,7 @@
 }
 
 .feature-subtitle {
-  font-size: 14px;
+  font-size: 22px;
   color: rgba(255, 255, 255, 0.9);
   text-align: center;
   line-height: 1.4;
@@ -275,7 +275,7 @@
 }
 
 .course-title {
-  font-size: 20px;
+  font-size: 30px;
   font-weight: 700;
   color: #2d3748;
   margin-bottom: 6px;
@@ -284,7 +284,7 @@
 }
 
 .course-description {
-  font-size: 16px;
+  font-size: 20px;
   color: #4a5568;
   line-height: 1.5;
   opacity: 0.85;
@@ -301,7 +301,7 @@
 .course-level,
 .course-duration,
 .course-students {
-  font-size: 14px;
+  font-size: 18px;
   padding: 6px 12px;
   border-radius: 14px;
   background: rgba(102, 126, 234, 0.15);
@@ -373,7 +373,7 @@
   }
 
   .card-title {
-    font-size: 22px;
+    font-size: 32px;
     margin-bottom: 16px;
   }
 
@@ -383,7 +383,7 @@
 
   .search-input {
     height: 48px;
-    font-size: 16px;
+    font-size: 19px;
   }
 
   .swiper {
@@ -395,11 +395,11 @@
   }
 
   .swiper-title {
-    font-size: 20px;
+    font-size: 30px;
   }
 
   .swiper-subtitle {
-    font-size: 15px;
+    font-size: 22px;
   }
 
   .features-container {
@@ -417,11 +417,11 @@
   }
 
   .feature-title {
-    font-size: 16px;
+    font-size: 24px;
   }
 
   .feature-subtitle {
-    font-size: 13px;
+    font-size: 20px;
   }
 
   .course-item {
@@ -435,11 +435,11 @@
   }
 
   .course-title {
-    font-size: 18px;
+    font-size: 28px;
   }
 
   .course-description {
-    font-size: 15px;
+    font-size: 19px;
   }
 
   .course-meta {
@@ -449,7 +449,7 @@
   .course-level,
   .course-duration,
   .course-students {
-    font-size: 13px;
+    font-size: 17px;
     padding: 5px 10px;
   }
 }

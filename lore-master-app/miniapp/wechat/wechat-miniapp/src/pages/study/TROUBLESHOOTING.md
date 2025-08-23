@@ -22,7 +22,7 @@ npm run build:weapp
 确认 `src/app.config.ts` 中已正确注册学习页面：
 ```typescript
 pages: [
-  'pages/index/index',
+  'pages/home/index',
   'pages/study/study',  // 确保这一行存在
   // ...其他页面
 ]

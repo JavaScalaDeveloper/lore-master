@@ -1,6 +1,6 @@
 export default {
   pages: [
-    'pages/index/index',
+    'pages/home/index',
     'pages/study/study',
     'pages/profile/profile',
     'pages/chat/chat',
@@ -11,6 +11,8 @@ export default {
     'pages/course/collection/collection',
     'pages/course/article/article',
     'pages/course/video/video',
+    'pages/carousel-detail/index',
+    'pages/carousel-test/index',
   ],
   window: {
     backgroundTextStyle: 'light',
@@ -25,7 +27,7 @@ export default {
     borderStyle: 'black',
     list: [
       {
-        pagePath: 'pages/index/index',
+        pagePath: 'pages/home/index',
         text: '主页',
         iconPath: '/public/icons/home.png',
         selectedIconPath: '/public/icons/home_selected.png'
