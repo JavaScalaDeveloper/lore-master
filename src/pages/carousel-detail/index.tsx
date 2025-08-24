@@ -64,7 +64,7 @@ export default function CarouselDetail() {
 
   // 处理外部链接点击
   const handleJumpClick = () => {
-    if (detail?.jumpUrl) {
+    if (detail && detail.jumpUrl) {
       Taro.showModal({
         title: '跳转确认',
         content: `即将跳转到外部链接：${detail.jumpUrl}`,

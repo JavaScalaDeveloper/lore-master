@@ -105,7 +105,7 @@ export default function Article() {
           })
         }
       } else {
-        const errorMsg = response?.message || '加载失败'
+        const errorMsg = (response && response.message) || '加载失败'
         showToast({
           title: errorMsg,
           icon: 'error'

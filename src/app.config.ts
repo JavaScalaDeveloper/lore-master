@@ -20,6 +20,8 @@ export default {
     navigationBarTitleText: 'Lore Master',
     navigationBarTextStyle: 'black'
   },
+  // 启用组件按需注入，优化小程序性能
+  lazyCodeLoading: 'requiredComponents',
   tabBar: {
     color: '#999',
     selectedColor: '#1AAD19',
