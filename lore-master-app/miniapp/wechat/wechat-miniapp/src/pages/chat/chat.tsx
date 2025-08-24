@@ -1,4 +1,4 @@
-﻿import { useState, useRef } from 'react'
+﻿﻿﻿﻿﻿﻿﻿﻿import { useState, useRef } from 'react'
 import { useLoad, navigateBack, showToast, request, getStorageSync, connectSocket, onSocketOpen, onSocketMessage, onSocketClose, onSocketError, sendSocketMessage, closeSocket } from '@tarojs/taro'
 import { View, Text, ScrollView, Textarea, Button, Image } from '@tarojs/components'
 import MarkdownRenderer from '../../components/MarkdownRenderer/MarkdownRenderer'
@@ -90,7 +90,7 @@ const Chat = () => {
     console.log('检查登录状态:', {
       hasToken: !!token,
       hasUserInfo: !!storedUserInfo,
-      userId: storedUserInfo?.id || 'none'
+      userId: (storedUserInfo && storedUserInfo.id) || 'none'
     })
 
     if (!token) {
@@ -135,7 +135,7 @@ const Chat = () => {
 
       console.log('聊天历史API响应:', response)
 
-      if (response.statusCode === 200 && response.data?.success) {
+      if (response.statusCode === 200 && response.data && response.data.success) {
         const historyMessages = response.data.data || []
         console.log('获取到聊天历史:', historyMessages.length, '条')
 
@@ -175,7 +175,7 @@ const Chat = () => {
           }
         }
       } else {
-        console.error('获取聊天历史失败:', response.data?.message || '未知错误')
+        console.error('获取聊天历史失败:', (response.data && response.data.message) || '未知错误')
         // 失败时显示欢迎消息
         initializeWelcomeMessage()
 
@@ -280,7 +280,7 @@ const Chat = () => {
 
       // 获取登录态信息
       const token = getStorageSync('token')
-      const userId = getStorageSync('userId') || userInfo?.id
+      const userId = getStorageSync('userId') || (userInfo && userInfo.id)
 
       if (!token) {
         console.warn('未找到token，WebSocket连接可能失败')
@@ -583,7 +583,7 @@ const Chat = () => {
   const callBackendAPI = async (message: string, aiMessageId: string) => {
     const token = getStorageSync('token')
     const storedUserInfo = getStorageSync('userInfo')
-    const userId = storedUserInfo?.id || userInfo?.id || getStorageSync('userId') || 'anonymous'
+    const userId = (storedUserInfo && storedUserInfo.id) || (userInfo && userInfo.id) || getStorageSync('userId') || 'anonymous'
 
     // 检查登录态
     if (!token) {
@@ -697,8 +697,8 @@ const Chat = () => {
 
     console.log('同步接口响应', response)
 
-    if (response.statusCode === 200 && response.data?.success) {
-      const content = response.data.data?.message || '收到了你的消息，但无法生成详细回复。'
+    if (response.statusCode === 200 && response.data && response.data.success) {
+      const content = (response.data.data && response.data.data.message) || '收到了你的消息，但无法生成详细回复。'
 
       // 使用快速打字机效果显示
       await simulateRealTimeTyping(aiMessageId, content)
@@ -895,7 +895,7 @@ const Chat = () => {
                   </Text>
                 </View>
                 <View className='avatar-container user-avatar-container'>
-                  {userInfo?.avatarUrl ? (
+                  {userInfo && userInfo.avatarUrl ? (
                     <Image
                       src={userInfo.avatarUrl}
                       className='user-avatar-image'

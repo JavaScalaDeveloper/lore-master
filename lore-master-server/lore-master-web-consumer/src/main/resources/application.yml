@@ -11,6 +11,10 @@ server:
 spring:
   application:
     name: lore-master-consumer
+
+  # 允许Bean定义覆盖
+  main:
+    allow-bean-definition-overriding: true
   
   # 数据源配置
   datasource:
@@ -212,8 +216,8 @@ llm:
   # 模型配置
   ollama:
     url: http://localhost:11434
-    model: ${LLM_MODEL:qwen-max}
-  ollama-model: qwen3:0.6b
+#    model: ${LLM_MODEL:qwen3:0.6b}
+    model: ${LLM_MODEL:qwen2.5:0.5b}
   # 最大Token数
   max-tokens: ${LLM_MAX_TOKENS:100000}
   # 温度参数（0.0-2.0，控制回答的随机性）
