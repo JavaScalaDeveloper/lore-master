@@ -1,0 +1,220 @@
+.carousel-test {
+  padding: 20px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+}
+
+.test-section {
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  font-size: 22px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.test-buttons {
+  margin-bottom: 16px;
+}
+
+.test-button {
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.test-button[disabled] {
+  background: #ccc;
+  color: #999;
+}
+
+.result-section {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px;
+  border-left: 4px solid #007aff;
+}
+
+.result-text {
+  font-size: 18px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.banners-section {
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.banner-item {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background-color: #fafafa;
+}
+
+.banner-item:last-child {
+  margin-bottom: 0;
+}
+
+.banner-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.banner-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  flex: 1;
+  margin-right: 12px;
+}
+
+.banner-id {
+  font-size: 14px;
+  color: #999;
+  background-color: #e9ecef;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.banner-subtitle {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 12px;
+  line-height: 1.4;
+  display: block;
+}
+
+.banner-meta {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.meta-item {
+  font-size: 16px;
+  color: #999;
+}
+
+.banner-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-button {
+  flex: 1;
+  border-radius: 6px;
+  font-size: 16px;
+  padding: 6px 12px;
+}
+
+.detail-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+}
+
+.view-button {
+  background-color: #ffc107;
+  color: #333;
+  border: none;
+}
+
+.action-button[disabled] {
+  background-color: #ccc;
+  color: #999;
+}
+
+.info-section {
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.info-content {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.info-text {
+  font-size: 18px;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.info-text:last-child {
+  margin-bottom: 0;
+}
+
+/* 响应式设计 - 小屏幕适配 */
+@media (max-width: 375px) {
+  .title {
+    font-size: 26px;
+  }
+
+  .section-title {
+    font-size: 20px;
+  }
+
+  .test-button {
+    font-size: 16px;
+  }
+
+  .result-text {
+    font-size: 16px;
+  }
+
+  .banner-title {
+    font-size: 18px;
+  }
+
+  .banner-subtitle {
+    font-size: 16px;
+  }
+
+  .meta-item {
+    font-size: 14px;
+  }
+
+  .action-button {
+    font-size: 14px;
+  }
+
+  .info-text {
+    font-size: 16px;
+  }
+}
