@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useRouter, showToast, showLoading, hideLoading } from '@tarojs/taro'
+import { useRouter, request, showToast, showLoading, hideLoading, getStorageSync } from '@tarojs/taro'
 import { View, Text, ScrollView, Button } from '@tarojs/components'
-import { request } from '../../../utils/request'
+import { buildApiUrl, getApiHeaders } from '../../../config/api'
 import './article.css'
 
 // 导入 Taro HTML 样式
@@ -33,10 +33,87 @@ export default function Article() {
   const [loading, setLoading] = useState(true)
   const [liked, setLiked] = useState(false)
   const [collected, setCollected] = useState(false)
+  const [parsedContent, setParsedContent] = useState<string>('')
 
   const courseCode = router.params.courseCode
   const courseId = router.params.courseId
   const title = router.params.title ? decodeURIComponent(router.params.title) : '图文详情'
+
+  // 简化的 Markdown 解析函数，专注于表格渲染
+  const parseMarkdown = (markdown: string): string => {
+    try {
+      let html = markdown
+      
+      // 首先处理表格
+      html = parseMarkdownTables(html)
+      
+      // 处理标题
+      html = html.replace(/^### (.*)$/gm, '<h3 class="h3">$1</h3>')
+      html = html.replace(/^## (.*)$/gm, '<h2 class="h2">$1</h2>')
+      html = html.replace(/^# (.*)$/gm, '<h1 class="h1">$1</h1>')
+      
+      // 处理加粗和斜体
+      html = html.replace(/\*\*([^*]+)\*\*/g, '<strong class="strong">$1</strong>')
+      html = html.replace(/\*([^*]+)\*/g, '<em class="em">$1</em>')
+      
+      // 处理内联代码
+      html = html.replace(/`([^`]+)`/g, '<code class="code">$1</code>')
+      
+      // 处理引用块
+      html = html.replace(/^> (.*)$/gm, '<blockquote class="blockquote">$1</blockquote>')
+      
+      // 处理换行
+      html = html.replace(/\n\n/g, '</p><p class="p">')
+      html = html.replace(/\n/g, '<br>')
+      html = '<p class="p">' + html + '</p>'
+      
+      return html
+    } catch (error) {
+      console.error('Markdown 解析失败:', error)
+      // 如果解析失败，返回原始内容但处理换行
+      return markdown.replace(/\n/g, '<br>')
+    }
+  }
+  
+  // 简化的表格解析函数
+  const parseMarkdownTables = (markdown: string): string => {
+    // 匹配简单的 Markdown 表格
+    const tableRegex = /\n(\|.+\|)\s*\n(\|[-:\s]+\|)\s*\n((\|.+\|\s*\n?)+)/g
+    
+    return markdown.replace(tableRegex, (match, headerRow, separatorRow, bodyRows) => {
+      try {
+        // 解析表头
+        const headers = headerRow.split('|').slice(1, -1).map(cell => cell.trim())
+        
+        // 解析表格体
+        const rows = bodyRows.trim().split('\n').map(row => {
+          return row.split('|').slice(1, -1).map(cell => cell.trim())
+        })
+        
+        // 生成 HTML
+        let html = '<table class="table">\n'
+        html += '  <thead><tr class="tr">\n'
+        headers.forEach(header => {
+          html += `    <th class="th">${header}</th>\n`
+        })
+        html += '  </tr></thead>\n  <tbody>\n'
+        
+        rows.forEach(row => {
+          html += '    <tr class="tr">\n'
+          row.forEach(cell => {
+            html += `      <td class="td">${cell}</td>\n`
+          })
+          html += '    </tr>\n'
+        })
+        
+        html += '  </tbody>\n</table>'
+        return html
+      } catch (error) {
+        console.error('表格解析错误:', error)
+        return match
+      }
+    })
+  }
 
   // 添加调试日志
   console.log('Article页面参数:', router.params)
@@ -65,26 +142,38 @@ export default function Article() {
 
       let response
 
+      // 获取token
+      let token = ''
+      try {
+        token = getStorageSync('token')
+      } catch (error) {
+        console.warn('获取token失败:', error)
+      }
+
       // 根据参数类型选择不同的API
       if (courseCode) {
         console.log('准备调用getCourseByCode API，courseCode:', courseCode)
         response = await request({
-          url: '/api/consumer/course/getCourseByCode',
+          url: buildApiUrl('/api/consumer/course/getCourseByCode'),
           method: 'POST',
           data: {
             courseCode: courseCode,
             includeSubCourses: false
-          }
+          },
+          header: getApiHeaders(token),
+          timeout: 30000
         })
       } else if (courseId) {
         console.log('准备调用getCourseById API，courseId:', courseId)
         response = await request({
-          url: '/api/consumer/course/getCourseById',
+          url: buildApiUrl('/api/consumer/course/getCourseById'),
           method: 'POST',
           data: {
             courseId: parseInt(courseId),
             includeSubCourses: false
-          }
+          },
+          header: getApiHeaders(token),
+          timeout: 30000
         })
       } else {
         throw new Error('缺少课程参数')
@@ -92,11 +181,22 @@ export default function Article() {
 
       console.log('课程详情响应:', response)
 
-      if (response && response.success) {
-        const courseDetail = response.data
+      if (response && response.data && response.data.success) {
+        const courseDetail = response.data.data
 
         if (courseDetail.contentType === 'ARTICLE') {
           setCourse(courseDetail)
+          
+          // 简化内容处理逻辑
+          if (courseDetail.contentHtml) {
+            // 如果有 HTML 内容，直接使用
+            setParsedContent(courseDetail.contentHtml)
+          } else if (courseDetail.contentMarkdown) {
+            // 否则解析 Markdown 内容
+            const htmlContent = parseMarkdown(courseDetail.contentMarkdown)
+            setParsedContent(htmlContent)
+          }
+          
           // 记录浏览已在后端接口中自动处理
         } else {
           showToast({
@@ -105,7 +205,7 @@ export default function Article() {
           })
         }
       } else {
-        const errorMsg = (response && response.message) || '加载失败'
+        const errorMsg = response?.data?.message || '加载失败'
         showToast({
           title: errorMsg,
           icon: 'error'
@@ -131,12 +231,13 @@ export default function Article() {
 
     try {
       const response = await request({
-        url: `/api/consumer/course/like/${course.id}`,
+        url: buildApiUrl(`/api/consumer/course/like/${course.id}`),
         method: 'POST',
-        data: {}
+        data: {},
+        header: getApiHeaders()
       })
 
-      if (response && response.success) {
+      if (response && response.data && response.data.success) {
         setLiked(!liked)
         if (course) {
           setCourse({
@@ -164,12 +265,13 @@ export default function Article() {
 
     try {
       const response = await request({
-        url: `/api/consumer/course/collect/${course.id}`,
+        url: buildApiUrl(`/api/consumer/course/collect/${course.id}`),
         method: 'POST',
-        data: {}
+        data: {},
+        header: getApiHeaders()
       })
 
-      if (response && response.success) {
+      if (response && response.data && response.data.success) {
         setCollected(!collected)
         if (course) {
           setCourse({
@@ -282,10 +384,10 @@ export default function Article() {
           </View>
         )}
 
-        {course.contentHtml ? (
+        {parsedContent ? (
           <View
             className='taro_html content-html'
-            dangerouslySetInnerHTML={{ __html: course.contentHtml }}
+            dangerouslySetInnerHTML={{ __html: parsedContent }}
           />
         ) : course.contentMarkdown ? (
           <View className='content-markdown'>

@@ -1,0 +1,176 @@
+/* Markdown 预览样式 */
+.markdown-preview {
+  line-height: 1.6;
+  color: #333;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* 标题样式 */
+.markdown-preview h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #eaecef;
+  padding-bottom: 8px;
+}
+
+.markdown-preview h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #eaecef;
+  padding-bottom: 6px;
+}
+
+.markdown-preview h3 {
+  font-size: 1.25em;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.markdown-preview h4 {
+  font-size: 1em;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.markdown-preview h5,
+.markdown-preview h6 {
+  font-size: 0.875em;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+/* 段落样式 */
+.markdown-preview p {
+  margin-bottom: 16px;
+}
+
+/* 列表样式 */
+.markdown-preview ul,
+.markdown-preview ol {
+  margin-bottom: 16px;
+  padding-left: 32px;
+}
+
+.markdown-preview li {
+  margin-bottom: 4px;
+}
+
+/* 表格样式 */
+.markdown-preview table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+  margin-bottom: 16px;
+  background-color: #fff;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.markdown-preview table th,
+.markdown-preview table td {
+  padding: 8px 12px;
+  border: 1px solid #d0d7de;
+  text-align: left;
+  vertical-align: top;
+}
+
+.markdown-preview table th {
+  background-color: #f6f8fa;
+  font-weight: 600;
+  border-bottom: 2px solid #d0d7de;
+}
+
+.markdown-preview table tr:nth-child(even) {
+  background-color: #f6f8fa;
+}
+
+.markdown-preview table tr:hover {
+  background-color: #f1f8ff;
+}
+
+/* 引用块样式 */
+.markdown-preview blockquote {
+  border-left: 4px solid #d0d7de;
+  padding: 0 16px;
+  margin: 16px 0;
+  color: #656d76;
+  background-color: #f6f8fa;
+  border-radius: 0 6px 6px 0;
+}
+
+.markdown-preview blockquote p {
+  margin-bottom: 0;
+}
+
+/* 代码样式 */
+.markdown-preview code {
+  background-color: rgba(175, 184, 193, 0.2);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: 'SFMono-Regular', 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace;
+  font-size: 0.85em;
+}
+
+.markdown-preview pre {
+  background-color: #f6f8fa;
+  padding: 16px;
+  border-radius: 6px;
+  overflow: auto;
+  margin-bottom: 16px;
+  border: 1px solid #d0d7de;
+}
+
+.markdown-preview pre code {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.85em;
+}
+
+/* 图片样式 */
+.markdown-preview img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 8px 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 链接样式 */
+.markdown-preview a {
+  color: #0969da;
+  text-decoration: none;
+}
+
+.markdown-preview a:hover {
+  text-decoration: underline;
+}
+
+/* 分割线样式 */
+.markdown-preview hr {
+  border: none;
+  border-top: 1px solid #d0d7de;
+  margin: 24px 0;
+}
+
+/* 强调样式 */
+.markdown-preview strong {
+  font-weight: 600;
+}
+
+.markdown-preview em {
+  font-style: italic;
+}
+
+/* 删除线样式 */
+.markdown-preview del {
+  text-decoration: line-through;
+}
+
+/* 任务列表样式 */
+.markdown-preview input[type="checkbox"] {
+  margin-right: 8px;
+}

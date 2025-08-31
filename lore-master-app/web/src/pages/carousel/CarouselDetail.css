@@ -1,0 +1,67 @@
+/* 轮播图详情页样式 */
+
+.carousel-detail-content {
+  line-height: 1.8;
+}
+
+.content-html h1 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.content-html h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 14px;
+}
+
+.content-html h3 {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.content-html p {
+  margin-bottom: 12px;
+}
+
+.content-html ul,
+.content-html ol {
+  margin-bottom: 12px;
+  padding-left: 20px;
+}
+
+.content-html li {
+  margin-bottom: 4px;
+}
+
+.content-html blockquote {
+  border-left: 4px solid #1890ff;
+  padding-left: 16px;
+  margin: 16px 0;
+  font-style: italic;
+  color: #666;
+}
+
+.content-html code {
+  background-color: #f5f5f5;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: Monaco, Consolas, monospace;
+}
+
+.content-html pre {
+  background-color: #f5f5f5;
+  padding: 12px;
+  border-radius: 6px;
+  overflow: auto;
+  margin-bottom: 16px;
+}
+
+.content-html img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 8px 0;
+}

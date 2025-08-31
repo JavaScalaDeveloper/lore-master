@@ -279,3 +279,114 @@
   color: #0366d6;
   text-decoration: underline;
 }
+
+/* 表格样式 */
+.content-html .table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+  margin: 24rpx 0;
+  background-color: #fff;
+  border: 2rpx solid #d0d7de;
+  border-radius: 12rpx;
+  overflow: hidden;
+  font-size: 24rpx;
+}
+
+.content-html .table .th,
+.content-html .table .td {
+  padding: 16rpx 20rpx;
+  border: 1rpx solid #d0d7de;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.4;
+}
+
+.content-html .table .th {
+  background-color: #f6f8fa;
+  font-weight: 600;
+  border-bottom: 2rpx solid #d0d7de;
+  color: #24292f;
+}
+
+.content-html .table .tr:nth-child(even) .td {
+  background-color: #f6f8fa;
+}
+
+.content-html .table .tr:nth-child(odd) .td {
+  background-color: #fff;
+}
+
+/* 支持直接类名的表格样式（自定义解析器使用） */
+.content-html table,
+.table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+  margin: 24rpx 0;
+  background-color: #fff;
+  border: 2rpx solid #d0d7de;
+  border-radius: 12rpx;
+  overflow: hidden;
+  font-size: 24rpx;
+}
+
+.content-html th,
+.content-html td,
+.th,
+.td {
+  padding: 16rpx 20rpx;
+  border: 1rpx solid #d0d7de;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.4;
+}
+
+.content-html th,
+.th {
+  background-color: #f6f8fa;
+  font-weight: 600;
+  border-bottom: 2rpx solid #d0d7de;
+  color: #24292f;
+}
+
+.content-html tr:nth-child(even) td,
+.tr:nth-child(even) .td {
+  background-color: #f6f8fa;
+}
+
+.content-html tr:nth-child(odd) td,
+.tr:nth-child(odd) .td {
+  background-color: #fff;
+}
+
+/* 引用块样式 */
+.content-html .blockquote {
+  border-left: 8rpx solid #d0d7de;
+  padding: 0 32rpx;
+  margin: 32rpx 0;
+  color: #656d76;
+  background-color: #f6f8fa;
+  border-radius: 0 12rpx 12rpx 0;
+}
+
+.content-html .blockquote .p {
+  margin: 16rpx 0;
+  font-style: italic;
+}
+
+/* 分割线样式 */
+.content-html .hr {
+  border: none;
+  border-top: 2rpx solid #d0d7de;
+  margin: 48rpx 0;
+}
+
+/* 图片样式 */
+.content-html .img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12rpx;
+  margin: 16rpx 0;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}

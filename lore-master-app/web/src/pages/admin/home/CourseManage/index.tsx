@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { marked } from 'marked';
+import './markdown-preview.css';
 import {
   Card,
   Table,
@@ -149,7 +151,7 @@ const CourseManage: React.FC = () => {
     try {
       const requestParams = {
         ...queryParams,
-        page: queryParams.page - 1 // 转换为后端期望的从0开始的页码
+        page: Math.max(0, queryParams.page - 1) // 转换为后端期望的从0开始的页码，确保不会小于0
       };
       const response = await adminApi.post('/api/admin/course/list', requestParams);
       if (response.success) {
@@ -336,19 +338,24 @@ const CourseManage: React.FC = () => {
   // Markdown内容变化处理
   const handleMarkdownChange = (value: string) => {
     setMarkdownContent(value);
+    // 同步更新表单字段值
+    form.setFieldValue('contentMarkdown', value);
 
-    // 简单的Markdown预览（实际项目中建议使用专业的Markdown解析库）
-    const htmlContent = value
-      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-      .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-      .replace(/\*(.*)\*/gim, '<em>$1</em>')
-      .replace(/!\[([^\]]*)\]\(([^)]*)\)/gim, '<img alt="$1" src="$2" style="max-width: 100%;" />')
-      .replace(/\[([^\]]*)\]\(([^)]*)\)/gim, '<a href="$2">$1</a>')
-      .replace(/\n/gim, '<br>');
-
-    setMarkdownPreview(htmlContent);
+    // 使用专业的 marked 库解析 Markdown
+    try {
+      // 配置 marked 选项
+      marked.setOptions({
+        breaks: true, // 支持 GFM 换行
+        gfm: true,   // 启用 GitHub Flavored Markdown
+      });
+      
+      const htmlContent = marked(value);
+      setMarkdownPreview(htmlContent as string);
+    } catch (error) {
+      console.error('Markdown 解析失败:', error);
+      // 如果解析失败，回退到简单的文本显示
+      setMarkdownPreview(value.replace(/\n/g, '<br>'));
+    }
   };
 
   // 新增课程
@@ -819,7 +826,21 @@ const CourseManage: React.FC = () => {
             showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条 (共 ${Math.ceil(total / queryParams.size)} 页)`,
             pageSizeOptions: [10, 20, 50, 100, 200],
             onChange: (page, size) => {
-              setQueryParams(prev => ({ ...prev, page: page - 1, size: size || 10 }));
+              // 确保页码不会小于1
+              const newPage = Math.max(1, page);
+              setQueryParams(prev => ({ 
+                ...prev, 
+                page: newPage, 
+                size: size || prev.size || 10 
+              }));
+            },
+            onShowSizeChange: (current, size) => {
+              // 分页大小变化时，重置到第1页
+              setQueryParams(prev => ({ 
+                ...prev, 
+                page: 1, 
+                size: size || 10 
+              }));
             },
           }}
         />
@@ -1126,6 +1147,7 @@ const CourseManage: React.FC = () => {
                       placeholder="请输入Markdown格式的课程详情内容..."
                       rows={15}
                       style={{ fontFamily: 'Monaco, Consolas, monospace' }}
+                      value={markdownContent}
                       onChange={(e) => handleMarkdownChange(e.target.value)}
                     />
                   )
@@ -1145,8 +1167,10 @@ const CourseManage: React.FC = () => {
                         padding: '16px',
                         border: '1px solid #d9d9d9',
                         borderRadius: '6px',
-                        backgroundColor: '#fafafa'
+                        backgroundColor: '#fafafa',
+                        overflow: 'auto'
                       }}
+                      className="markdown-preview"
                       dangerouslySetInnerHTML={{ __html: markdownPreview || '暂无内容' }}
                     />
                   )

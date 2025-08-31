@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Spin, Button, Typography, Image, message, Space } from 'antd';
 import { ArrowLeftOutlined, EyeOutlined, CalendarOutlined } from '@ant-design/icons';
 import { consumerApi } from '../../utils/request';
+import './CarouselDetail.css';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -152,44 +153,14 @@ const CarouselDetail: React.FC = () => {
         )}
 
         {/* 内容区域 */}
-        <div style={{ lineHeight: '1.8' }}>
+        <div 
+          className="carousel-detail-content"
+          style={{ lineHeight: '1.8' }}
+        >
           {detail.contentHtml ? (
             <div 
               dangerouslySetInnerHTML={{ __html: detail.contentHtml }}
-              style={{
-                '& h1': { fontSize: '24px', fontWeight: 'bold', marginBottom: '16px' },
-                '& h2': { fontSize: '20px', fontWeight: 'bold', marginBottom: '14px' },
-                '& h3': { fontSize: '18px', fontWeight: 'bold', marginBottom: '12px' },
-                '& p': { marginBottom: '12px' },
-                '& ul, & ol': { marginBottom: '12px', paddingLeft: '20px' },
-                '& li': { marginBottom: '4px' },
-                '& blockquote': { 
-                  borderLeft: '4px solid #1890ff', 
-                  paddingLeft: '16px', 
-                  margin: '16px 0',
-                  fontStyle: 'italic',
-                  color: '#666'
-                },
-                '& code': {
-                  backgroundColor: '#f5f5f5',
-                  padding: '2px 4px',
-                  borderRadius: '3px',
-                  fontFamily: 'Monaco, Consolas, monospace'
-                },
-                '& pre': {
-                  backgroundColor: '#f5f5f5',
-                  padding: '12px',
-                  borderRadius: '6px',
-                  overflow: 'auto',
-                  marginBottom: '16px'
-                },
-                '& img': {
-                  maxWidth: '100%',
-                  height: 'auto',
-                  borderRadius: '4px',
-                  margin: '8px 0'
-                }
-              }}
+              className="content-html"
             />
           ) : detail.contentMarkdown ? (
             <pre style={{ 
