@@ -370,7 +370,7 @@ export default function Index() {
             className='search-btn'
             onClick={handleSearch}
           >
-            搜索
+            🔍 搜索
           </Button>
         </View>
       </View>

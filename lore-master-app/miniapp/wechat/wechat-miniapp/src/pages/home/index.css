@@ -57,7 +57,7 @@
   right: 4px;
   top: 50%;
   transform: translateY(-50%);
-  width: 88px;
+  width: 100px;
   height: 48px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -72,8 +72,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  writing-mode: horizontal-tb;
+  writing-mode: horizontal-tb !important;
   text-orientation: mixed;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
 }
 
 .search-btn:hover {
@@ -445,9 +447,10 @@
   }
 
   .search-btn {
-    width: 76px;
+    width: 90px;
     height: 40px;
     font-size: 14px;
+    writing-mode: horizontal-tb !important;
   }
 
   .swiper {
