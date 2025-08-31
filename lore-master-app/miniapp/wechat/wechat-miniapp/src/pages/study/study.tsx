@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react'
-import { useLoad, request, showToast, showLoading, hideLoading, navigateTo } from '@tarojs/taro'
+import { useState, useRef, useEffect } from 'react'
+import Taro, { useLoad, request, showToast, showLoading, hideLoading, navigateTo } from '@tarojs/taro'
 import { View, Text, Input, Button, ScrollView, Picker } from '@tarojs/components'
 import { buildApiUrl, getApiHeaders } from '../../config/api'
 import './study.css'
@@ -64,6 +64,102 @@ export default function Study() {
     setTimeout(() => loadCourses(true), 500)
   })
 
+  // 监听来自主页的搜索事件
+  useEffect(() => {
+    const handleSearchFromHome = (keyword: string) => {
+      console.log('接收到来自主页的搜索关键词:', keyword)
+      setSearchKeyword(keyword)
+      // 使用回调形式确保状态更新后再执行搜索
+      setTimeout(() => {
+        console.log('准备执行搜索，当前关键词:', keyword)
+        loadCoursesWithKeyword(keyword, true)
+      }, 100)
+    }
+
+    // 监听搜索事件
+    Taro.eventCenter.on('searchFromHome', handleSearchFromHome)
+
+    return () => {
+      // 清理事件监听
+      Taro.eventCenter.off('searchFromHome', handleSearchFromHome)
+    }
+  }, [])
+
+  // 加载课程列表（带关键词参数）
+  const loadCoursesWithKeyword = async (keyword: string, reset = false) => {
+    if (loading) return
+
+    const page = reset ? 0 : currentPage
+
+    try {
+      setLoading(true)
+      if (reset) {
+        showLoading({ title: '加载中...' })
+      }
+
+      const queryParams = {
+        page,
+        size: 10,
+        publishedOnly: true,
+        keyword: keyword.trim() || undefined,
+        difficultyLevel: selectedLevel || undefined,
+        courseType: selectedType === '普通' ? 'NORMAL' : selectedType === '合集' ? 'COLLECTION' : undefined,
+        contentType: selectedContent === '图文' ? 'ARTICLE' : selectedContent === '视频' ? 'VIDEO' : undefined
+      }
+
+      console.log('API调用参数:', queryParams)
+
+      const apiUrl = buildApiUrl('/api/consumer/course/queryCourseList')
+
+      const response = await request({
+        url: apiUrl,
+        method: 'POST',
+        data: queryParams,
+        header: getApiHeaders(),
+        // 添加超时设置
+        timeout: 30000
+      })
+
+      if (response && response.data && response.data.success) {
+        const pageData: CoursePageVO = response.data.data
+
+        if (reset) {
+          setCourses(pageData.courses || [])
+          setCurrentPage(0)
+        } else {
+          setCourses(prev => [...prev, ...(pageData.courses || [])])
+        }
+
+        setCurrentPage(page + 1)
+        setHasMore(!!pageData.hasNext)
+      } else {
+        const errorMsg = response?.data?.message || '加载失败'
+        console.error('API请求失败:', errorMsg)
+        showToast({
+          title: errorMsg,
+          icon: 'error'
+        })
+        // 确保即使API失败，也有一个空列表而不是undefined
+        if (reset) {
+          setCourses([])
+        }
+      }
+    } catch (error) {
+      console.error('加载课程失败:', error)
+      showToast({
+        title: '网络错误，请检查网络连接',
+        icon: 'error'
+      })
+      // 确保即使网络错误，也有一个空列表而不是undefined
+      if (reset) {
+        setCourses([])
+      }
+    } finally {
+      setLoading(false)
+      hideLoading()
+    }
+  }
+
   // 加载课程列表
   const loadCourses = async (reset = false) => {
     if (loading) return
@@ -85,6 +181,8 @@ export default function Study() {
         courseType: selectedType === '普通' ? 'NORMAL' : selectedType === '合集' ? 'COLLECTION' : undefined,
         contentType: selectedContent === '图文' ? 'ARTICLE' : selectedContent === '视频' ? 'VIDEO' : undefined
       }
+
+      console.log('API调用参数:', queryParams)
 
       const apiUrl = buildApiUrl('/api/consumer/course/queryCourseList')
 

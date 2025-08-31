@@ -1,4 +1,4 @@
-import { View, Text, Input, Swiper, SwiperItem, Image } from '@tarojs/components';
+import { View, Text, Input, Swiper, SwiperItem, Image, Button } from '@tarojs/components';
 import { useEffect, useState } from 'react';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { get, post } from '../../utils/request';
@@ -15,12 +15,6 @@ interface CarouselBanner {
   createdTime: string;
 }
 
-// API响应类型
-interface ApiResponse<T> {
-  success: boolean;
-  message: string;
-  data: T;
-}
 
 // 最近学习课程数据类型
 interface RecentLearningCourse {
@@ -193,9 +187,29 @@ export default function Index() {
     }
   };
 
-  // 处理搜索
-  const handleSearch = (e: any) => {
+  // 处理搜索输入
+  const handleSearchInput = (e: any) => {
     setSearchValue(e.detail.value);
+  };
+
+  // 处理搜索提交
+  const handleSearch = () => {
+    const keyword = searchValue.trim();
+    if (keyword) {
+      // 跳转到学习页面并传递搜索关键词
+      Taro.switchTab({
+        url: '/pages/study/study'
+      }).then(() => {
+        // 使用事件总线传递搜索关键词到学习页面
+        Taro.eventCenter.trigger('searchFromHome', keyword);
+      });
+    } else {
+      Taro.showToast({
+        title: '请输入搜索内容',
+        icon: 'none',
+        duration: 1500
+      });
+    }
   };
 
   // 处理功能点击
@@ -343,13 +357,22 @@ export default function Index() {
     <View className='index'>
       {/* 顶部搜索框 */}
       <View className='search-container'>
-        <Input
-          className='search-input'
-          placeholder='🔍 搜索课程、知识点...'
-          type='text'
-          value={searchValue}
-          onInput={handleSearch}
-        />
+        <View className='search-box'>
+          <Input
+            className='search-input'
+            placeholder='搜索课程、知识点...'
+            type='text'
+            value={searchValue}
+            onInput={handleSearchInput}
+            onConfirm={handleSearch}
+          />
+          <Button
+            className='search-btn'
+            onClick={handleSearch}
+          >
+            搜索
+          </Button>
+        </View>
       </View>
 
       {/* Swiper滑动视图卡片 */}
