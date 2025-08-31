@@ -1,12 +1,13 @@
-﻿﻿﻿﻿﻿﻿﻿﻿import { useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { useLoad, navigateBack, showToast, request, getStorageSync, connectSocket, onSocketOpen, onSocketMessage, onSocketClose, onSocketError, sendSocketMessage, closeSocket } from '@tarojs/taro'
 import { View, Text, ScrollView, Textarea, Button, Image } from '@tarojs/components'
 import MarkdownRenderer from '../../components/MarkdownRenderer/MarkdownRenderer'
+import { API_CONFIG } from '../../config/api'
 import './chat.css'
 
 // API配置
-const API_BASE_URL = 'http://localhost:8082'
-const WS_BASE_URL = 'ws://localhost:8082'
+const API_BASE_URL = API_CONFIG.baseUrl
+const WS_BASE_URL = API_BASE_URL.replace('http://', 'ws://').replace('https://', 'wss://')
 const API_ENDPOINTS = {
   CHAT_STREAM: `${API_BASE_URL}/api/chat/stream`,
   CHAT_MINIAPP_STREAM: `${API_BASE_URL}/api/chat/miniapp-stream`,

@@ -147,10 +147,14 @@ const CourseManage: React.FC = () => {
   const loadCourses = async () => {
     setLoading(true);
     try {
-      const response = await adminApi.post('/api/admin/course/list', queryParams);
+      const requestParams = {
+        ...queryParams,
+        page: queryParams.page - 1 // 转换为后端期望的从0开始的页码
+      };
+      const response = await adminApi.post('/api/admin/course/list', requestParams);
       if (response.success) {
         setCourses(response.data.courses || []);
-        setTotal(response.data.total || 0);
+        setTotal(response.data.totalElements || 0);
       } else {
         message.error('加载课程列表失败: ' + response.message);
       }
@@ -812,9 +816,10 @@ const CourseManage: React.FC = () => {
             total: total,
             showSizeChanger: true,
             showQuickJumper: true,
-            showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
+            showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条 (共 ${Math.ceil(total / queryParams.size)} 页)`,
+            pageSizeOptions: [10, 20, 50, 100, 200],
             onChange: (page, size) => {
-              setQueryParams(prev => ({ ...prev, page, size: size || 10 }));
+              setQueryParams(prev => ({ ...prev, page: page - 1, size: size || 10 }));
             },
           }}
         />

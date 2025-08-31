@@ -58,7 +58,7 @@ export default {
   // 配置服务器域名
   request: {
     domainList: [
-      'http://localhost:8082',
+      'https://ly112978940c.vicp.fun',
       'https://your-production-domain.com'
     ],
     // 开发环境下允许HTTP请求

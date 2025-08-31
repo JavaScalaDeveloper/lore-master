@@ -26,14 +26,14 @@ const configs: Record<Environment, ApiConfig> = {
 
   // 生产环境
   production: {
-    baseUrl: 'https://api.loremaster.com', // 替换为实际的生产环境域名
+    baseUrl: process.env.TARO_APP_API_BASE_URL || 'https://api.loremaster.com', // 从环境变量或默认值获取生产环境地址
     timeout: 15000,
     enableLog: false,
   },
 
   // 测试环境
   test: {
-    baseUrl: 'https://test-api.loremaster.com', // 替换为实际的测试环境域名
+    baseUrl: process.env.TARO_APP_API_BASE_URL || 'https://test-api.loremaster.com', // 从环境变量或默认值获取测试环境地址
     timeout: 12000,
     enableLog: true,
   },
