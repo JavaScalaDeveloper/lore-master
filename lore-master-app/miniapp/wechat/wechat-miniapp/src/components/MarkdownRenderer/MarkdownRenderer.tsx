@@ -32,7 +32,6 @@ const MarkdownRenderer = ({ content, className = '' }: MarkdownRendererProps) =>
     const parseInlineFormats = (text: string) => {
       const parts: any[] = []
       let currentText = text
-      let index = 0
 
       while (currentText.length > 0) {
         // 查找下一个格式标记
@@ -158,6 +157,57 @@ const MarkdownRenderer = ({ content, className = '' }: MarkdownRendererProps) =>
         return
       }
 
+      // 表格处理
+      if (line.includes('|') && line.trim().startsWith('|') && line.trim().endsWith('|')) {
+        // 检查是否是表格的开始
+        const nextLine = lines[index + 1]
+        if (nextLine && (nextLine.includes('---') || nextLine.includes(':-'))) {
+          // 这是一个表格的开始
+          flushList()
+          
+          const tableLines: string[] = []
+          tableLines.push(line) // 表头
+          
+          // 跳过分隔行
+          let currentIndex = index + 1
+          if (lines[currentIndex] && (lines[currentIndex].includes('---') || lines[currentIndex].includes(':-'))) {
+            currentIndex++
+          }
+          
+          // 收集表格数据行
+          while (currentIndex < lines.length && 
+                 lines[currentIndex] && 
+                 lines[currentIndex].includes('|') && 
+                 lines[currentIndex].trim().startsWith('|') && 
+                 lines[currentIndex].trim().endsWith('|')) {
+            tableLines.push(lines[currentIndex])
+            currentIndex++
+          }
+          
+          if (tableLines.length >= 2) {
+            // 解析表格
+            const headers = tableLines[0].split('|').slice(1, -1).map(cell => cell.trim())
+            const rows = tableLines.slice(1).map(row => 
+              row.split('|').slice(1, -1).map(cell => cell.trim())
+            )
+            
+            elements.push({
+              type: 'table',
+              headers,
+              rows
+            })
+            
+            // 跳过已处理的行
+            for (let i = index + 1; i < currentIndex; i++) {
+              if (i < lines.length) {
+                lines[i] = '' // 标记为已处理
+              }
+            }
+            return
+          }
+        }
+      }
+
       // 普通段落
       flushList()
 
@@ -274,6 +324,31 @@ const MarkdownRenderer = ({ content, className = '' }: MarkdownRendererProps) =>
                   </Text>
                 </View>
               </ScrollView>
+            )
+          case 'table':
+            return (
+              <View key={index} className='md-table-container'>
+                <View className='md-table'>
+                  {/* 表头 */}
+                  <View className='md-table-header'>
+                    {element.headers.map((header: string, headerIndex: number) => (
+                      <View key={headerIndex} className='md-table-header-cell'>
+                        <Text className='md-table-header-text'>{header}</Text>
+                      </View>
+                    ))}
+                  </View>
+                  {/* 表格体 */}
+                  {element.rows.map((row: string[], rowIndex: number) => (
+                    <View key={rowIndex} className='md-table-row'>
+                      {row.map((cell: string, cellIndex: number) => (
+                        <View key={cellIndex} className='md-table-cell'>
+                          <Text className='md-table-cell-text'>{cell}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  ))}
+                </View>
+              </View>
             )
           case 'break':
             return <View key={index} className='md-break' />

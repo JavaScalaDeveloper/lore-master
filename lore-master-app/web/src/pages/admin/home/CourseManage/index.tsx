@@ -335,8 +335,26 @@ const CourseManage: React.FC = () => {
     }
   };
 
+  // 图片代理处理函数
+  const processImageUrls = (html: string): string => {
+    // 匹配所有img标签中的src属性
+    return html.replace(/<img([^>]*?)src=["']([^"']*)["']([^>]*?)>/gi, (match, before, src, after) => {
+      console.log('Processing image:', src); // 调试日志
+      // 检查是否是外部链接（http/https开头且不是本站链接）
+      if (src.startsWith('http') && !src.includes(window.location.hostname)) {
+        // 使用免费的图片代理服务
+        const proxySrc = `https://images.weserv.nl/?url=${encodeURIComponent(src)}`;
+        console.log('Converting to proxy URL:', proxySrc); // 调试日志
+        return `<img${before}src="${proxySrc}"${after} onerror="this.onerror=null;this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWbvueJh+WKoOi9veWksei0pTwvdGV4dD48L3N2Zz4=';this.title='图片加载失败: ${src}'">`;
+      }
+      console.log('Keeping original URL:', src); // 调试日志
+      return match;
+    });
+  };
+
   // Markdown内容变化处理
   const handleMarkdownChange = (value: string) => {
+    console.log('Markdown content changed:', value); // 调试日志
     setMarkdownContent(value);
     // 同步更新表单字段值
     form.setFieldValue('contentMarkdown', value);
@@ -349,8 +367,14 @@ const CourseManage: React.FC = () => {
         gfm: true,   // 启用 GitHub Flavored Markdown
       });
       
-      const htmlContent = marked(value);
-      setMarkdownPreview(htmlContent as string);
+      let htmlContent = marked(value) as string;
+      console.log('Original HTML content:', htmlContent); // 调试日志
+      
+      // 处理外部图片链接
+      htmlContent = processImageUrls(htmlContent);
+      console.log('Processed HTML content:', htmlContent); // 调试日志
+      
+      setMarkdownPreview(htmlContent);
     } catch (error) {
       console.error('Markdown 解析失败:', error);
       // 如果解析失败，回退到简单的文本显示
@@ -892,6 +916,25 @@ const CourseManage: React.FC = () => {
                     <Tag key={index}>{tag}</Tag>
                   ))}
                 </Space>
+              </div>
+            )}
+            {selectedCourse.contentMarkdown && (
+              <div>
+                <p><strong>课程内容：</strong></p>
+                <div
+                  style={{
+                    maxHeight: '400px',
+                    padding: '16px',
+                    border: '1px solid #d9d9d9',
+                    borderRadius: '6px',
+                    backgroundColor: '#fafafa',
+                    overflow: 'auto'
+                  }}
+                  className="markdown-preview"
+                  dangerouslySetInnerHTML={{ 
+                    __html: processImageUrls(marked(selectedCourse.contentMarkdown) as string) 
+                  }}
+                />
               </div>
             )}
           </div>
