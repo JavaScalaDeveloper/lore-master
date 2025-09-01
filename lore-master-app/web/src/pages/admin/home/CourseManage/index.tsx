@@ -142,7 +142,7 @@ const CourseManage: React.FC = () => {
   // Markdown编辑器状态
   const [markdownContent, setMarkdownContent] = useState('');
   const [markdownPreview, setMarkdownPreview] = useState('');
-  const [previewMode, setPreviewMode] = useState(false);
+  const [previewMode, setPreviewMode] = useState('split');
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
 
   // 加载课程列表
@@ -442,6 +442,9 @@ const CourseManage: React.FC = () => {
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
+
+      // 确保传递原始Markdown内容
+      values.contentMarkdown = markdownContent;
 
       // 根据知识点编码设置路径信息
       const selectedNode = knowledgeNodes.find(node => node.nodeCode === values.knowledgeNodeCode);
@@ -876,7 +879,7 @@ const CourseManage: React.FC = () => {
         open={detailModalVisible}
         onCancel={() => setDetailModalVisible(false)}
         footer={null}
-        width={800}
+        width={1200}
       >
         {selectedCourse && (
           <div>
@@ -947,7 +950,7 @@ const CourseManage: React.FC = () => {
         open={editModalVisible}
         onCancel={() => setEditModalVisible(false)}
         onOk={handleSave}
-        width={800}
+        width={1400}
         okText="保存"
         cancelText="取消"
       >
@@ -1161,8 +1164,8 @@ const CourseManage: React.FC = () => {
             label="课程详情内容"
           >
             <Tabs
-              activeKey={previewMode ? 'preview' : 'edit'}
-              onChange={(key) => setPreviewMode(key === 'preview')}
+              activeKey={previewMode}
+              onChange={(key) => setPreviewMode(key)}
               tabBarExtraContent={
                 <Space>
                   <Upload
@@ -1216,6 +1219,48 @@ const CourseManage: React.FC = () => {
                       className="markdown-preview"
                       dangerouslySetInnerHTML={{ __html: markdownPreview || '暂无内容' }}
                     />
+                  )
+                },
+                {
+                  key: 'split',
+                  label: (
+                    <span>
+                      <EyeOutlined />
+                      分屏
+                    </span>
+                  ),
+                  children: (
+                    <div style={{ display: 'flex', gap: '16px', height: '400px' }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ marginBottom: '8px', fontWeight: 'bold' }}>编辑</div>
+                        <TextArea
+                          placeholder="请输入Markdown格式的课程详情内容..."
+                          value={markdownContent}
+                          onChange={(e) => handleMarkdownChange(e.target.value)}
+                          style={{ 
+                            height: '370px',
+                            fontFamily: 'Monaco, Consolas, monospace',
+                            fontSize: '13px',
+                            resize: 'none'
+                          }}
+                        />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ marginBottom: '8px', fontWeight: 'bold' }}>预览</div>
+                        <div
+                          style={{
+                            height: '370px',
+                            padding: '12px',
+                            border: '1px solid #d9d9d9',
+                            borderRadius: '6px',
+                            backgroundColor: '#fafafa',
+                            overflow: 'auto'
+                          }}
+                          className="markdown-preview"
+                          dangerouslySetInnerHTML={{ __html: markdownPreview || '暂无内容' }}
+                        />
+                      </div>
+                    </div>
                   )
                 }
               ]}

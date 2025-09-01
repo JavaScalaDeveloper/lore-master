@@ -14,7 +14,8 @@ import {
   TrophyOutlined,
   FileTextOutlined,
   ExperimentOutlined,
-  PlayCircleOutlined
+  PlayCircleOutlined,
+  PictureOutlined
 } from '@ant-design/icons';
 import Overview from './Overview/index';
 import UserManage from './UserManage';
@@ -25,6 +26,7 @@ import QuestionManage from './QuestionManage/index';
 import SubjectManage from './SubjectManage/index';
 import LevelManage from './LevelManage/index';
 import CryptoTest from './CryptoTest/index';
+import CarouselManage from './carousel/CarouselManage';
 
 const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
@@ -54,6 +56,11 @@ const menuItems = [
     key: 'course',
     icon: <PlayCircleOutlined />,
     label: '课程管理',
+  },
+  {
+    key: 'carousel',
+    icon: <PictureOutlined />,
+    label: '轮播图管理',
   },
   {
     key: 'question',
@@ -118,6 +125,8 @@ const Home: React.FC = () => {
         return <KnowledgeManage />;
       case 'course':
         return <CourseManage />;
+      case 'carousel':
+        return <CarouselManage />;
       case 'question':
         return <QuestionManage />;
       case 'subject':

@@ -1,6 +1,9 @@
 package com.lore.master.data.vo.consumer;
 
+import com.lore.master.data.entity.consumer.ConsumerCarouselBanner;
 import lombok.Data;
+import org.springframework.beans.BeanUtils;
+
 import java.time.LocalDateTime;
 
 /**
@@ -58,4 +61,13 @@ public class CarouselBannerDetailVO {
      * 更新时间
      */
     private LocalDateTime updatedTime;
+
+    /**
+     * 转换为详情VO对象
+     */
+    public static CarouselBannerDetailVO convertToDetailVO(ConsumerCarouselBanner banner) {
+        CarouselBannerDetailVO vo = new CarouselBannerDetailVO();
+        BeanUtils.copyProperties(banner, vo);
+        return vo;
+    }
 }

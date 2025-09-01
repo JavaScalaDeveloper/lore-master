@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Spin, Button, Typography, Image, message, Space } from 'antd';
-import { ArrowLeftOutlined, EyeOutlined, CalendarOutlined } from '@ant-design/icons';
-import { consumerApi } from '../../utils/request';
+import { Card, Spin, Button, Typography, Image, message, Space, Modal } from 'antd';
+import { ArrowLeftOutlined, EyeOutlined, CalendarOutlined, EditOutlined } from '@ant-design/icons';
+import { marked } from 'marked';
+import { adminApi } from '../../../../utils/request';
 import './CarouselDetail.css';
 
 const { Title, Paragraph, Text } = Typography;
@@ -25,6 +26,7 @@ const CarouselDetail: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<CarouselBannerDetail | null>(null);
+  const [editModalVisible, setEditModalVisible] = useState(false);
 
   useEffect(() => {
     if (bannerId) {
@@ -37,7 +39,7 @@ const CarouselDetail: React.FC = () => {
   const loadCarouselDetail = async (id: string) => {
     try {
       setLoading(true);
-      const response = await consumerApi.get(`/api/carousel/detail?bannerId=${id}`);
+      const response = await adminApi.get(`/api/admin/carousel/detail?bannerId=${id}`);
       if (response.success) {
         setDetail(response.data);
       } else {
@@ -53,7 +55,7 @@ const CarouselDetail: React.FC = () => {
 
   const incrementViewCount = async (id: string) => {
     try {
-      await consumerApi.post(`/api/carousel/view?bannerId=${id}`);
+      await adminApi.post(`/api/admin/carousel/view?bannerId=${id}`);
     } catch (error) {
       console.error('更新查看次数失败:', error);
     }
@@ -61,6 +63,15 @@ const CarouselDetail: React.FC = () => {
 
   const handleBack = () => {
     navigate(-1);
+  };
+
+  const handleEdit = () => {
+    setEditModalVisible(true);
+  };
+
+  const renderMarkdown = (markdown: string) => {
+    const html = marked(markdown);
+    return { __html: html };
   };
 
   const formatDate = (dateString: string) => {
@@ -98,15 +109,22 @@ const CarouselDetail: React.FC = () => {
   }
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px' }}>
-      {/* 返回按钮 */}
-      <div style={{ marginBottom: '20px' }}>
+    <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '20px' }}>
+      {/* 操作按钮 */}
+      <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between' }}>
         <Button 
           icon={<ArrowLeftOutlined />} 
           onClick={handleBack}
           type="text"
         >
           返回
+        </Button>
+        <Button 
+          type="primary"
+          icon={<EditOutlined />} 
+          onClick={handleEdit}
+        >
+          编辑
         </Button>
       </div>
 
@@ -157,20 +175,48 @@ const CarouselDetail: React.FC = () => {
           className="carousel-detail-content"
           style={{ lineHeight: '1.8' }}
         >
-          {detail.contentHtml ? (
+          {detail.contentMarkdown ? (
+            <div>
+              <h3 style={{ marginBottom: '16px', color: '#333' }}>Markdown 原始内容</h3>
+              <div style={{
+                padding: '16px',
+                backgroundColor: '#f8f8f8',
+                border: '1px solid #e8e8e8',
+                borderRadius: '6px',
+                marginBottom: '24px'
+              }}>
+                <pre style={{ 
+                  margin: 0, 
+                  whiteSpace: 'pre-wrap',
+                  fontFamily: 'Monaco, Consolas, monospace',
+                  fontSize: '13px',
+                  lineHeight: '1.5',
+                  color: '#333'
+                }}>
+                  {detail.contentMarkdown}
+                </pre>
+              </div>
+              
+              <h3 style={{ marginBottom: '16px', color: '#333' }}>渲染预览</h3>
+              <div 
+                dangerouslySetInnerHTML={renderMarkdown(detail.contentMarkdown)}
+                className="markdown-content"
+                style={{
+                  fontSize: '16px',
+                  lineHeight: '1.8',
+                  color: '#333',
+                  padding: '16px',
+                  backgroundColor: '#fafafa',
+                  border: '1px solid #f0f0f0',
+                  borderRadius: '6px'
+                }}
+              />
+            </div>
+          ) : detail.contentHtml ? (
             <div 
               dangerouslySetInnerHTML={{ __html: detail.contentHtml }}
               className="content-html"
             />
-          ) : detail.contentMarkdown ? (
-            <pre style={{ 
-              whiteSpace: 'pre-wrap', 
-              fontFamily: 'inherit',
-              fontSize: '14px',
-              lineHeight: '1.6'
-            }}>
-              {detail.contentMarkdown}
-            </pre>
           ) : (
             <Text type="secondary">暂无详细内容</Text>
           )}
@@ -189,6 +235,31 @@ const CarouselDetail: React.FC = () => {
           </div>
         )}
       </Card>
+
+      {/* 编辑模态框 */}
+      <Modal
+        title="编辑轮播图"
+        open={editModalVisible}
+        onCancel={() => setEditModalVisible(false)}
+        footer={null}
+        width={800}
+        destroyOnClose
+      >
+        <div style={{ textAlign: 'center', padding: '50px' }}>
+          <Text type="secondary">编辑功能将在管理页面中打开</Text>
+          <div style={{ marginTop: '20px' }}>
+            <Button 
+              type="primary"
+              onClick={() => {
+                setEditModalVisible(false);
+                navigate('/admin/carousel');
+              }}
+            >
+              前往管理页面
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
