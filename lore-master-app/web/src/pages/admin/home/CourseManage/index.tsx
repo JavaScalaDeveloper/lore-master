@@ -396,45 +396,57 @@ const CourseManage: React.FC = () => {
   };
 
   // 编辑课程
-  const handleEdit = (course: Course) => {
+  const handleEdit = async (course: Course) => {
     setIsCreating(false);
     setEditingCourse(course);
 
-    // 设置表单初始值
-    form.setFieldsValue({
-      courseCode: course.courseCode,
-      title: course.title,
-      description: course.description,
-      author: course.author,
-      courseType: course.courseType,
-      contentType: course.contentType,
-      difficultyLevel: course.difficultyLevel,
-      status: course.status,
-      knowledgeNodeCode: course.knowledgeNodeCode,
-      tags: course.tags,
-      durationMinutes: course.durationMinutes,
-      sortOrder: course.sortOrder,
-      contentUrl: course.contentUrl,
-      coverImageUrl: course.coverImageUrl,
-      thumbnailUrl: course.thumbnailUrl,
-      contentMarkdown: course.contentMarkdown
-    });
+    try {
+      // 获取完整的课程详情（包含Markdown内容）
+      const response = await adminApi.get(`/api/admin/course/detail/${course.id}`);
+      if (response.success) {
+        const fullCourse = response.data;
+        
+        // 设置表单初始值
+        form.setFieldsValue({
+          courseCode: fullCourse.courseCode,
+          title: fullCourse.title,
+          description: fullCourse.description,
+          author: fullCourse.author,
+          courseType: fullCourse.courseType,
+          contentType: fullCourse.contentType,
+          difficultyLevel: fullCourse.difficultyLevel,
+          status: fullCourse.status,
+          knowledgeNodeCode: fullCourse.knowledgeNodeCode,
+          tags: fullCourse.tags,
+          durationMinutes: fullCourse.durationMinutes,
+          sortOrder: fullCourse.sortOrder,
+          contentUrl: fullCourse.contentUrl,
+          coverImageUrl: fullCourse.coverImageUrl,
+          thumbnailUrl: fullCourse.thumbnailUrl,
+          contentMarkdown: fullCourse.contentMarkdown
+        });
 
-    // 设置Markdown内容
-    const markdownValue = course.contentMarkdown || '';
-    setMarkdownContent(markdownValue);
-    handleMarkdownChange(markdownValue);
+        // 设置Markdown内容
+        const markdownValue = fullCourse.contentMarkdown || '';
+        setMarkdownContent(markdownValue);
+        handleMarkdownChange(markdownValue);
 
-    setUploadedFiles([]);
+        setUploadedFiles([]);
+        setEditModalVisible(true);
 
-    setEditModalVisible(true);
-
-    // 根据当前课程的知识点路径加载相关技能树
-    if (course.knowledgeNodePath) {
-      loadKnowledgeNodes(course.knowledgeNodePath);
-    } else {
-      // 如果没有知识点路径，加载所有根节点
-      loadKnowledgeNodes();
+        // 根据当前课程的知识点路径加载相关技能树
+        if (fullCourse.knowledgeNodePath) {
+          loadKnowledgeNodes(fullCourse.knowledgeNodePath);
+        } else {
+          // 如果没有知识点路径，加载所有根节点
+          loadKnowledgeNodes();
+        }
+      } else {
+        message.error('获取课程详情失败');
+      }
+    } catch (error) {
+      console.error('获取课程详情失败:', error);
+      message.error('获取课程详情失败');
     }
   };
 

@@ -4,6 +4,7 @@ import com.lore.master.data.dto.business.CourseQueryDTO;
 import com.lore.master.data.dto.business.CourseRequest;
 import com.lore.master.data.vo.business.CourseVO;
 import com.lore.master.data.vo.business.CoursePageVO;
+import com.lore.master.data.vo.business.CourseListPageVO;
 import com.lore.master.data.vo.business.RecentLearningCourseVO;
 
 import java.util.List;
@@ -14,12 +15,12 @@ import java.util.List;
 public interface BusinessCourseService {
 
     /**
-     * 分页查询课程
+     * 分页查询课程（轻量级，不包含大字段）
      * 
      * @param queryDTO 查询条件
      * @return 分页课程数据
      */
-    CoursePageVO getCourses(CourseQueryDTO queryDTO);
+    CourseListPageVO getCourses(CourseQueryDTO queryDTO);
 
     /**
      * 根据课程编码获取课程详情
@@ -57,7 +58,7 @@ public interface BusinessCourseService {
      * @param userId 用户ID（可选）
      * @return 搜索结果
      */
-    CoursePageVO searchCourses(String keyword, Integer page, Integer size, String userId);
+    CourseListPageVO searchCourses(String keyword, Integer page, Integer size, String userId);
 
     /**
      * 获取热门课程
@@ -67,7 +68,7 @@ public interface BusinessCourseService {
      * @param userId 用户ID（可选）
      * @return 热门课程列表
      */
-    CoursePageVO getPopularCourses(Integer page, Integer size, String userId);
+    CourseListPageVO getPopularCourses(Integer page, Integer size, String userId);
 
     /**
      * 获取最新课程
@@ -77,7 +78,7 @@ public interface BusinessCourseService {
      * @param userId 用户ID（可选）
      * @return 最新课程列表
      */
-    CoursePageVO getLatestCourses(Integer page, Integer size, String userId);
+    CourseListPageVO getLatestCourses(Integer page, Integer size, String userId);
 
     /**
      * 根据知识点路径获取相关课程
@@ -88,7 +89,7 @@ public interface BusinessCourseService {
      * @param userId 用户ID（可选）
      * @return 相关课程列表
      */
-    CoursePageVO getCoursesByKnowledgePath(String knowledgeNodePath, Integer page, Integer size, String userId);
+    CourseListPageVO getCoursesByKnowledgePath(String knowledgeNodePath, Integer page, Integer size, String userId);
 
     /**
      * 根据难度等级获取课程
@@ -99,7 +100,7 @@ public interface BusinessCourseService {
      * @param userId 用户ID（可选）
      * @return 课程列表
      */
-    CoursePageVO getCoursesByDifficulty(String difficultyLevel, Integer page, Integer size, String userId);
+    CourseListPageVO getCoursesByDifficulty(String difficultyLevel, Integer page, Integer size, String userId);
 
     /**
      * 根据作者获取课程
@@ -110,7 +111,7 @@ public interface BusinessCourseService {
      * @param userId 用户ID（可选）
      * @return 课程列表
      */
-    CoursePageVO getCoursesByAuthor(String author, Integer page, Integer size, String userId);
+    CourseListPageVO getCoursesByAuthor(String author, Integer page, Integer size, String userId);
 
     /**
      * 获取课程统计信息
@@ -152,7 +153,7 @@ public interface BusinessCourseService {
      * @param size 每页大小
      * @return 推荐课程列表
      */
-    CoursePageVO getRecommendedCourses(String userId, Integer page, Integer size);
+    CourseListPageVO getRecommendedCourses(String userId, Integer page, Integer size);
 
     /**
      * 创建课程

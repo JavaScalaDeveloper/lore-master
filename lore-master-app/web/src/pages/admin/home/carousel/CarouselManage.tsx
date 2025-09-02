@@ -118,7 +118,7 @@ const CarouselManage: React.FC = () => {
 
   const handleDelete = async (bannerId: string) => {
     try {
-      const response = await adminApi.post(`/api/admin/carousel/delete?bannerId=${bannerId}`);
+      const response = await adminApi.post('/api/admin/carousel/delete', { bannerId });
       if (response.success) {
         message.success('删除成功');
         loadBanners();
@@ -133,7 +133,7 @@ const CarouselManage: React.FC = () => {
 
   const handleStatusChange = async (bannerId: string, status: string) => {
     try {
-      const response = await adminApi.post(`/api/admin/carousel/updateStatus?bannerId=${bannerId}&status=${status}`);
+      const response = await adminApi.post('/api/admin/carousel/updateStatus', { bannerId, status });
       if (response.success) {
         message.success('状态更新成功');
         loadBanners();

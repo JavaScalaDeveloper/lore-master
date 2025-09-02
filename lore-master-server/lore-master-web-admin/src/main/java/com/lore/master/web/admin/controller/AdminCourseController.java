@@ -4,6 +4,7 @@ import com.lore.master.common.result.Result;
 import com.lore.master.data.dto.business.CourseQueryDTO;
 import com.lore.master.data.dto.business.CourseRequest;
 import com.lore.master.data.vo.business.CoursePageVO;
+import com.lore.master.data.vo.business.CourseListPageVO;
 import com.lore.master.data.vo.business.CourseVO;
 import com.lore.master.service.business.BusinessCourseService;
 import lombok.RequiredArgsConstructor;
@@ -29,13 +30,13 @@ public class AdminCourseController {
      * 分页查询课程列表
      */
     @PostMapping("/list")
-    public Result<CoursePageVO> getCourseList(@Valid @RequestBody CourseQueryDTO queryDTO) {
+    public Result<CourseListPageVO> getCourseList(@Valid @RequestBody CourseQueryDTO queryDTO) {
         log.info("管理端查询课程列表，参数：{}", queryDTO);
 
         // 管理端查询不限制发布状态
         queryDTO.setPublishedOnly(false);
 
-        CoursePageVO result = courseService.getCourses(queryDTO);
+        CourseListPageVO result = courseService.getCourses(queryDTO);
         return Result.success(result);
     }
 
@@ -76,13 +77,13 @@ public class AdminCourseController {
      * 搜索课程
      */
     @PostMapping("/search")
-    public Result<CoursePageVO> searchCourses(@Valid @RequestBody CourseQueryDTO queryDTO) {
+    public Result<CourseListPageVO> searchCourses(@Valid @RequestBody CourseQueryDTO queryDTO) {
         log.info("管理端搜索课程，参数：{}", queryDTO);
 
         // 管理端搜索不限制发布状态
         queryDTO.setPublishedOnly(false);
 
-        CoursePageVO result = courseService.searchCourses(
+        CourseListPageVO result = courseService.searchCourses(
             queryDTO.getKeyword(),
             queryDTO.getPage(),
             queryDTO.getSize(),

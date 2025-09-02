@@ -10,6 +10,8 @@ import com.lore.master.data.repository.business.BusinessCourseRepository;
 import com.lore.master.data.repository.consumer.ConsumerUserCourseLearningRecordRepository;
 import com.lore.master.data.vo.business.CourseVO;
 import com.lore.master.data.vo.business.CoursePageVO;
+import com.lore.master.data.vo.business.CourseListVO;
+import com.lore.master.data.vo.business.CourseListPageVO;
 import com.lore.master.data.vo.business.RecentLearningCourseVO;
 import com.lore.master.service.business.BusinessCourseService;
 import com.lore.master.service.business.MarkdownProcessingService;
@@ -45,7 +47,7 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
     private final ConsumerUserCourseLearningRecordRepository learningRecordRepository;
 
     @Override
-    public CoursePageVO getCourses(CourseQueryDTO queryDTO) {
+    public CourseListPageVO getCourses(CourseQueryDTO queryDTO) {
         log.info("查询课程列表，条件：{}", queryDTO);
 
         // 构建分页参数
@@ -139,7 +141,7 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
     }
 
     @Override
-    public CoursePageVO searchCourses(String keyword, Integer page, Integer size, String userId) {
+    public CourseListPageVO searchCourses(String keyword, Integer page, Integer size, String userId) {
         log.info("搜索课程，keyword：{}，page：{}，size：{}，userId：{}", keyword, page, size, userId);
 
         Pageable pageable = PageRequest.of(page, size);
@@ -149,7 +151,7 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
     }
 
     @Override
-    public CoursePageVO getPopularCourses(Integer page, Integer size, String userId) {
+    public CourseListPageVO getPopularCourses(Integer page, Integer size, String userId) {
         log.info("获取热门课程，page：{}，size：{}，userId：{}", page, size, userId);
 
         Pageable pageable = PageRequest.of(page, size);
@@ -161,7 +163,7 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
     }
 
     @Override
-    public CoursePageVO getLatestCourses(Integer page, Integer size, String userId) {
+    public CourseListPageVO getLatestCourses(Integer page, Integer size, String userId) {
         log.info("获取最新课程，page：{}，size：{}，userId：{}", page, size, userId);
 
         Pageable pageable = PageRequest.of(page, size);
@@ -173,7 +175,7 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
     }
 
     @Override
-    public CoursePageVO getCoursesByKnowledgePath(String knowledgeNodePath, Integer page, Integer size, String userId) {
+    public CourseListPageVO getCoursesByKnowledgePath(String knowledgeNodePath, Integer page, Integer size, String userId) {
         log.info("根据知识点路径获取课程，knowledgeNodePath：{}，page：{}，size：{}，userId：{}", 
                 knowledgeNodePath, page, size, userId);
 
@@ -185,7 +187,7 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
     }
 
     @Override
-    public CoursePageVO getCoursesByDifficulty(String difficultyLevel, Integer page, Integer size, String userId) {
+    public CourseListPageVO getCoursesByDifficulty(String difficultyLevel, Integer page, Integer size, String userId) {
         log.info("根据难度等级获取课程，difficultyLevel：{}，page：{}，size：{}，userId：{}", 
                 difficultyLevel, page, size, userId);
 
@@ -196,7 +198,7 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
     }
 
     @Override
-    public CoursePageVO getCoursesByAuthor(String author, Integer page, Integer size, String userId) {
+    public CourseListPageVO getCoursesByAuthor(String author, Integer page, Integer size, String userId) {
         log.info("根据作者获取课程，author：{}，page：{}，size：{}，userId：{}", author, page, size, userId);
 
         Pageable pageable = PageRequest.of(page, size);
@@ -248,7 +250,7 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
     }
 
     @Override
-    public CoursePageVO getRecommendedCourses(String userId, Integer page, Integer size) {
+    public CourseListPageVO getRecommendedCourses(String userId, Integer page, Integer size) {
         log.info("获取推荐课程，userId：{}，page：{}，size：{}", userId, page, size);
 
         // TODO: 实现基于用户学习目标和历史的推荐算法
@@ -281,14 +283,14 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
     }
 
     /**
-     * 构建课程分页VO（从Page对象）
+     * 构建课程分页VO（从Page对象）- 轻量级版本
      */
-    private CoursePageVO buildCoursePageVO(Page<BusinessCourse> coursePage, CourseQueryDTO queryDTO) {
-        List<CourseVO> courseVOs = coursePage.getContent().stream()
-                .map(course -> convertToVO(course, null))
+    private CourseListPageVO buildCoursePageVO(Page<BusinessCourse> coursePage, CourseQueryDTO queryDTO) {
+        List<CourseListVO> courseVOs = coursePage.getContent().stream()
+                .map(this::convertToListVO)
                 .collect(Collectors.toList());
 
-        return CoursePageVO.builder()
+        return CourseListPageVO.builder()
                 .courses(courseVOs)
                 .currentPage(coursePage.getNumber())
                 .pageSize(coursePage.getSize())
@@ -303,14 +305,14 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
     }
 
     /**
-     * 构建课程分页VO（从List对象）
+     * 构建课程分页VO（从List对象）- 轻量级版本
      */
-    private CoursePageVO buildCoursePageVO(List<BusinessCourse> courses, CourseQueryDTO queryDTO) {
-        List<CourseVO> courseVOs = courses.stream()
-                .map(course -> convertToVO(course, null))
+    private CourseListPageVO buildCoursePageVO(List<BusinessCourse> courses, CourseQueryDTO queryDTO) {
+        List<CourseListVO> courseVOs = courses.stream()
+                .map(this::convertToListVO)
                 .collect(Collectors.toList());
 
-        return CoursePageVO.builder()
+        return CourseListPageVO.builder()
                 .courses(courseVOs)
                 .currentPage(0)
                 .pageSize(courses.size())
@@ -324,7 +326,59 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
     }
 
     /**
-     * 转换实体为VO
+     * 转换实体为轻量级列表VO（不包含大字段）
+     */
+    private CourseListVO convertToListVO(BusinessCourse course) {
+        CourseListVO.CourseListVOBuilder builder = CourseListVO.builder()
+                .id(course.getId())
+                .courseCode(course.getCourseCode())
+                .title(course.getTitle())
+                .description(course.getDescription())
+                .author(course.getAuthor())
+                .courseType(course.getCourseType())
+                .contentType(course.getContentType())
+                .difficultyLevel(course.getDifficultyLevel())
+                .difficultyLevels(course.getDifficultyLevels())
+                .parentCourseId(course.getParentCourseId())
+                .sortOrder(course.getSortOrder())
+                .status(course.getStatus())
+                .knowledgeNodeCode(course.getKnowledgeNodeCode())
+                .knowledgeNodePath(course.getKnowledgeNodePath())
+                .knowledgeNodeNamePath(course.getKnowledgeNodeNamePath())
+                .tags(course.getTags())
+                .durationMinutes(course.getDurationMinutes())
+                .viewCount(course.getViewCount())
+                .likeCount(course.getLikeCount())
+                .collectCount(course.getCollectCount())
+                .contentUrl(course.getContentUrl())
+                .coverImageUrl(course.getCoverImageUrl())
+                .thumbnailUrl(course.getThumbnailUrl())
+                .contentUpdatedTime(course.getContentUpdatedTime())
+                .publishTime(course.getPublishTime())
+                .createdTime(course.getCreatedTime());
+
+        // 解析难度等级列表
+        if (StringUtils.hasText(course.getDifficultyLevels())) {
+            List<String> difficultyLevelList = Arrays.asList(course.getDifficultyLevels().split(","));
+            builder.difficultyLevelList(difficultyLevelList);
+        }
+
+        // 解析标签列表
+        if (StringUtils.hasText(course.getTags())) {
+            List<String> tagList = Arrays.asList(course.getTags().split(","));
+            builder.tagList(tagList);
+        }
+
+        // 格式化时长
+        if (course.getDurationMinutes() != null && course.getDurationMinutes() > 0) {
+            builder.formattedDuration(formatDuration(course.getDurationMinutes()));
+        }
+
+        return builder.build();
+    }
+
+    /**
+     * 转换实体为完整VO（包含所有字段）
      */
     private CourseVO convertToVO(BusinessCourse course, String userId) {
         CourseVO.CourseVOBuilder builder = CourseVO.builder()

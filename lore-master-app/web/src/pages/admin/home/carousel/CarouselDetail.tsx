@@ -39,7 +39,7 @@ const CarouselDetail: React.FC = () => {
   const loadCarouselDetail = async (id: string) => {
     try {
       setLoading(true);
-      const response = await adminApi.get(`/api/admin/carousel/detail?bannerId=${id}`);
+      const response = await adminApi.post('/api/admin/carousel/detail', { bannerId: id });
       if (response.success) {
         setDetail(response.data);
       } else {

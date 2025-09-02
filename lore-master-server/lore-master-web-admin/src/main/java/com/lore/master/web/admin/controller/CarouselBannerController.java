@@ -5,13 +5,15 @@ import com.lore.master.data.dto.admin.CarouselBannerQueryRequest;
 import com.lore.master.data.dto.admin.CarouselBannerRequest;
 import com.lore.master.data.dto.admin.CarouselBannerUpdateRequest;
 import com.lore.master.data.dto.admin.CarouselBannerSortRequest;
+import com.lore.master.data.dto.admin.CarouselBannerDetailRequest;
+import com.lore.master.data.dto.admin.CarouselBannerDeleteRequest;
+import com.lore.master.data.dto.admin.CarouselBannerStatusRequest;
 import com.lore.master.data.entity.consumer.ConsumerCarouselBanner;
 import com.lore.master.data.repository.consumer.ConsumerCarouselBannerRepository;
 import com.lore.master.data.vo.consumer.CarouselBannerVO;
 import com.lore.master.data.vo.consumer.CarouselBannerDetailVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -66,10 +68,10 @@ public class CarouselBannerController {
     /**
      * 获取轮播图详情
      */
-    @GetMapping("/detail")
-    public Result<CarouselBannerDetailVO> getCarouselBannerDetail(@RequestParam String bannerId) {
+    @PostMapping("/detail")
+    public Result<CarouselBannerDetailVO> getCarouselBannerDetail(@Valid @RequestBody CarouselBannerDetailRequest request) {
         try {
-            Optional<ConsumerCarouselBanner> bannerOpt = carouselBannerRepository.findByBannerId(bannerId);
+            Optional<ConsumerCarouselBanner> bannerOpt = carouselBannerRepository.findByBannerId(request.getBannerId());
             if (bannerOpt.isEmpty()) {
                 return Result.error("轮播图不存在");
             }
@@ -146,9 +148,9 @@ public class CarouselBannerController {
      * 删除轮播图
      */
     @PostMapping("/delete")
-    public Result<String> deleteCarouselBanner(@RequestParam String bannerId) {
+    public Result<String> deleteCarouselBanner(@Valid @RequestBody CarouselBannerDeleteRequest request) {
         try {
-            Optional<ConsumerCarouselBanner> bannerOpt = carouselBannerRepository.findByBannerId(bannerId);
+            Optional<ConsumerCarouselBanner> bannerOpt = carouselBannerRepository.findByBannerId(request.getBannerId());
             if (bannerOpt.isEmpty()) {
                 return Result.error("轮播图不存在");
             }
@@ -166,17 +168,15 @@ public class CarouselBannerController {
      * 更新轮播图状态
      */
     @PostMapping("/updateStatus")
-    public Result<String> updateCarouselBannerStatus(
-            @RequestParam String bannerId,
-            @RequestParam String status) {
+    public Result<String> updateCarouselBannerStatus(@Valid @RequestBody CarouselBannerStatusRequest request) {
         try {
-            Optional<ConsumerCarouselBanner> bannerOpt = carouselBannerRepository.findByBannerId(bannerId);
+            Optional<ConsumerCarouselBanner> bannerOpt = carouselBannerRepository.findByBannerId(request.getBannerId());
             if (bannerOpt.isEmpty()) {
                 return Result.error("轮播图不存在");
             }
 
             ConsumerCarouselBanner banner = bannerOpt.get();
-            banner.setStatus(status);
+            banner.setStatus(request.getStatus());
             banner.setUpdatedBy("admin"); // TODO: 从当前登录用户获取
             banner.setUpdatedTime(LocalDateTime.now());
 

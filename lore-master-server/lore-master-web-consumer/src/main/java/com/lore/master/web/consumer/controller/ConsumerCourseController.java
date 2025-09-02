@@ -5,6 +5,7 @@ import com.lore.master.common.context.UserContext;
 import com.lore.master.data.dto.business.*;
 import com.lore.master.data.vo.business.ApiResponse;
 import com.lore.master.data.vo.business.CoursePageVO;
+import com.lore.master.data.vo.business.CourseListPageVO;
 import com.lore.master.data.vo.business.CourseVO;
 import com.lore.master.data.vo.business.RecentLearningCourseVO;
 import com.lore.master.service.business.BusinessCourseService;
@@ -33,12 +34,12 @@ public class ConsumerCourseController {
      * 分页查询课程
      */
     @PostMapping("/queryCourseList")
-    public ApiResponse<CoursePageVO> queryCourseList(@RequestBody CourseQueryDTO queryDTO) {
+    public ApiResponse<CourseListPageVO> queryCourseList(@RequestBody CourseQueryDTO queryDTO) {
         
         log.info("分页查询课程，参数：{}", queryDTO);
         
         try {
-            CoursePageVO result = courseService.getCourses(queryDTO);
+            CourseListPageVO result = courseService.getCourses(queryDTO);
             return ApiResponse.success("查询成功", result);
         } catch (Exception e) {
             log.error("查询课程失败", e);
@@ -148,12 +149,12 @@ public class ConsumerCourseController {
      * 搜索课程
      */
     @PostMapping("/searchCourses")
-    public ApiResponse<CoursePageVO> searchCourses(@RequestBody CourseSearchDTO searchDTO) {
+    public ApiResponse<CourseListPageVO> searchCourses(@RequestBody CourseSearchDTO searchDTO) {
         
         log.info("搜索课程，参数：{}", searchDTO);
         
         try {
-            CoursePageVO result = courseService.searchCourses(
+            CourseListPageVO result = courseService.searchCourses(
                     searchDTO.getKeyword(), 
                     searchDTO.getPage(), 
                     searchDTO.getSize(), 
@@ -170,12 +171,12 @@ public class ConsumerCourseController {
      * 获取热门课程
      */
     @PostMapping("/getPopularCourses")
-    public ApiResponse<CoursePageVO> getPopularCourses(@RequestBody PageQueryDTO queryDTO) {
+    public ApiResponse<CourseListPageVO> getPopularCourses(@RequestBody PageQueryDTO queryDTO) {
         
         log.info("获取热门课程，参数：{}", queryDTO);
         
         try {
-            CoursePageVO result = courseService.getPopularCourses(
+            CourseListPageVO result = courseService.getPopularCourses(
                     queryDTO.getPage(), 
                     queryDTO.getSize(), 
                     queryDTO.getUserId()
@@ -191,12 +192,12 @@ public class ConsumerCourseController {
      * 获取最新课程
      */
     @PostMapping("/getLatestCourses")
-    public ApiResponse<CoursePageVO> getLatestCourses(@RequestBody PageQueryDTO queryDTO) {
+    public ApiResponse<CourseListPageVO> getLatestCourses(@RequestBody PageQueryDTO queryDTO) {
         
         log.info("获取最新课程，参数：{}", queryDTO);
         
         try {
-            CoursePageVO result = courseService.getLatestCourses(
+            CourseListPageVO result = courseService.getLatestCourses(
                     queryDTO.getPage(), 
                     queryDTO.getSize(), 
                     queryDTO.getUserId()
@@ -212,12 +213,12 @@ public class ConsumerCourseController {
      * 根据知识点路径获取相关课程
      */
     @PostMapping("/getCoursesByKnowledgePath")
-    public ApiResponse<CoursePageVO> getCoursesByKnowledgePath(@RequestBody KnowledgePathQueryDTO queryDTO) {
+    public ApiResponse<CourseListPageVO> getCoursesByKnowledgePath(@RequestBody KnowledgePathQueryDTO queryDTO) {
         
         log.info("根据知识点路径获取课程，参数：{}", queryDTO);
         
         try {
-            CoursePageVO result = courseService.getCoursesByKnowledgePath(
+            CourseListPageVO result = courseService.getCoursesByKnowledgePath(
                     queryDTO.getKnowledgeNodePath(), 
                     queryDTO.getPage(), 
                     queryDTO.getSize(), 
@@ -234,12 +235,12 @@ public class ConsumerCourseController {
      * 根据难度等级获取课程
      */
     @PostMapping("/getCoursesByDifficulty")
-    public ApiResponse<CoursePageVO> getCoursesByDifficulty(@RequestBody DifficultyQueryDTO queryDTO) {
+    public ApiResponse<CourseListPageVO> getCoursesByDifficulty(@RequestBody DifficultyQueryDTO queryDTO) {
         
         log.info("根据难度等级获取课程，参数：{}", queryDTO);
         
         try {
-            CoursePageVO result = courseService.getCoursesByDifficulty(
+            CourseListPageVO result = courseService.getCoursesByDifficulty(
                     queryDTO.getDifficultyLevel(), 
                     queryDTO.getPage(), 
                     queryDTO.getSize(), 
@@ -256,12 +257,12 @@ public class ConsumerCourseController {
      * 根据作者获取课程
      */
     @PostMapping("/getCoursesByAuthor")
-    public ApiResponse<CoursePageVO> getCoursesByAuthor(@RequestBody AuthorQueryDTO queryDTO) {
+    public ApiResponse<CourseListPageVO> getCoursesByAuthor(@RequestBody AuthorQueryDTO queryDTO) {
         
         log.info("根据作者获取课程，参数：{}", queryDTO);
         
         try {
-            CoursePageVO result = courseService.getCoursesByAuthor(
+            CourseListPageVO result = courseService.getCoursesByAuthor(
                     queryDTO.getAuthor(), 
                     queryDTO.getPage(), 
                     queryDTO.getSize(), 
@@ -295,12 +296,12 @@ public class ConsumerCourseController {
      * 获取推荐课程
      */
     @PostMapping("/getRecommendedCourses")
-    public ApiResponse<CoursePageVO> getRecommendedCourses(@RequestBody PageQueryDTO queryDTO) {
+    public ApiResponse<CourseListPageVO> getRecommendedCourses(@RequestBody PageQueryDTO queryDTO) {
 
         log.info("获取推荐课程，参数：{}", queryDTO);
 
         try {
-            CoursePageVO result = courseService.getRecommendedCourses(
+            CourseListPageVO result = courseService.getRecommendedCourses(
                     queryDTO.getUserId(),
                     queryDTO.getPage(),
                     queryDTO.getSize()
