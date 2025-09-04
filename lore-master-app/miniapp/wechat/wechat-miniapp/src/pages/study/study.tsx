@@ -87,14 +87,14 @@ export default function Study() {
 
   // 加载课程列表（带关键词参数）
   const loadCoursesWithKeyword = async (keyword: string, reset = false) => {
-    if (loading) return
+    if (loading) return;
 
-    const page = reset ? 0 : currentPage
+    const page = reset ? 0 : currentPage;
 
     try {
-      setLoading(true)
+      setLoading(true);
       if (reset) {
-        showLoading({ title: '加载中...' })
+        showLoading({ title: '加载中...' });
       }
 
       const queryParams = {
@@ -105,11 +105,10 @@ export default function Study() {
         difficultyLevel: selectedLevel || undefined,
         courseType: selectedType === '普通' ? 'NORMAL' : selectedType === '合集' ? 'COLLECTION' : undefined,
         contentType: selectedContent === '图文' ? 'ARTICLE' : selectedContent === '视频' ? 'VIDEO' : undefined
-      }
+      };
 
-      console.log('API调用参数:', queryParams)
-
-      const apiUrl = buildApiUrl('/api/consumer/course/queryCourseList')
+      console.log('API调用参数:', queryParams);
+      const apiUrl = buildApiUrl('/api/consumer/course/queryCourseList');
 
       const response = await request({
         url: apiUrl,
@@ -121,13 +120,19 @@ export default function Study() {
       })
 
       if (response && response.data && response.data.success) {
-        const pageData: CoursePageVO = response.data.data
+        const pageData: CoursePageVO = response.data.data;
+        let filteredCourses = pageData.courses || [];
+
+        // Ensure we only show collection courses when collection filter is active
+        if (selectedType === '合集') {
+          filteredCourses = filteredCourses.filter(course => course.courseType === 'COLLECTION');
+        }
 
         if (reset) {
-          setCourses(pageData.courses || [])
-          setCurrentPage(0)
+          setCourses(filteredCourses);
+          setCurrentPage(0);
         } else {
-          setCourses(prev => [...prev, ...(pageData.courses || [])])
+          setCourses(prev => [...prev, ...filteredCourses]);
         }
 
         setCurrentPage(page + 1)
@@ -196,13 +201,19 @@ export default function Study() {
       })
 
       if (response && response.data && response.data.success) {
-        const pageData: CoursePageVO = response.data.data
+        const pageData: CoursePageVO = response.data.data;
+        let filteredCourses = pageData.courses || [];
+
+        // Ensure we only show collection courses when collection filter is active
+        if (selectedType === '合集') {
+          filteredCourses = filteredCourses.filter(course => course.courseType === 'COLLECTION');
+        }
 
         if (reset) {
-          setCourses(pageData.courses || [])
-          setCurrentPage(0)
+          setCourses(filteredCourses);
+          setCurrentPage(0);
         } else {
-          setCourses(prev => [...prev, ...(pageData.courses || [])])
+          setCourses(prev => [...prev, ...filteredCourses]);
         }
 
         setCurrentPage(page + 1)

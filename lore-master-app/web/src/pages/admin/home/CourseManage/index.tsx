@@ -103,6 +103,7 @@ interface QueryParams {
   size: number;
   keyword?: string;
   courseType?: string;
+  contentType?: string;
   difficultyLevel?: string;
   status?: string;
   publishedOnly?: boolean;
@@ -144,6 +145,15 @@ const CourseManage: React.FC = () => {
   const [markdownPreview, setMarkdownPreview] = useState('');
   const [previewMode, setPreviewMode] = useState('split');
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+  
+  // 课程类型状态
+  const [selectedCourseType, setSelectedCourseType] = useState('NORMAL');
+  
+  // 合集子课程管理状态
+  const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
+  const [selectedSubCourses, setSelectedSubCourses] = useState<Course[]>([]);
+  const [filteredAvailableCourses, setFilteredAvailableCourses] = useState<Course[]>([]);
+  const [subCourseSearchValue, setSubCourseSearchValue] = useState('');
 
   // 加载课程列表
   const loadCourses = async () => {
@@ -239,6 +249,25 @@ const CourseManage: React.FC = () => {
     });
 
     return result;
+  };
+
+  // 加载可用课程（用于合集选择）
+  const loadAvailableCourses = async () => {
+    try {
+      const response = await adminApi.post('/api/admin/course/list', {
+        page: 0,
+        size: 1000,
+        courseType: 'NORMAL' // 只加载普通课程
+      });
+      if (response.success) {
+        const courses = response.data.courses || [];
+        setAvailableCourses(courses);
+        setFilteredAvailableCourses(courses); // 初始化过滤列表
+      }
+    } catch (error) {
+      console.error('加载可用课程失败:', error);
+      message.error('加载可用课程失败');
+    }
   };
 
   // 初始化加载
@@ -390,9 +419,15 @@ const CourseManage: React.FC = () => {
     setMarkdownContent('');
     setMarkdownPreview('');
     setUploadedFiles([]);
+    setSelectedCourseType('NORMAL');
+    setSelectedSubCourses([]);
+    setSubCourseSearchValue('');
+    setFilteredAvailableCourses(availableCourses);
     setEditModalVisible(true);
     // 新增时加载所有根节点的知识点
     loadKnowledgeNodes();
+    // 加载可用课程
+    loadAvailableCourses();
   };
 
   // 编辑课程
@@ -426,10 +461,26 @@ const CourseManage: React.FC = () => {
           contentMarkdown: fullCourse.contentMarkdown
         });
 
-        // 设置Markdown内容
-        const markdownValue = fullCourse.contentMarkdown || '';
-        setMarkdownContent(markdownValue);
-        handleMarkdownChange(markdownValue);
+        // 设置课程类型状态
+        setSelectedCourseType(fullCourse.courseType || 'NORMAL');
+        
+        // 设置Markdown内容（仅当不是合集类型时）
+        if (fullCourse.courseType !== 'COLLECTION') {
+          const markdownValue = fullCourse.contentMarkdown || '';
+          setMarkdownContent(markdownValue);
+          handleMarkdownChange(markdownValue);
+        }
+
+        // 如果是合集类型，加载子课程
+        if (fullCourse.courseType === 'COLLECTION') {
+          setSelectedSubCourses(fullCourse.subCourses || []);
+          loadAvailableCourses();
+          setSubCourseSearchValue('');
+          // 在加载完成后初始化过滤列表
+          setTimeout(() => {
+            setFilteredAvailableCourses(availableCourses);
+          }, 100);
+        }
 
         setUploadedFiles([]);
         setEditModalVisible(true);
@@ -450,13 +501,63 @@ const CourseManage: React.FC = () => {
     }
   };
 
+  // 课程类型变化处理
+  const handleCourseTypeChange = (value: string) => {
+    setSelectedCourseType(value);
+    
+    // 如果切换到合集类型，清空Markdown内容并加载可用课程
+    if (value === 'COLLECTION') {
+      setMarkdownContent('');
+      setMarkdownPreview('');
+      form.setFieldValue('contentMarkdown', '');
+      form.setFieldValue('contentType', undefined); // 合集不需要内容类型
+      loadAvailableCourses();
+      setSubCourseSearchValue('');
+      setFilteredAvailableCourses(availableCourses);
+    } else {
+      // 如果切换到普通课程，清空子课程选择
+      setSelectedSubCourses([]);
+      setSubCourseSearchValue('');
+      form.setFieldValue('contentType', 'ARTICLE'); // 设置默认内容类型
+    }
+  };
+
+  // 子课程选择处理
+  const handleSubCourseSelect = (courseIds: number[]) => {
+    const selected = availableCourses.filter(course => courseIds.includes(course.id));
+    setSelectedSubCourses(selected);
+  };
+
+  // 子课程搜索处理
+  const handleSubCourseSearch = (value: string) => {
+    setSubCourseSearchValue(value);
+    if (!value.trim()) {
+      setFilteredAvailableCourses(availableCourses);
+    } else {
+      const filtered = availableCourses.filter(course => 
+        course.title.toLowerCase().includes(value.toLowerCase()) ||
+        course.courseCode.toLowerCase().includes(value.toLowerCase()) ||
+        course.author.toLowerCase().includes(value.toLowerCase()) ||
+        (course.description && course.description.toLowerCase().includes(value.toLowerCase()))
+      );
+      setFilteredAvailableCourses(filtered);
+    }
+  };
+
   // 保存课程
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
 
-      // 确保传递原始Markdown内容
-      values.contentMarkdown = markdownContent;
+      // 根据课程类型处理不同的数据
+      if (selectedCourseType === 'COLLECTION') {
+        // 合集类型：传递子课程ID列表
+        values.subCourseIds = selectedSubCourses.map(course => course.id);
+        values.contentMarkdown = null; // 合集不需要Markdown内容
+      } else {
+        // 普通课程：确保传递原始Markdown内容
+        values.contentMarkdown = markdownContent;
+      }
 
       // 根据知识点编码设置路径信息
       const selectedNode = knowledgeNodes.find(node => node.nodeCode === values.knowledgeNodeCode);
@@ -513,15 +614,19 @@ const CourseManage: React.FC = () => {
   };
 
   // 获取课程类型标签
-  const getCourseTypeTag = (type: string) => {
-    const typeMap: { [key: string]: { color: string; text: string } } = {
-      'VIDEO': { color: 'blue', text: '视频课程' },
-      'LIVE': { color: 'green', text: '直播课程' },
-      'TEXT': { color: 'orange', text: '图文课程' },
-      'MIXED': { color: 'purple', text: '混合课程' }
-    };
-    const config = typeMap[type] || { color: 'default', text: type };
-    return <Tag color={config.color}>{config.text}</Tag>;
+  const getCourseTypeTag = (courseType: string, contentType?: string) => {
+    if (courseType === 'COLLECTION') {
+      return <Tag color="purple">合集</Tag>;
+    }
+    
+    // 普通课程根据内容类型显示
+    if (contentType === 'VIDEO') {
+      return <Tag color="blue">视频</Tag>;
+    } else if (contentType === 'ARTICLE') {
+      return <Tag color="green">图文</Tag>;
+    } else {
+      return <Tag color="default">未知</Tag>;
+    }
   };
 
   // 获取难度标签
@@ -582,7 +687,7 @@ const CourseManage: React.FC = () => {
       dataIndex: 'courseType',
       key: 'courseType',
       width: 100,
-      render: (type: string) => getCourseTypeTag(type),
+      render: (courseType: string, record: Course) => getCourseTypeTag(courseType, record.contentType),
     },
     {
       title: '难度等级',
@@ -793,10 +898,20 @@ const CourseManage: React.FC = () => {
               onChange={(value) => handleFilter('courseType', value)}
               value={queryParams.courseType}
             >
-              <Option value="VIDEO">视频课程</Option>
-              <Option value="LIVE">直播课程</Option>
-              <Option value="TEXT">图文课程</Option>
-              <Option value="MIXED">混合课程</Option>
+              <Option value="NORMAL">普通课程</Option>
+              <Option value="COLLECTION">合集</Option>
+            </Select>
+          </Col>
+          <Col span={3}>
+            <Select
+              placeholder="内容类型"
+              allowClear
+              style={{ width: '100%' }}
+              onChange={(value) => handleFilter('contentType', value)}
+              value={queryParams.contentType}
+            >
+              <Option value="ARTICLE">图文</Option>
+              <Option value="VIDEO">视频</Option>
             </Select>
           </Col>
           <Col span={3}>
@@ -814,7 +929,7 @@ const CourseManage: React.FC = () => {
               <Option value="L5">L5-专家</Option>
             </Select>
           </Col>
-          <Col span={3}>
+          <Col span={2}>
             <Select
               placeholder="状态"
               allowClear
@@ -828,7 +943,7 @@ const CourseManage: React.FC = () => {
             </Select>
           </Col>
 
-          <Col span={9}>
+          <Col span={8}>
             <Space>
               <Button icon={<ReloadOutlined />} onClick={loadCourses}>
                 刷新
@@ -899,8 +1014,10 @@ const CourseManage: React.FC = () => {
               <Col span={12}>
                 <p><strong>课程编码：</strong>{selectedCourse.courseCode}</p>
                 <p><strong>课程名称：</strong>{selectedCourse.title}</p>
-                <p><strong>课程类型：</strong>{getCourseTypeTag(selectedCourse.courseType)}</p>
-                <p><strong>内容类型：</strong>{selectedCourse.contentType || '-'}</p>
+                <p><strong>课程类型：</strong>{getCourseTypeTag(selectedCourse.courseType, selectedCourse.contentType)}</p>
+                {selectedCourse.courseType !== 'COLLECTION' && (
+                  <p><strong>内容类型：</strong>{selectedCourse.contentType || '-'}</p>
+                )}
                 <p><strong>难度等级：</strong>{getDifficultyTag(selectedCourse.difficultyLevel)}</p>
                 <p><strong>时长：</strong>{selectedCourse.durationMinutes ? `${selectedCourse.durationMinutes}分钟` : '-'}</p>
                 <p><strong>排序：</strong>{selectedCourse.sortOrder}</p>
@@ -933,7 +1050,40 @@ const CourseManage: React.FC = () => {
                 </Space>
               </div>
             )}
-            {selectedCourse.contentMarkdown && (
+            {selectedCourse.courseType === 'COLLECTION' && selectedCourse.subCourses && selectedCourse.subCourses.length > 0 && (
+              <div>
+                <p><strong>子课程列表（{selectedCourse.subCourses.length}个）：</strong></p>
+                <div style={{ maxHeight: '300px', overflowY: 'auto', border: '1px solid #d9d9d9', borderRadius: '6px', padding: '8px' }}>
+                  {selectedCourse.subCourses.map((subCourse, index) => (
+                    <div key={subCourse.id} style={{ 
+                      padding: '8px 12px', 
+                      borderBottom: index < selectedCourse.subCourses!.length - 1 ? '1px solid #f0f0f0' : 'none',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+                          [{subCourse.courseCode}] {subCourse.title}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#666' }}>
+                          <Space size="middle">
+                            <span>作者：{subCourse.author}</span>
+                            <span>难度：{getDifficultyTag(subCourse.difficultyLevel)}</span>
+                            <span>类型：{getCourseTypeTag(subCourse.courseType, subCourse.contentType)}</span>
+                            <span>观看：{subCourse.viewCount}</span>
+                          </Space>
+                        </div>
+                      </div>
+                      <div>
+                        {getStatusTag(subCourse.status)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {selectedCourse.courseType !== 'COLLECTION' && selectedCourse.contentMarkdown && (
               <div>
                 <p><strong>课程内容：</strong></p>
                 <div
@@ -1020,7 +1170,11 @@ const CourseManage: React.FC = () => {
                 label="课程类型"
                 rules={[{ required: true, message: '请选择课程类型' }]}
               >
-                <Select placeholder="请选择课程类型">
+                <Select 
+                  placeholder="请选择课程类型"
+                  onChange={handleCourseTypeChange}
+                  value={selectedCourseType}
+                >
                   <Option value="NORMAL">普通课程</Option>
                   <Option value="COLLECTION">合集</Option>
                 </Select>
@@ -1029,17 +1183,20 @@ const CourseManage: React.FC = () => {
           </Row>
 
           <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="contentType"
-                label="内容类型"
-              >
-                <Select placeholder="请选择内容类型">
-                  <Option value="ARTICLE">图文</Option>
-                  <Option value="VIDEO">视频</Option>
-                </Select>
-              </Form.Item>
-            </Col>
+            {selectedCourseType !== 'COLLECTION' && (
+              <Col span={12}>
+                <Form.Item
+                  name="contentType"
+                  label="内容类型"
+                  rules={selectedCourseType !== 'COLLECTION' ? [{ required: true, message: '请选择内容类型' }] : []}
+                >
+                  <Select placeholder="请选择内容类型">
+                    <Option value="ARTICLE">图文</Option>
+                    <Option value="VIDEO">视频</Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+            )}
             <Col span={12}>
               <Form.Item
                 name="difficultyLevel"
@@ -1170,11 +1327,113 @@ const CourseManage: React.FC = () => {
             </Col>
           </Row>
 
-          {/* Markdown内容编辑器 */}
-          <Form.Item
-            name="contentMarkdown"
-            label="课程详情内容"
-          >
+          {/* 合集类型：子课程选择 */}
+          {selectedCourseType === 'COLLECTION' && (
+            <Form.Item
+              label="选择子课程"
+              required
+            >
+              <div>
+                <Select
+                  mode="multiple"
+                  placeholder="搜索并选择要添加到合集的课程（支持课程名称、编码、作者搜索）"
+                  value={selectedSubCourses.map(course => course.id)}
+                  onChange={handleSubCourseSelect}
+                  showSearch
+                  allowClear
+                  filterOption={false}
+                  searchValue={subCourseSearchValue}
+                  onSearch={handleSubCourseSearch}
+                  notFoundContent={
+                    filteredAvailableCourses.length === 0 && subCourseSearchValue ? (
+                      <div style={{ textAlign: 'center', padding: '20px', color: '#999' }}>
+                        <div>未找到匹配 "{subCourseSearchValue}" 的课程</div>
+                        <Button 
+                          type="link" 
+                          size="small" 
+                          onClick={() => handleSubCourseSearch('')}
+                          style={{ padding: 0, marginTop: '8px' }}
+                        >
+                          清除搜索条件
+                        </Button>
+                      </div>
+                    ) : 
+                    "暂无可用课程"
+                  }
+                  style={{ width: '100%' }}
+                  optionLabelProp="label"
+                  dropdownStyle={{ maxHeight: '400px' }}
+                >
+                  {filteredAvailableCourses.map(course => (
+                    <Option 
+                      key={course.id} 
+                      value={course.id}
+                      label={`[${course.courseCode}] ${course.title}`}
+                    >
+                      <div style={{ padding: '4px 0' }}>
+                        <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>
+                          [{course.courseCode}] {course.title}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#666', display: 'flex', justifyContent: 'space-between' }}>
+                          <span>作者：{course.author}</span>
+                          <span>类型：{course.contentType === 'VIDEO' ? '视频' : '图文'}</span>
+                          <span>难度：{course.difficultyLevel}</span>
+                          <span>观看：{course.viewCount}</span>
+                        </div>
+                      </div>
+                    </Option>
+                  ))}
+                </Select>
+                {subCourseSearchValue && (
+                  <div style={{ marginTop: '8px', textAlign: 'right' }}>
+                    <Text type="secondary" style={{ fontSize: '12px' }}>
+                      已搜索：{subCourseSearchValue} • 显示 {filteredAvailableCourses.length} 个结果
+                    </Text>
+                    <Button 
+                      type="link" 
+                      size="small" 
+                      onClick={() => handleSubCourseSearch('')}
+                      style={{ marginLeft: '8px', padding: 0 }}
+                    >
+                      清除
+                    </Button>
+                  </div>
+                )}
+              </div>
+              {selectedSubCourses.length > 0 && (
+                <div style={{ marginTop: 8 }}>
+                  <Text type="secondary">已选择 {selectedSubCourses.length} 个课程：</Text>
+                  <div style={{ marginTop: 4, maxHeight: '120px', overflowY: 'auto' }}>
+                    {selectedSubCourses.map(course => (
+                      <Tag 
+                        key={course.id} 
+                        style={{ marginBottom: 4, display: 'block', padding: '4px 8px' }}
+                        closable
+                        onClose={() => {
+                          const newSelected = selectedSubCourses.filter(c => c.id !== course.id);
+                          setSelectedSubCourses(newSelected);
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontWeight: 'bold' }}>[{course.courseCode}] {course.title}</span>
+                          <span style={{ fontSize: '12px', color: '#666', marginLeft: '8px' }}>
+                            {course.author} | {course.contentType === 'VIDEO' ? '视频' : '图文'}
+                          </span>
+                        </div>
+                      </Tag>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </Form.Item>
+          )}
+
+          {/* Markdown内容编辑器（仅普通课程显示） */}
+          {selectedCourseType !== 'COLLECTION' && (
+            <Form.Item
+              name="contentMarkdown"
+              label="课程详情内容"
+            >
             <Tabs
               activeKey={previewMode}
               onChange={(key) => setPreviewMode(key)}
@@ -1278,6 +1537,7 @@ const CourseManage: React.FC = () => {
               ]}
             />
           </Form.Item>
+          )}
 
           {/* 上传文件列表 */}
           {uploadedFiles.length > 0 && (

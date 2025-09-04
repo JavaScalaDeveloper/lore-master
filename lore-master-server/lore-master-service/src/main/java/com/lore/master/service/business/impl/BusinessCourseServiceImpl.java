@@ -31,7 +31,9 @@ import java.util.Optional;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -491,6 +493,11 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
         // 保存课程
         BusinessCourse savedCourse = courseRepository.save(course);
 
+        // 如果是合集类型，处理子课程关联
+        if ("COLLECTION".equals(request.getCourseType()) && request.getSubCourseIds() != null && !request.getSubCourseIds().isEmpty()) {
+            updateSubCourseRelations(savedCourse.getId(), request.getSubCourseIds());
+        }
+
         log.info("创建课程成功，课程ID：{}，课程编码：{}", savedCourse.getId(), savedCourse.getCourseCode());
         return convertToVO(savedCourse, null);
     }
@@ -521,6 +528,18 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
         // 更新课程信息
         copyRequestToEntity(request, existingCourse);
         existingCourse.setUpdatedBy("admin"); // TODO: 从当前登录用户获取
+
+        // 如果是合集类型，处理子课程关联
+        if ("COLLECTION".equals(request.getCourseType())) {
+            if (request.getSubCourseIds() != null) {
+                updateSubCourseRelations(request.getId(), request.getSubCourseIds());
+            }
+        } else {
+            // 如果从合集类型改为普通课程，清除原有的子课程关联
+            if ("COLLECTION".equals(existingCourse.getCourseType())) {
+                updateSubCourseRelations(request.getId(), new ArrayList<>());
+            }
+        }
 
         // 保存更新
         BusinessCourse updatedCourse = courseRepository.save(existingCourse);
@@ -645,6 +664,70 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
             entity.setContentFileIds(null);
             entity.setContentUpdatedTime(null);
         }
+    }
+
+    /**
+     * 更新子课程关联关系
+     * @param collectionId 合集ID
+     * @param subCourseIds 子课程ID列表
+     */
+    private void updateSubCourseRelations(Long collectionId, List<Long> subCourseIds) {
+        log.info("更新子课程关联关系，合集ID：{}，子课程IDs：{}", collectionId, subCourseIds);
+
+        // 1. 获取当前合集的所有子课程
+        List<BusinessCourse> currentSubCourses = courseRepository.findByParentCourseIdAndIsDeletedFalse(collectionId);
+        Set<Long> currentSubCourseIds = currentSubCourses.stream()
+                .map(BusinessCourse::getId)
+                .collect(Collectors.toSet());
+
+        // 2. 新的子课程ID集合
+        Set<Long> newSubCourseIds = subCourseIds != null ? new HashSet<>(subCourseIds) : new HashSet<>();
+
+        // 3. 找出需要删除的关联（在旧列表中但不在新列表中）
+        Set<Long> toRemove = new HashSet<>(currentSubCourseIds);
+        toRemove.removeAll(newSubCourseIds);
+
+        // 4. 找出需要添加的关联（在新列表中但不在旧列表中）
+        Set<Long> toAdd = new HashSet<>(newSubCourseIds);
+        toAdd.removeAll(currentSubCourseIds);
+
+        // 5. 删除旧的关联（将parent_course_id设为null）
+        if (!toRemove.isEmpty()) {
+            List<BusinessCourse> coursesToUpdate = courseRepository.findAllById(toRemove);
+            for (BusinessCourse course : coursesToUpdate) {
+                if (!course.getIsDeleted()) {
+                    course.setParentCourseId(null);
+                    course.setUpdatedBy("admin");
+                }
+            }
+            courseRepository.saveAll(coursesToUpdate);
+            log.info("已移除子课程关联：{}", toRemove);
+        }
+
+        // 6. 添加新的关联（设置parent_course_id）
+        if (!toAdd.isEmpty()) {
+            List<BusinessCourse> coursesToUpdate = courseRepository.findAllById(toAdd);
+            for (BusinessCourse course : coursesToUpdate) {
+                if (!course.getIsDeleted()) {
+                    // 检查课程是否已经属于其他合集
+                    if (course.getParentCourseId() != null && !course.getParentCourseId().equals(collectionId)) {
+                        log.warn("课程 ID:{} 已属于其他合集 ID:{}，跳过添加", course.getId(), course.getParentCourseId());
+                        continue;
+                    }
+                    // 检查课程类型是否为普通课程
+                    if ("COLLECTION".equals(course.getCourseType())) {
+                        log.warn("课程 ID:{} 是合集类型，不能作为子课程，跳过添加", course.getId());
+                        continue;
+                    }
+                    course.setParentCourseId(collectionId);
+                    course.setUpdatedBy("admin");
+                }
+            }
+            courseRepository.saveAll(coursesToUpdate);
+            log.info("已添加子课程关联：{}", toAdd);
+        }
+
+        log.info("子课程关联更新完成");
     }
 
     @Override

@@ -5,6 +5,7 @@ import lombok.Data;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 
 /**
  * 课程请求DTO
@@ -130,6 +131,11 @@ public class CourseRequest {
      */
     private String contentFileIds;
 
+    /**
+     * 子课程ID列表（仅合集类型有效）
+     */
+    private List<Long> subCourseIds;
+
     @Override
     public String toString() {
         return "CourseRequest{" +
@@ -139,6 +145,7 @@ public class CourseRequest {
                 ", author='" + author + '\'' +
                 ", courseType='" + courseType + '\'' +
                 ", status='" + status + '\'' +
+                ", subCourseIds=" + subCourseIds +
                 '}';
     }
 }
