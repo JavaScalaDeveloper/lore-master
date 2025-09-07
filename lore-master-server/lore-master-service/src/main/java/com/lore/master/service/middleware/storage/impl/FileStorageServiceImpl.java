@@ -59,10 +59,12 @@ public class FileStorageServiceImpl implements FileStorageService {
 
             // 检查是否已存在相同文件（如果启用去重）
             if (storageProperties.getEnableDeduplication()) {
-                Optional<FileStorage> existingFile = fileStorageRepository.findByMd5Hash(md5Hash);
-                if (existingFile.isPresent() && !request.getOverwrite()) {
-                    log.info("文件已存在，返回已有文件信息: {}", md5Hash);
-                    return convertToVO(existingFile.get());
+                // 查找相同MD5的文件，取时间最近的那一个
+                List<FileStorage> existingFiles = fileStorageRepository.findByMd5HashOrderByCreatedTimeDesc(md5Hash);
+                if (!existingFiles.isEmpty() && !request.getOverwrite()) {
+                    FileStorage latestFile = existingFiles.get(0); // 获取最近的文件
+                    log.info("文件已存在，返回最近的文件信息: {}, 创建时间: {}", md5Hash, latestFile.getCreatedTime());
+                    return convertToVO(latestFile);
                 }
             }
 

@@ -30,6 +30,12 @@ public interface FileStorageRepository extends JpaRepository<FileStorage, Long> 
     Optional<FileStorage> findByMd5Hash(String md5Hash);
 
     /**
+     * 根据MD5哈希值查找最近的文件（按创建时间倒序，取第一个）
+     */
+    @Query("SELECT f FROM FileStorage f WHERE f.md5Hash = :md5Hash AND f.status = 1 ORDER BY f.createdTime DESC LIMIT 1")
+    List<FileStorage> findByMd5HashOrderByCreatedTimeDesc(@Param("md5Hash") String md5Hash);
+
+    /**
      * 根据文件分类查找文件
      */
     Page<FileStorage> findByFileCategoryAndStatus(String fileCategory, Integer status, Pageable pageable);

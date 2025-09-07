@@ -5,6 +5,7 @@
   height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   position: relative;
+  padding-bottom: env(safe-area-inset-bottom); /* 为小程序底部安全区域留出空间 */
 }
 
 /* 全局字体大小覆盖 */
@@ -196,6 +197,40 @@
   margin: 2px 0;
 }
 
+/* 加载更多历史记录样式 */
+.loading-more-history {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  margin: 10px 20px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.loading-more-history .loading-text {
+  font-size: 24px;
+  color: #667eea;
+  font-weight: 500;
+}
+
+/* 没有更多历史记录样式 */
+.no-more-history {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+  margin: 10px 20px;
+}
+
+.no-more-history .no-more-text {
+  font-size: 22px;
+  color: #a0aec0;
+  font-weight: 400;
+}
+
 .ai-message-markdown .md-list-item text:first-child {
   color: #667eea;
   margin-right: 4px;
@@ -242,7 +277,7 @@
 /* 消息列表容器 */
 .messages-container {
   flex: 1;
-  padding: 20px 16px;
+  padding: 20px 16px 12px 16px; /* 减少底部内边距，与输入框更接近 */
   overflow-y: auto;
   z-index: 1;
   position: relative;
@@ -515,15 +550,17 @@
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-top: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 16px 20px;
+  padding: 12px 20px 20px 20px; /* 调整上下内边距，上移一些 */
   z-index: 10;
   position: relative;
+  margin-bottom: 0; /* 确保没有下边距 */
 }
 
 .input-row {
   display: flex;
   align-items: flex-end;
   gap: 12px;
+  margin-bottom: 0; /* 防止额外的底部间距 */
 }
 
 /* 输入模式切换按钮 */
@@ -553,7 +590,7 @@
 /* 语音输入区域 */
 .voice-input {
   width: 100%;
-  min-height: 60px;
+  min-height: 44px; /* 与按钮高度一致 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -772,11 +809,11 @@
 
 .message-input {
   width: 100%;
-  min-height: 60px;
-  max-height: 180px;
-  padding: 16px 20px;
+  min-height: 44px; /* 减少最小高度，与发送按钮高度一致 */
+  max-height: 120px; /* 减少最大高度 */
+  padding: 12px 20px; /* 减少内边距 */
   font-size: 32px !important;
-  line-height: 1.5;
+  line-height: 1.4; /* 稍微减少行高 */
   border: none;
   background: transparent;
   resize: none;
@@ -890,7 +927,7 @@
   }
 
   .input-container {
-    padding: 12px 16px;
+    padding: 8px 16px 16px 16px; /* 进一步减少小屏幕上的内边距 */
   }
 
   .function-btn,
@@ -902,8 +939,8 @@
   }
 
   .message-input {
-    min-height: 56px;
-    padding: 14px 16px;
+    min-height: 44px; /* 与按钮高度一致 */
+    padding: 12px 16px;
     font-size: 32px !important;
   }
 

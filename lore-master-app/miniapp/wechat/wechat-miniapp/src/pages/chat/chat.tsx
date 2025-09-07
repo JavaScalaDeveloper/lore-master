@@ -67,6 +67,9 @@ const Chat = () => {
   const [inputText, setInputText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingHistory, setIsLoadingHistory] = useState(true)
+  const [isLoadingMoreHistory, setIsLoadingMoreHistory] = useState(false) // 加载更多历史记录状态
+  const [hasMoreHistory, setHasMoreHistory] = useState(true) // 是否还有更多历史记录
+  const [currentPage, setCurrentPage] = useState(0) // 当前页码
   const [currentTypingId, setCurrentTypingId] = useState<string | null>(null)
   const [wsConnected, setWsConnected] = useState(false)
   const [wsConnecting, setWsConnecting] = useState(false)
@@ -118,17 +121,25 @@ const Chat = () => {
   }
 
   // 获取聊天历史
-  const loadChatHistory = async (showToastOnSuccess = false) => {
+  const loadChatHistory = async (showToastOnSuccess = false, page = 0, append = false) => {
     try {
-      console.log('开始加载聊天历史...')
-      setIsLoadingHistory(true)
+      console.log(`开始加载聊天历史... page=${page}, append=${append}`)
+      
+      if (append) {
+        setIsLoadingMoreHistory(true)
+      } else {
+        setIsLoadingHistory(true)
+      }
 
       // 获取token
       const token = getStorageSync('token')
       if (!token) {
         console.log('未找到token，跳过加载聊天历史')
-        initializeWelcomeMessage()
+        if (!append) {
+          initializeWelcomeMessage()
+        }
         setIsLoadingHistory(false)
+        setIsLoadingMoreHistory(false)
         return
       }
 
@@ -139,8 +150,8 @@ const Chat = () => {
           'content-type': 'application/json'
         },
         data: {
-          page: 0,
-          size: 20 // 获取最近20条消息
+          page: page,
+          size: 20 // 每页获取20条消息
         }
       })
 
@@ -148,7 +159,7 @@ const Chat = () => {
 
       if (response.statusCode === 200 && response.data && response.data.success) {
         const historyMessages = response.data.data || []
-        console.log('获取到聊天历史:', historyMessages.length, '条')
+        console.log(`获取到第${page}页聊天历史:`, historyMessages.length, '条')
 
         // 转换历史消息格式
         const convertedMessages: Message[] = historyMessages.map((msg: any) => ({
@@ -159,41 +170,68 @@ const Chat = () => {
           isComplete: true
         }))
 
-        // 如果有历史消息，设置到状态中
-        if (convertedMessages.length > 0) {
-          setMessages(convertedMessages)
-          console.log('已加载', convertedMessages.length, '条历史消息')
-
-          // 如果是手动刷新，显示成功提示
-          if (showToastOnSuccess) {
+        if (append) {
+          // 追加模式：将新消息添加到现有消息的开头（历史记录在上方）
+          if (convertedMessages.length > 0) {
+            // 后端返回的是按时间倒序的数据，对于追加模式，我们需要将其反转
+            // 因为更早的消息应该插入到现有消息列表的开头
+            const reversedMessages = [...convertedMessages].reverse()
+            setMessages(prevMessages => [...reversedMessages, ...prevMessages])
+            setCurrentPage(page)
+            console.log(`已追加${convertedMessages.length}条历史消息到第${page}页`)
+          } else {
+            // 没有更多数据了
+            setHasMoreHistory(false)
             showToast({
-              title: `已加载${convertedMessages.length}条历史消息`,
-              icon: 'success',
-              duration: 2000
-            })
-          }
-        } else {
-          // 没有历史消息时显示欢迎消息
-          initializeWelcomeMessage()
-
-          // 如果是手动刷新，显示无历史消息提示
-          if (showToastOnSuccess) {
-            showToast({
-              title: '暂无聊天历史',
+              title: '没有更多历史记录了',
               icon: 'none',
               duration: 2000
             })
           }
+        } else {
+          // 初始加载模式：后端返回最近20条消息（倒序），需要反转为正序显示
+          if (convertedMessages.length > 0) {
+            // 将后端返回的倒序数据反转为正序，确保最新消息在下面
+            const sortedMessages = [...convertedMessages].reverse()
+            setMessages(sortedMessages)
+            setCurrentPage(0)
+            setHasMoreHistory(convertedMessages.length === 20) // 如果返回了满20条，可能还有更多
+            console.log('已加载', sortedMessages.length, '条历史消息，按时间正序排列')
+
+            // 如果是手动刷新，显示成功提示
+            if (showToastOnSuccess) {
+              showToast({
+                title: `已加载${convertedMessages.length}条历史消息`,
+                icon: 'success',
+                duration: 2000
+              })
+            }
+          } else {
+            // 没有历史消息时显示欢迎消息
+            initializeWelcomeMessage()
+            setHasMoreHistory(false)
+
+            // 如果是手动刷新，显示无历史消息提示
+            if (showToastOnSuccess) {
+              showToast({
+                title: '暂无聊天历史',
+                icon: 'none',
+                duration: 2000
+              })
+            }
+          }
         }
       } else {
         console.error('获取聊天历史失败:', (response.data && response.data.message) || '未知错误')
-        // 失败时显示欢迎消息
-        initializeWelcomeMessage()
+        if (!append) {
+          // 失败时显示欢迎消息
+          initializeWelcomeMessage()
+        }
 
         // 显示错误提示（可选）
         if (response.statusCode !== 200) {
           showToast({
-            title: '加载聊天历史失败',
+            title: append ? '加载更多历史失败' : '加载聊天历史失败',
             icon: 'none',
             duration: 2000
           })
@@ -201,8 +239,10 @@ const Chat = () => {
       }
     } catch (error) {
       console.error('加载聊天历史出错:', error)
-      // 出错时显示欢迎消息
-      initializeWelcomeMessage()
+      if (!append) {
+        // 出错时显示欢迎消息
+        initializeWelcomeMessage()
+      }
 
       // 显示网络错误提示
       showToast({
@@ -212,7 +252,31 @@ const Chat = () => {
       })
     } finally {
       setIsLoadingHistory(false)
+      setIsLoadingMoreHistory(false)
     }
+  }
+
+  // 加载更多历史记录
+  const loadMoreHistory = async () => {
+    if (isLoadingMoreHistory || !hasMoreHistory) {
+      console.log('正在加载中或没有更多历史记录')
+      return
+    }
+
+    const nextPage = currentPage + 1
+    console.log(`加载第${nextPage}页历史记录`)
+    await loadChatHistory(false, nextPage, true)
+  }
+
+  // 处理滚动事件，实现上拉加载
+  const handleScrollToUpper = () => {
+    console.log('用户滚动到顶部，尝试加载更多历史记录')
+    loadMoreHistory()
+  }
+
+  // 确保消息数组始终按时间正序排列（最早的在上，最新的在下）
+  const sortMessagesByTime = (messages: Message[]) => {
+    return [...messages].sort((a, b) => a.timestamp - b.timestamp)
   }
 
   // 初始化欢迎消息
@@ -225,6 +289,8 @@ const Chat = () => {
       isComplete: true
     }
     setMessages([welcomeMessage])
+    setCurrentPage(0)
+    setHasMoreHistory(false)
   }
 
   useLoad(() => {
@@ -506,18 +572,21 @@ const Chat = () => {
       }
 
       // 处理普通流式内容
-      setMessages(prev => prev.map(msg => {
-        if (msg.id === messageId) {
-          const newContent = msg.content + data
-          return {
-            ...msg,
-            content: newContent,
-            isTyping: true,
-            isComplete: false
+      setMessages(prev => {
+        const updatedMessages = prev.map(msg => {
+          if (msg.id === messageId) {
+            const newContent = msg.content + data
+            return {
+              ...msg,
+              content: newContent,
+              isTyping: true,
+              isComplete: false
+            }
           }
-        }
-        return msg
-      }))
+          return msg
+        })
+        return sortMessagesByTime(updatedMessages)
+      })
 
       // 滚动到底部
       scrollToBottom()
@@ -546,7 +615,11 @@ const Chat = () => {
       isComplete: true
     }
 
-    setMessages(prev => [...prev, userMessage])
+    // 添加用户消息并按时间排序
+    setMessages(prev => {
+      const newMessages = [...prev, userMessage]
+      return sortMessagesByTime(newMessages)
+    })
     setInputText('')
     setIsLoading(true)
 
@@ -556,12 +629,16 @@ const Chat = () => {
       id: aiMessageId,
       type: 'ai',
       content: '',
-      timestamp: Date.now(),
+      timestamp: Date.now() + 1, // 稍微延后一点，确保在用户消息之后
       isTyping: true,
       isComplete: false
     }
 
-    setMessages(prev => [...prev, aiMessage])
+    // 添加AI消息并按时间排序
+    setMessages(prev => {
+      const newMessages = [...prev, aiMessage]
+      return sortMessagesByTime(newMessages)
+    })
     setCurrentTypingId(aiMessageId)
 
     try {
@@ -570,16 +647,19 @@ const Chat = () => {
       console.error('发送消息失败', error)
 
       // 更新消息为错误状态
-      setMessages(prev => prev.map(msg =>
-        msg.id === aiMessageId
-          ? {
-              ...msg,
-              content: '抱歉，我现在无法回复。请稍后再试。\n\n可能的原因：\n• 网络连接问题\n• 服务器暂时不可用\n• 请求超时',
-              isTyping: false,
-              isComplete: true
-            }
-          : msg
-      ))
+      setMessages(prev => {
+        const updatedMessages = prev.map(msg =>
+          msg.id === aiMessageId
+            ? {
+                ...msg,
+                content: '抱歉，我现在无法回复。请稍后再试。\n\n可能的原因：\n• 网络连接问题\n• 服务器暂时不可用\n• 请求超时',
+                isTyping: false,
+                isComplete: true
+              }
+            : msg
+        )
+        return sortMessagesByTime(updatedMessages)
+      })
 
       showToast({
         title: '发送失败，请重试',
@@ -1093,7 +1173,23 @@ const Chat = () => {
         scrollY
         ref={scrollViewRef}
         scrollIntoView={`msg-${messages.length - 1}`}
+        onScrollToUpper={handleScrollToUpper}
+        upperThreshold={50}
+        enableBackToTop={false}
       >
+        {/* 加载更多历史记录的提示 */}
+        {isLoadingMoreHistory && (
+          <View className='loading-more-history'>
+            <Text className='loading-text'>正在加载更多历史记录...</Text>
+          </View>
+        )}
+        
+        {/* 没有更多历史记录的提示 */}
+        {!hasMoreHistory && messages.length > 20 && (
+          <View className='no-more-history'>
+            <Text className='no-more-text'>没有更多历史记录了</Text>
+          </View>
+        )}
         {/* 加载历史消息指示器 */}
         {isLoadingHistory && (
           <View className='loading-history'>
@@ -1101,13 +1197,14 @@ const Chat = () => {
           </View>
         )}
 
-        {/* 调试信息：显示消息数量和登录状态 */}
+        // 调试信息：显示消息数量和登录状态
         {!isLoadingHistory && (
           <View className='debug-info'>
             <Text className='debug-text'>
               消息: {messages.length} 条 |
               登录: {getStorageSync('token') ? '✓' : '✗'} |
-              WS: {wsConnected ? '✓' : '✗'}
+              WS: {wsConnected ? '✓' : '✗'} |
+              排序: {messages.length > 1 && messages.every((msg, i) => i === 0 || messages[i-1].timestamp <= msg.timestamp) ? '✓' : '✗'}
             </Text>
           </View>
         )}

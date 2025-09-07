@@ -566,15 +566,16 @@ const Profile = () => {
 
   // 上传头像函数
   const uploadAvatar = async () => {
-    // 只检查登录状态
-    // if (!isLogin) {
-    //   console.log('上传头像失败: 未登录', {isLogin})
-    //   showToast({
-    //     title: '请先登录',
-    //     icon: 'none'
-    //   })
-    //   return
-    // }
+    // 检查登录状态
+    if (!isLogin) {
+      console.log('上传头像失败: 未登录', {isLogin})
+      showToast({
+        title: '请先登录',
+        icon: 'none'
+      })
+      return
+    }
+    
     console.log('开始上传头像')
 
     try {
@@ -605,35 +606,79 @@ const Profile = () => {
           },
           success: (res: any) => {
             console.log('头像上传结果:', res)
+            console.log('响应状态码:', res.statusCode)
+            console.log('响应数据:', res.data)
+            
             const data = JSON.parse(res.data)
+            console.log('解析后的响应数据:', data)
+            
             if (res.statusCode === 200 && data.success) {
-              // 上传成功，更新用户头像
-              // 拼接完整的URL，因为后端返回的是相对路径
-              const newAvatarUrl = data.accessUrl.startsWith('/api/') ?
-                buildApiUrl(data.accessUrl) : data.accessUrl;
-              const updatedUserInfo = {
-                ...userInfo,
-                avatarUrl: newAvatarUrl
+              // 上传成功，立即更新用户头像显示
+              console.log('头像上传成功，开始更新界面显示')
+              
+              // 从响应中获取新的头像URL
+              // 根据你的截图，后端返回的是 accessUrl 字段
+              let newAvatarUrl = data.data?.accessUrl || data.accessUrl
+              
+              // 如果没有accessUrl，尝试其他可能的字段
+              if (!newAvatarUrl) {
+                newAvatarUrl = data.data?.downloadUrl || data.downloadUrl || data.data?.url || data.url
               }
-
-              setUserInfo(updatedUserInfo)
-
-              // 更新本地存储
-              try {
-                setStorageSync('userInfo', updatedUserInfo)
-                console.log('更新本地用户信息成功')
-              } catch (e) {
-                console.error('更新本地用户信息失败:', e)
+              
+              console.log('原始头像URL:', newAvatarUrl)
+              
+              // 拼接完整的URL，因为后端返回的可能是相对路径
+              if (newAvatarUrl && newAvatarUrl.startsWith('/api/')) {
+                newAvatarUrl = buildApiUrl(newAvatarUrl)
               }
+              
+              // 添加时间戳防止缓存
+              if (newAvatarUrl) {
+                const timestamp = Date.now()
+                newAvatarUrl = newAvatarUrl.includes('?') ? 
+                  `${newAvatarUrl}&t=${timestamp}` : 
+                  `${newAvatarUrl}?t=${timestamp}`
+              }
+              
+              console.log('最终头像URL:', newAvatarUrl)
+              
+              if (newAvatarUrl) {
+                // 立即更新状态，确保界面实时显示新头像
+                const updatedUserInfo = {
+                  ...userInfo,
+                  avatarUrl: newAvatarUrl
+                }
 
-              hideLoading()
-              showToast({
-                title: '头像上传成功',
-                icon: 'success'
-              })
-              resolve(newAvatarUrl)
+                // 先更新状态，让界面立即显示新头像
+                setUserInfo(updatedUserInfo)
+                console.log('用户信息状态已更新，新头像应该立即显示:', updatedUserInfo)
+
+                // 然后更新本地存储
+                try {
+                  setStorageSync('userInfo', updatedUserInfo)
+                  console.log('本地存储用户信息更新成功:', updatedUserInfo)
+                } catch (e) {
+                  console.error('更新本地用户信息失败:', e)
+                }
+
+                hideLoading()
+                showToast({
+                  title: '头像上传成功',
+                  icon: 'success'
+                })
+                resolve(newAvatarUrl)
+              } else {
+                console.error('无法获取新头像URL')
+                hideLoading()
+                showToast({
+                  title: '头像上传成功，但无法获取新头像URL',
+                  icon: 'none'
+                })
+                reject(new Error('无法获取新头像URL'))
+              }
             } else {
               const errorMsg = data.message || '头像上传失败'
+              console.error('头像上传失败:', errorMsg)
               hideLoading()
               showToast({
                 title: errorMsg,
@@ -643,7 +688,7 @@ const Profile = () => {
             }
           },
           fail: (err: any) => {
-            console.error('头像上传失败:', err)
+            console.error('头像上传网络请求失败:', err)
             hideLoading()
             showToast({
               title: '头像上传失败',
@@ -747,14 +792,22 @@ const Profile = () => {
       {isLogin ? (
         <View className='user-info-card'>
           <Image
+            key={userInfo?.avatarUrl || 'default'} // 使用key强制重新渲染
             src={userInfo?.avatarUrl || DEFAULT_AVATAR}
             className='user-avatar'
             mode='aspectFill'
             onError={(e: any) => {
               console.error('头像加载失败:', e)
+              console.log('当前头像URL:', userInfo?.avatarUrl)
+              console.log('使用默认头像:', DEFAULT_AVATAR)
+              // 头像加载失败时，更新为默认头像
               setUserInfo(prev => prev ? { ...prev, avatarUrl: DEFAULT_AVATAR } : null)
             }}
+            onLoad={() => {
+              console.log('头像加载成功:', userInfo?.avatarUrl)
+            }}
             onClick={uploadAvatar}
+            lazyLoad={false} // 禁用懒加载，确保立即加载
           />
           <View className='user-info-content'>
             <Text className='user-nickname'>{userInfo?.nickName || '微信用户'}</Text>

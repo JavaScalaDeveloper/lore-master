@@ -94,12 +94,21 @@ public class ConsumerChatMessageServiceImpl implements ConsumerChatMessageServic
 
     /**
      * 获取用户的所有消息（分页）
+     * 按创建时间倒序返回，确保最新的消息在前面
      */
     public List<ConsumerChatMessage> getUserMessages(ConsumerChatHistoryRequest request) {
         String userId = request.getUserId();
         String sessionId = "session_" + userId;
         Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
-        return consumerChatMessageRepository.findByUserIdOrderByCreateTimeAsc(userId, pageable);
+        
+        // 使用会话ID查询消息，按创建时间倒序排列（最新的在前面）
+        List<ConsumerChatMessage> messages = consumerChatMessageRepository
+                .findByUserIdAndSessionIdOrderByCreateTimeDesc(userId, sessionId, pageable);
+        
+        log.debug("获取用户聊天历史: userId={}, sessionId={}, page={}, size={}, 返回消息数量={}", 
+                userId, sessionId, request.getPage(), request.getSize(), messages.size());
+                
+        return messages;
     }
 
     /**
