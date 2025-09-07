@@ -61,18 +61,27 @@ export default function Study() {
   useLoad(() => {
     console.log('Study page loaded.')
     // 添加延迟以避免初始加载过快导致的问题
-    setTimeout(() => loadCourses(true), 500)
+    setTimeout(() => loadCoursesWithFilters(selectedLevel, selectedType, selectedContent, true), 500)
   })
 
   // 监听来自主页的搜索事件
   useEffect(() => {
     const handleSearchFromHome = (keyword: string) => {
       console.log('接收到来自主页的搜索关键词:', keyword)
+      
+      // 重置所有筛选条件
+      setSelectedLevel('')
+      setSelectedType('')
+      setSelectedContent('')
+      
+      // 设置搜索关键词
       setSearchKeyword(keyword)
+      
       // 使用回调形式确保状态更新后再执行搜索
       setTimeout(() => {
         console.log('准备执行搜索，当前关键词:', keyword)
-        loadCoursesWithKeyword(keyword, true)
+        // 使用重置后的筛选条件进行搜索
+        loadCoursesWithFilters('', '', '', true, keyword)
       }, 100)
     }
 
@@ -85,88 +94,25 @@ export default function Study() {
     }
   }, [])
 
-  // 加载课程列表（带关键词参数）
-  const loadCoursesWithKeyword = async (keyword: string, reset = false) => {
-    if (loading) return;
-
-    const page = reset ? 0 : currentPage;
-
-    try {
-      setLoading(true);
-      if (reset) {
-        showLoading({ title: '加载中...' });
-      }
-
-      const queryParams = {
-        page,
-        size: 10,
-        publishedOnly: true,
-        keyword: keyword.trim() || undefined,
-        difficultyLevel: selectedLevel || undefined,
-        courseType: selectedType === '普通' ? 'NORMAL' : selectedType === '合集' ? 'COLLECTION' : undefined,
-        contentType: selectedContent === '图文' ? 'ARTICLE' : selectedContent === '视频' ? 'VIDEO' : undefined
-      };
-
-      console.log('API调用参数:', queryParams);
-      const apiUrl = buildApiUrl('/api/consumer/course/queryCourseList');
-
-      const response = await request({
-        url: apiUrl,
-        method: 'POST',
-        data: queryParams,
-        header: getApiHeaders(),
-        // 添加超时设置
-        timeout: 30000
-      })
-
-      if (response && response.data && response.data.success) {
-        const pageData: CoursePageVO = response.data.data;
-        let filteredCourses = pageData.courses || [];
-
-        // Ensure we only show collection courses when collection filter is active
-        if (selectedType === '合集') {
-          filteredCourses = filteredCourses.filter(course => course.courseType === 'COLLECTION');
-        }
-
-        if (reset) {
-          setCourses(filteredCourses);
-          setCurrentPage(0);
-        } else {
-          setCourses(prev => [...prev, ...filteredCourses]);
-        }
-
-        setCurrentPage(page + 1)
-        setHasMore(!!pageData.hasNext)
-      } else {
-        const errorMsg = response?.data?.message || '加载失败'
-        console.error('API请求失败:', errorMsg)
-        showToast({
-          title: errorMsg,
-          icon: 'error'
-        })
-        // 确保即使API失败，也有一个空列表而不是undefined
-        if (reset) {
-          setCourses([])
-        }
-      }
-    } catch (error) {
-      console.error('加载课程失败:', error)
-      showToast({
-        title: '网络错误，请检查网络连接',
-        icon: 'error'
-      })
-      // 确保即使网络错误，也有一个空列表而不是undefined
-      if (reset) {
-        setCourses([])
-      }
-    } finally {
-      setLoading(false)
-      hideLoading()
-    }
+  // 搜索处理
+  const handleSearch = () => {
+    loadCoursesWithFilters(selectedLevel, selectedType, selectedContent, true)
   }
 
-  // 加载课程列表
-  const loadCourses = async (reset = false) => {
+  // 筛选条件变化处理
+  const handleFilterChange = (newLevel?: string, newType?: string, newContent?: string) => {
+    // 使用传入的新值或当前状态值
+    const level = newLevel !== undefined ? newLevel : selectedLevel
+    const type = newType !== undefined ? newType : selectedType  
+    const content = newContent !== undefined ? newContent : selectedContent
+    
+    setTimeout(() => {
+      loadCoursesWithFilters(level, type, content, true)
+    }, 100)
+  }
+
+  // 使用指定筛选条件加载课程
+  const loadCoursesWithFilters = async (level: string, type: string, content: string, reset = false, keyword?: string) => {
     if (loading) return
 
     const page = reset ? 0 : currentPage
@@ -177,17 +123,20 @@ export default function Study() {
         showLoading({ title: '加载中...' })
       }
 
+      // 使用传入的keyword参数，如果没有则使用当前状态的searchKeyword
+      const searchTerm = keyword !== undefined ? keyword : searchKeyword
+
       const queryParams = {
         page,
         size: 10,
         publishedOnly: true,
-        keyword: searchKeyword.trim() || undefined,
-        difficultyLevel: selectedLevel || undefined,
-        courseType: selectedType === '普通' ? 'NORMAL' : selectedType === '合集' ? 'COLLECTION' : undefined,
-        contentType: selectedContent === '图文' ? 'ARTICLE' : selectedContent === '视频' ? 'VIDEO' : undefined
+        keyword: searchTerm.trim() || undefined,
+        difficultyLevel: level || undefined,
+        courseType: type === '普通' ? 'NORMAL' : type === '合集' ? 'COLLECTION' : undefined,
+        contentType: content === '图文' ? 'ARTICLE' : content === '视频' ? 'VIDEO' : undefined
       }
 
-      console.log('API调用参数:', queryParams)
+      console.log('API调用参数 (使用筛选条件):', queryParams)
 
       const apiUrl = buildApiUrl('/api/consumer/course/queryCourseList')
 
@@ -196,7 +145,6 @@ export default function Study() {
         method: 'POST',
         data: queryParams,
         header: getApiHeaders(),
-        // 添加超时设置
         timeout: 30000
       })
 
@@ -205,7 +153,7 @@ export default function Study() {
         let filteredCourses = pageData.courses || [];
 
         // Ensure we only show collection courses when collection filter is active
-        if (selectedType === '合集') {
+        if (type === '合集') {
           filteredCourses = filteredCourses.filter(course => course.courseType === 'COLLECTION');
         }
 
@@ -225,7 +173,6 @@ export default function Study() {
           title: errorMsg,
           icon: 'error'
         })
-        // 确保即使API失败，也有一个空列表而不是undefined
         if (reset) {
           setCourses([])
         }
@@ -236,7 +183,6 @@ export default function Study() {
         title: '网络错误，请检查网络连接',
         icon: 'error'
       })
-      // 确保即使网络错误，也有一个空列表而不是undefined
       if (reset) {
         setCourses([])
       }
@@ -244,16 +190,6 @@ export default function Study() {
       setLoading(false)
       hideLoading()
     }
-  }
-
-  // 搜索处理
-  const handleSearch = () => {
-    loadCourses(true)
-  }
-
-  // 筛选条件变化处理
-  const handleFilterChange = () => {
-    setTimeout(() => loadCourses(true), 100)
   }
 
   // 加载更多
@@ -266,7 +202,7 @@ export default function Study() {
     // 防抖处理
     loadMoreTimerRef.current = setTimeout(() => {
       if (hasMore && !loading) {
-        loadCourses(false)
+        loadCoursesWithFilters(selectedLevel, selectedType, selectedContent, false)
       }
     }, 300)
   }
@@ -394,8 +330,9 @@ export default function Study() {
               value={levelOptions.indexOf(selectedLevel)}
               onChange={(e) => {
                 const index = e.detail.value
-                setSelectedLevel(levelOptions[index])
-                handleFilterChange()
+                const newLevel = levelOptions[index]
+                setSelectedLevel(newLevel)
+                handleFilterChange(newLevel, undefined, undefined)
               }}
             >
               <View className='picker-view'>
@@ -413,8 +350,9 @@ export default function Study() {
               value={typeOptions.indexOf(selectedType)}
               onChange={(e) => {
                 const index = e.detail.value
-                setSelectedType(typeOptions[index])
-                handleFilterChange()
+                const newType = typeOptions[index]
+                setSelectedType(newType)
+                handleFilterChange(undefined, newType, undefined)
               }}
             >
               <View className='picker-view'>
@@ -432,8 +370,9 @@ export default function Study() {
               value={contentOptions.indexOf(selectedContent)}
               onChange={(e) => {
                 const index = e.detail.value
-                setSelectedContent(contentOptions[index])
-                handleFilterChange()
+                const newContent = contentOptions[index]
+                setSelectedContent(newContent)
+                handleFilterChange(undefined, undefined, newContent)
               }}
             >
               <View className='picker-view'>
@@ -524,7 +463,7 @@ export default function Study() {
               className='load-more-btn'
               onTap={() => {
                 if (hasMore && !loading) {
-                  loadCourses(false)
+                  loadCoursesWithFilters(selectedLevel, selectedType, selectedContent, false)
                 }
               }}
             >

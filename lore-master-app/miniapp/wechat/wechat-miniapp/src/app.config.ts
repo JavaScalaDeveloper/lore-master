@@ -17,7 +17,7 @@ export default {
   window: {
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#fff',
-    navigationBarTitleText: 'Lore Master',
+    navigationBarTitleText: '个人中心',
     navigationBarTextStyle: 'black'
   },
   // 启用组件按需注入，优化小程序性能

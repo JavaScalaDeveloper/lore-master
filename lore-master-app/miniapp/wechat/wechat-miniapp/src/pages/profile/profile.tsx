@@ -777,31 +777,7 @@ const Profile = () => {
         </View>
       )}
 
-      {/* 学习数据统计 */}
-      {isLogin && (
-        <View className='stats-container'>
-          <View className='stat-item' onClick={() => showToast({title: '查看学习天数详情'})}>
-            <Text className='stat-icon'>📅</Text>
-            <Text className='stat-value'>0</Text>
-            <Text className='stat-label'>学习天数</Text>
-          </View>
-          <View className='stat-item' onClick={() => showToast({title: '查看学习时长详情'})}>
-            <Text className='stat-icon'>⏰</Text>
-            <Text className='stat-value'>0</Text>
-            <Text className='stat-label'>学习时长(h)</Text>
-          </View>
-          <View className='stat-item' onClick={() => showToast({title: '查看完成课程详情'})}>
-            <Text className='stat-icon'>📚</Text>
-            <Text className='stat-value'>0</Text>
-            <Text className='stat-label'>完成课程</Text>
-          </View>
-          <View className='stat-item' onClick={() => showToast({title: '查看学习积分详情'})}>
-            <Text className='stat-icon'>⭐</Text>
-            <Text className='stat-value'>0</Text>
-            <Text className='stat-label'>学习积分</Text>
-          </View>
-        </View>
-      )}
+  
 
       {/* 学习目标区域 */}
       <View className='profile-content'>
@@ -826,14 +802,6 @@ const Profile = () => {
                     <Text className='goal-path'>暂未设置学习目标</Text>
                   )}
                 </View>
-                {currentLearningGoal && (
-                  <View className='goal-progress-row'>
-                    <View className='progress-bar-compact'>
-                      <View className='progress-fill-compact' style={{ width: `${currentLearningGoal.currentProgress || 0}%` }}></View>
-                    </View>
-                    <Text className='progress-text-compact'>{currentLearningGoal.currentProgress || 0}% 完成</Text>
-                  </View>
-                )}
               </View>
               <View className='goal-actions'>
                 <Button

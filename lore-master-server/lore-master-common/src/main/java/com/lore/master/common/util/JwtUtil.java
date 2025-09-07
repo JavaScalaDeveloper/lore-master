@@ -17,34 +17,34 @@ import java.util.Date;
  */
 @Slf4j
 public class JwtUtil {
-    
+
     /**
      * 默认密钥
      */
     private static final String DEFAULT_SECRET = "lore-master-jwt-secret-2024";
-    
+
     /**
      * 默认过期时间（24小时）
      */
-    private static final long DEFAULT_EXPIRE_TIME = 24 * 60 * 60 * 1000L;
-    
+    private static final long DEFAULT_EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000L;
+
     /**
      * 生成JWT token
      *
-     * @param userId 用户ID
+     * @param userId   用户ID
      * @param username 用户名
      * @return token
      */
     public static String generateToken(Long userId, String username) {
         return generateToken(userId, username, DEFAULT_SECRET, DEFAULT_EXPIRE_TIME);
     }
-    
+
     /**
      * 生成JWT token
      *
-     * @param userId 用户ID
-     * @param username 用户名
-     * @param secret 密钥
+     * @param userId     用户ID
+     * @param username   用户名
+     * @param secret     密钥
      * @param expireTime 过期时间（毫秒）
      * @return token
      */
@@ -52,7 +52,7 @@ public class JwtUtil {
         try {
             Date expireDate = new Date(System.currentTimeMillis() + expireTime);
             Algorithm algorithm = Algorithm.HMAC256(secret);
-            
+
             return JWT.create()
                     .withClaim("userId", userId)
                     .withClaim("username", username)
@@ -64,7 +64,7 @@ public class JwtUtil {
             return null;
         }
     }
-    
+
     /**
      * 验证token是否有效
      *
@@ -74,11 +74,11 @@ public class JwtUtil {
     public static boolean verifyToken(String token) {
         return verifyToken(token, DEFAULT_SECRET);
     }
-    
+
     /**
      * 验证token是否有效
      *
-     * @param token token
+     * @param token  token
      * @param secret 密钥
      * @return 是否有效
      */
@@ -87,7 +87,7 @@ public class JwtUtil {
             if (StrUtil.isBlank(token)) {
                 return false;
             }
-            
+
             Algorithm algorithm = Algorithm.HMAC256(secret);
             JWTVerifier verifier = JWT.require(algorithm).build();
             verifier.verify(token);
@@ -97,7 +97,7 @@ public class JwtUtil {
             return false;
         }
     }
-    
+
     /**
      * 获取token中的用户ID
      *
@@ -109,7 +109,7 @@ public class JwtUtil {
             if (StrUtil.isBlank(token)) {
                 return null;
             }
-            
+
             DecodedJWT jwt = JWT.decode(token);
             return jwt.getClaim("userId").asLong();
         } catch (JWTDecodeException e) {
@@ -117,7 +117,7 @@ public class JwtUtil {
             return null;
         }
     }
-    
+
     /**
      * 获取token中的用户名
      *
@@ -129,7 +129,7 @@ public class JwtUtil {
             if (StrUtil.isBlank(token)) {
                 return null;
             }
-            
+
             DecodedJWT jwt = JWT.decode(token);
             return jwt.getClaim("username").asString();
         } catch (JWTDecodeException e) {
@@ -137,7 +137,7 @@ public class JwtUtil {
             return null;
         }
     }
-    
+
     /**
      * 获取token过期时间
      *
@@ -149,7 +149,7 @@ public class JwtUtil {
             if (StrUtil.isBlank(token)) {
                 return null;
             }
-            
+
             DecodedJWT jwt = JWT.decode(token);
             return jwt.getExpiresAt();
         } catch (JWTDecodeException e) {
@@ -157,7 +157,7 @@ public class JwtUtil {
             return null;
         }
     }
-    
+
     /**
      * 判断token是否过期
      *
@@ -175,7 +175,7 @@ public class JwtUtil {
     /**
      * 生成刷新令牌
      *
-     * @param userId 用户ID
+     * @param userId   用户ID
      * @param username 用户名
      * @return 刷新令牌
      */

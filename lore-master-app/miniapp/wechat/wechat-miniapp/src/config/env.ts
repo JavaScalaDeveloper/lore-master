@@ -41,7 +41,7 @@ export const DEV_CONFIG = {
   // 一键切换配置：
   // - false: 使用本地地址 (localhost:8082)
   // - true: 使用远程地址 (ly112978940c.vicp.fun)
-  USE_REMOTE_URL: true,
+  USE_REMOTE_URL: false,
   
   // 是否使用局域网地址（用于真机调试）
   USE_NETWORK_URL: false,
