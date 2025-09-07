@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { useLoad, navigateBack, showToast, request, getStorageSync, connectSocket, onSocketOpen, onSocketMessage, onSocketClose, onSocketError, sendSocketMessage, closeSocket } from '@tarojs/taro'
+import { useLoad, navigateBack, showToast, request, uploadFile, getStorageSync, connectSocket, onSocketOpen, onSocketMessage, onSocketClose, onSocketError, sendSocketMessage, closeSocket, getRecorderManager, authorize } from '@tarojs/taro'
 import { View, Text, ScrollView, Textarea, Button, Image } from '@tarojs/components'
 import MarkdownRenderer from '../../components/MarkdownRenderer/MarkdownRenderer'
 import { API_CONFIG } from '../../config/api'
@@ -71,12 +71,22 @@ const Chat = () => {
   const [wsConnected, setWsConnected] = useState(false)
   const [wsConnecting, setWsConnecting] = useState(false)
   const [userInfo, setUserInfo] = useState<any>(null)
+  
+  // 语音录制相关状态
+  const [isRecording, setIsRecording] = useState(false)
+  const [recordingTime, setRecordingTime] = useState(0)
+  const [inputMode, setInputMode] = useState<'text' | 'voice'>('text')
+  const [isConverting, setIsConverting] = useState(false)
 
   const scrollViewRef = useRef<any>()
   const currentMessageIdRef = useRef<string | null>(null)
   const reconnectTimeoutRef = useRef<any>(null)
   const reconnectAttemptsRef = useRef(0)
   const maxReconnectAttempts = 5
+  
+  // 录音管理器和定时器
+  const recorderManagerRef = useRef<any>(null)
+  const recordingTimerRef = useRef<any>(null)
 
   // 生成唯一ID
   const generateId = () => {
@@ -519,8 +529,9 @@ const Chat = () => {
 
 
   // 发送消息
-  const sendMessage = async () => {
-    if (!inputText.trim()) return
+  const sendMessage = async (messageContent?: string) => {
+    const content = messageContent || inputText.trim()
+    if (!content) return
 
     // 检查登录状态
     if (!checkLoginStatus()) {
@@ -530,7 +541,7 @@ const Chat = () => {
     const userMessage: Message = {
       id: generateId(),
       type: 'user',
-      content: inputText.trim(),
+      content: content,
       timestamp: Date.now(),
       isComplete: true
     }
@@ -786,6 +797,249 @@ const Chat = () => {
     setInputText(e.detail.value)
   }
 
+  // 初始化录音管理器
+  const initRecorderManager = () => {
+    if (recorderManagerRef.current) {
+      return recorderManagerRef.current
+    }
+
+    const recorderManager = getRecorderManager()
+    recorderManagerRef.current = recorderManager
+
+    // 录音开始
+    recorderManager.onStart(() => {
+      console.log('录音开始')
+      setIsRecording(true)
+      setRecordingTime(0)
+      
+      // 开始计时
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1)
+      }, 1000)
+    })
+
+    // 录音结束
+    recorderManager.onStop((result) => {
+      console.log('录音结束', result)
+      setIsRecording(false)
+      setRecordingTime(0)
+      
+      // 清除计时器
+      if (recordingTimerRef.current) {
+        clearInterval(recordingTimerRef.current)
+        recordingTimerRef.current = null
+      }
+
+      // 处理录音结果
+      if (result.tempFilePath) {
+        handleVoiceToText(result.tempFilePath)
+      } else {
+        showToast({
+          title: '录音失败，请重试',
+          icon: 'none'
+        })
+      }
+    })
+
+    // 录音错误
+    recorderManager.onError((error) => {
+      console.error('录音错误', error)
+      setIsRecording(false)
+      setRecordingTime(0)
+      
+      if (recordingTimerRef.current) {
+        clearInterval(recordingTimerRef.current)
+        recordingTimerRef.current = null
+      }
+
+      showToast({
+        title: '录音失败：' + (error.errMsg || '未知错误'),
+        icon: 'none'
+      })
+    })
+
+    return recorderManager
+  }
+
+  // 开始录音
+  const startRecording = async () => {
+    try {
+      // 检查录音权限
+      const authResult = await authorize({
+        scope: 'scope.record'
+      })
+      
+      console.log('录音权限检查结果:', authResult)
+      
+      const recorderManager = initRecorderManager()
+      
+      // 开始录音
+      recorderManager.start({
+        duration: 60000, // 最长60秒
+        sampleRate: 16000, // 采样率
+        numberOfChannels: 1, // 声道数
+        encodeBitRate: 96000, // 编码码率
+        format: 'mp3' // 音频格式
+      })
+    } catch (error) {
+      console.error('开始录音失败', error)
+      showToast({
+        title: '无法开始录音，请检查权限',
+        icon: 'none'
+      })
+    }
+  }
+
+  // 停止录音
+  const stopRecording = () => {
+    if (recorderManagerRef.current && isRecording) {
+      recorderManagerRef.current.stop()
+    }
+  }
+
+  // 语音转文字
+  const handleVoiceToText = async (filePath: string) => {
+    try {
+      setIsConverting(true)
+      
+      showToast({
+        title: '正在转换语音...',
+        icon: 'loading',
+        duration: 3000
+      })
+
+      console.log('开始语音转文字，文件路径:', filePath)
+      
+      // 获取用户信息
+      const token = getStorageSync('token')
+      
+      if (!token) {
+        throw new Error('未找到登录token，请重新登录')
+      }
+
+      // 读取文件并转换为Base64
+      const fileManager = wx.getFileSystemManager()
+      const fileData = fileManager.readFileSync(filePath, 'base64')
+      const fileInfo = fileManager.statSync(filePath)
+      
+      console.log('文件信息:', { 
+        path: filePath, 
+        size: fileInfo.size,
+        base64Length: fileData.length 
+      })
+
+      // 构建请求数据
+      const requestData = {
+        audioData: fileData,
+        format: 'mp3',
+        fileSize: fileInfo.size,
+        fileName: 'voice_record.mp3',
+        language: 'zh_cn'
+      }
+      
+      console.log('请求数据:', {
+        format: requestData.format,
+        fileSize: requestData.fileSize,
+        fileName: requestData.fileName,
+        audioDataLength: requestData.audioData.length
+      })
+      
+      // 调用后端语音转文字API
+      const response = await request({
+        url: `${API_BASE_URL}/api/voice/transcribe`,
+        method: 'POST',
+        data: requestData,
+        header: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 30000 // 30秒超时
+      })
+      
+      console.log('语音转文字API响应:', response)
+      
+      if (response.statusCode === 200 && response.data) {
+        const result = typeof response.data === 'string' ? JSON.parse(response.data) : response.data
+        
+        if (result.success && result.data && result.data.text) {
+          const recognizedText = result.data.text.trim()
+          
+          if (recognizedText) {
+            setInputText(recognizedText)
+            
+            showToast({
+              title: '语音转换完成',
+              icon: 'success'
+            })
+            
+            console.log('语音识别结果:', recognizedText)
+            
+            // 自动发送转换后的文字
+            setTimeout(() => {
+              sendMessage(recognizedText)
+            }, 500)
+          } else {
+            throw new Error('语音识别结果为空，请重新录音')
+          }
+        } else {
+          throw new Error(result.message || '语音转换服务返回错误')
+        }
+      } else {
+        throw new Error(`语音转换请求失败，状态码: ${response.statusCode}`)
+      }
+    } catch (error) {
+      console.error('语音转文字失败:', error)
+      setIsConverting(false)
+      
+      let errorMessage = '语音转换失败'
+      
+      if (error.message) {
+        if (error.message.includes('网络')) {
+          errorMessage = '网络连接失败，请检查网络后重试'
+        } else if (error.message.includes('token')) {
+          errorMessage = '登录已过期，请重新登录'
+        } else if (error.message.includes('timeout')) {
+          errorMessage = '语音转换超时，请重试'
+        } else {
+          errorMessage = error.message
+        }
+      }
+      
+      showToast({
+        title: errorMessage,
+        icon: 'none',
+        duration: 3000
+      })
+      
+      // 如果是登录问题，清除token
+      if (errorMessage.includes('登录')) {
+        // 可以考虑跳转到登录页面
+        console.log('需要重新登录')
+      }
+    } finally {
+      setIsConverting(false)
+    }
+  }
+
+  // 切换输入模式
+  const toggleInputMode = () => {
+    setInputMode(prev => prev === 'text' ? 'voice' : 'text')
+  }
+
+  // 处理长按开始录音
+  const handleTouchStart = () => {
+    if (inputMode === 'voice') {
+      startRecording()
+    }
+  }
+
+  // 处理松开结束录音
+  const handleTouchEnd = () => {
+    if (inputMode === 'voice' && isRecording) {
+      stopRecording()
+    }
+  }
+
   // 返回首页
   const handleBack = () => {
     navigateBack()
@@ -925,26 +1179,75 @@ const Chat = () => {
       {/* 输入区域 */}
       <View className='input-container'>
         <View className='input-row'>
-          <View className='input-wrapper'>
-            <Textarea
-              className='message-input'
-              placeholder='输入消息...'
-              value={inputText}
-              onInput={handleInput}
-              maxlength={1000}
-              autoHeight
-              showConfirmBar={false}
-            />
+          {/* 输入模式切换按钮 */}
+          <View className='mode-switch-btn' onClick={toggleInputMode}>
+            <Text className='mode-icon'>
+              {inputMode === 'text' ? '🎤' : '⌨️'}
+            </Text>
           </View>
           
-          <Button 
-            className={`send-btn ${inputText.trim() ? 'active' : ''}`}
-            onClick={sendMessage}
-            disabled={!inputText.trim() || isLoading}
-          >
-            <Text className='send-icon'>➤</Text>
-          </Button>
+          <View className='input-wrapper'>
+            {inputMode === 'text' ? (
+              /* 文字输入模式 */
+              <Textarea
+                className='message-input'
+                placeholder='输入消息...'
+                value={inputText}
+                onInput={handleInput}
+                maxlength={1000}
+                autoHeight
+                showConfirmBar={false}
+              />
+            ) : (
+              /* 语音输入模式 */
+              <View
+                className={`voice-input ${isRecording ? 'recording' : ''}`}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+                onTouchCancel={handleTouchEnd}
+              >
+                {isRecording ? (
+                  <View className='recording-indicator'>
+                    <Text className='recording-text'>🎙️ 正在录音 {recordingTime}s</Text>
+                    <Text className='recording-hint'>松开发送</Text>
+                  </View>
+                ) : isConverting ? (
+                  <View className='converting-indicator'>
+                    <Text className='converting-text'>🔄 正在转换语音...</Text>
+                  </View>
+                ) : (
+                  <View className='voice-prompt'>
+                    <Text className='voice-text'>🎤 按住说话</Text>
+                  </View>
+                )}
+              </View>
+            )}
+          </View>
+          
+          {inputMode === 'text' && (
+            <Button 
+              className={`send-btn ${inputText.trim() ? 'active' : ''}`}
+              onClick={() => sendMessage()}
+              disabled={!inputText.trim() || isLoading}
+            >
+              <Text className='send-icon'>➤</Text>
+            </Button>
+          )}
         </View>
+        
+        {/* 录音状态提示 */}
+        {isRecording && (
+          <View className='recording-status'>
+            <View className='recording-wave'>
+              <View className='wave-bar'></View>
+              <View className='wave-bar'></View>
+              <View className='wave-bar'></View>
+              <View className='wave-bar'></View>
+              <View className='wave-bar'></View>
+            </View>
+            <Text className='recording-status-text'>正在录音中，松开手指发送</Text>
+          </View>
+        )}
       </View>
     </View>
   )

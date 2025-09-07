@@ -68,6 +68,9 @@ export default {
   permission: {
     'scope.userLocation': {
       'desc': '你的位置信息将用于小程序定位'
+    },
+    'scope.record': {
+      'desc': '你的录音权限将用于语音输入功能'
     }
   }
 }

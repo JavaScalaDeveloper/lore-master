@@ -38,19 +38,19 @@ public class JwtInterceptor implements HandlerInterceptor {
         // 获取token
         String token = getTokenFromRequest(request);
         if (StrUtil.isBlank(token)) {
-            writeErrorResponse(response, 401, "未登录，请先登录");
+            writeErrorResponse(request, response, 401, "未登录，请先登录");
             return false;
         }
         
         // 验证token
         if (!JwtUtil.verifyToken(token)) {
-            writeErrorResponse(response, 401, "登录已过期，请重新登录");
+            writeErrorResponse(request, response, 401, "登录已过期，请重新登录");
             return false;
         }
         
         // 检查token是否过期
         if (JwtUtil.isTokenExpired(token)) {
-            writeErrorResponse(response, 401, "登录已过期，请重新登录");
+            writeErrorResponse(request, response, 401, "登录已过期，请重新登录");
             return false;
         }
         
@@ -59,7 +59,7 @@ public class JwtInterceptor implements HandlerInterceptor {
         String username = JwtUtil.getUsername(token);
         
         if (userId == null || StrUtil.isBlank(username)) {
-            writeErrorResponse(response, 401, "无效的登录信息");
+            writeErrorResponse(request, response, 401, "无效的登录信息");
             return false;
         }
         
@@ -124,13 +124,19 @@ public class JwtInterceptor implements HandlerInterceptor {
     /**
      * 写入错误响应
      */
-    private void writeErrorResponse(HttpServletResponse response, int code, String message) throws IOException {
+    private void writeErrorResponse(HttpServletRequest request, HttpServletResponse response, int code, String message) throws IOException {
         response.setStatus(code); // 设置HTTP状态码为实际的错误码（如401）
         response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
 
-        // 设置跨域头
-        response.setHeader("Access-Control-Allow-Origin", "*");
+        // 设置跨域头 - 从请求中获取Origin并验证
+        String origin = request.getHeader("Origin");
+        if (origin != null && isAllowedOrigin(origin)) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+        } else {
+            // 如果没有Origin或不在允许列表中，使用默认的localhost
+            response.setHeader("Access-Control-Allow-Origin", "http://localhost:3001");
+        }
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         response.setHeader("Access-Control-Allow-Headers", "*");
         response.setHeader("Access-Control-Allow-Credentials", "true");
@@ -144,5 +150,28 @@ public class JwtInterceptor implements HandlerInterceptor {
             writer.write(jsonResult);
             writer.flush();
         }
+    }
+    
+    /**
+     * 检查Origin是否在允许列表中
+     */
+    private boolean isAllowedOrigin(String origin) {
+        String[] allowedOrigins = {
+            "http://localhost:3000",
+            "http://localhost:3001", 
+            "http://localhost:3002",
+            "http://localhost:3003",
+            "http://localhost:3004",
+            "https://www.loremaster.com",
+            "https://test.loremaster.com",
+            "https://ly112978940c.vicp.fun"
+        };
+        
+        for (String allowedOrigin : allowedOrigins) {
+            if (allowedOrigin.equals(origin)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

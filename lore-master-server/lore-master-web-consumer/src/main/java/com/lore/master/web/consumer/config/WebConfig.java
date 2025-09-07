@@ -33,7 +33,8 @@ public class WebConfig implements WebMvcConfigurer {
                     "http://localhost:3003",   // C端
                     "http://localhost:3004",   // 小程序
                     "https://www.loremaster.com", // 生产环境
-                    "https://test.loremaster.com"  // 测试环境
+                    "https://test.loremaster.com",  // 测试环境
+                    "https://ly112978940c.vicp.fun" // 开发环境
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
