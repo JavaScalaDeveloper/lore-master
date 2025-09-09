@@ -82,19 +82,9 @@ public class CourseRequest {
     private String status;
 
     /**
-     * 关联的知识点节点编码
+     * 关联的技能目标编码列表（JSON格式存储）
      */
-    private String knowledgeNodeCode;
-
-    /**
-     * 知识点节点全路径（用/分隔，如：java/basic/variable）
-     */
-    private String knowledgeNodePath;
-
-    /**
-     * 知识点节点名称全路径（用/分隔，便于搜索）
-     */
-    private String knowledgeNodeNamePath;
+    private List<String> skillTargetCodes;
 
     /**
      * 课程标签（用逗号分隔）

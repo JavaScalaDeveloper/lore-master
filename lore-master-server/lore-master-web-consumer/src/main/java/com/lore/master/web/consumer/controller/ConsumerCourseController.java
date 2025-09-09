@@ -217,18 +217,19 @@ public class ConsumerCourseController {
         
         log.info("根据知识点路径获取课程，参数：{}", queryDTO);
         
-        try {
-            CourseListPageVO result = courseService.getCoursesByKnowledgePath(
-                    queryDTO.getKnowledgeNodePath(), 
-                    queryDTO.getPage(), 
-                    queryDTO.getSize(), 
-                    queryDTO.getUserId()
-            );
-            return ApiResponse.success("查询成功", result);
-        } catch (Exception e) {
-            log.error("根据知识点路径查询课程失败，参数：{}", queryDTO, e);
-            return ApiResponse.error("查询失败：" + e.getMessage());
-        }
+//        try {
+//            CourseListPageVO result = courseService.getCoursesByKnowledgePath(
+//                    queryDTO.getKnowledgeNodePath(),
+//                    queryDTO.getPage(),
+//                    queryDTO.getSize(),
+//                    queryDTO.getUserId()
+//            );
+//            return ApiResponse.success("查询成功", result);
+//        } catch (Exception e) {
+//            log.error("根据知识点路径查询课程失败，参数：{}", queryDTO, e);
+//            return ApiResponse.error("查询失败：" + e.getMessage());
+//        }
+        return null;
     }
 
     /**

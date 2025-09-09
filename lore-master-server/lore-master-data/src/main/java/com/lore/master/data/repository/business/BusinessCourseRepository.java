@@ -56,12 +56,7 @@ public interface BusinessCourseRepository extends JpaRepository<BusinessCourse, 
            "ORDER BY c.publishTime DESC")
     Page<BusinessCourse> findByDifficultyLevel(@Param("level") String level, Pageable pageable);
 
-    /**
-     * 根据知识点路径查找课程（支持父节点搜索）
-     */
-    @Query("SELECT c FROM BusinessCourse c WHERE c.isDeleted = false AND " +
-           "c.knowledgeNodePath LIKE :pathPattern ORDER BY c.publishTime DESC")
-    Page<BusinessCourse> findByKnowledgeNodePath(@Param("pathPattern") String pathPattern, Pageable pageable);
+
 
     /**
      * 根据父课程ID查找子课程
@@ -79,11 +74,11 @@ public interface BusinessCourseRepository extends JpaRepository<BusinessCourse, 
     Page<BusinessCourse> findByAuthorAndIsDeletedFalseOrderByPublishTimeDesc(String author, Pageable pageable);
 
     /**
-     * 全文搜索课程（标题、描述、标签、知识点名称路径）
+     * 全文搜索课程（标题、描述、标签）
      */
     @Query("SELECT c FROM BusinessCourse c WHERE c.isDeleted = false AND c.status = 'PUBLISHED' AND " +
            "(c.title LIKE %:keyword% OR c.description LIKE %:keyword% OR " +
-           "c.tags LIKE %:keyword% OR c.knowledgeNodeNamePath LIKE %:keyword%) " +
+           "c.tags LIKE %:keyword%) " +
            "ORDER BY c.viewCount DESC, c.publishTime DESC")
     Page<BusinessCourse> searchCourses(@Param("keyword") String keyword, Pageable pageable);
 
@@ -117,10 +112,7 @@ public interface BusinessCourseRepository extends JpaRepository<BusinessCourse, 
      */
     Long countByAuthorAndStatusAndIsDeletedFalse(String author, String status);
 
-    /**
-     * 根据知识点编码查找课程
-     */
-    List<BusinessCourse> findByKnowledgeNodeCodeAndIsDeletedFalseOrderByPublishTimeDesc(String knowledgeNodeCode);
+
 
     /**
      * 查找合集课程
@@ -136,13 +128,11 @@ public interface BusinessCourseRepository extends JpaRepository<BusinessCourse, 
            "AND (:status IS NULL OR c.status = :status) " +
            "AND (:difficultyLevel IS NULL OR c.difficultyLevel = :difficultyLevel OR c.difficultyLevels LIKE %:difficultyLevel%) " +
            "AND (:author IS NULL OR c.author = :author) " +
-           "AND (:knowledgeNodePath IS NULL OR c.knowledgeNodePath LIKE :knowledgeNodePath%) " +
            "ORDER BY c.publishTime DESC")
     Page<BusinessCourse> findCoursesWithConditions(
             @Param("courseType") String courseType,
             @Param("status") String status,
             @Param("difficultyLevel") String difficultyLevel,
             @Param("author") String author,
-            @Param("knowledgeNodePath") String knowledgeNodePath,
             Pageable pageable);
 }

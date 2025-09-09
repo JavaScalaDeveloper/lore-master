@@ -80,16 +80,7 @@ public interface BusinessCourseService {
      */
     CourseListPageVO getLatestCourses(Integer page, Integer size, String userId);
 
-    /**
-     * 根据知识点路径获取相关课程
-     * 
-     * @param knowledgeNodePath 知识点路径
-     * @param page 页码
-     * @param size 每页大小
-     * @param userId 用户ID（可选）
-     * @return 相关课程列表
-     */
-    CourseListPageVO getCoursesByKnowledgePath(String knowledgeNodePath, Integer page, Integer size, String userId);
+
 
     /**
      * 根据难度等级获取课程

@@ -1197,7 +1197,6 @@ const Chat = () => {
           </View>
         )}
 
-        // 调试信息：显示消息数量和登录状态
         {!isLoadingHistory && (
           <View className='debug-info'>
             <Text className='debug-text'>

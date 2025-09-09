@@ -27,6 +27,8 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import java.time.LocalDateTime;
@@ -70,15 +72,11 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
         } else {
             // 复合条件查询
             String status = queryDTO.getPublishedOnly() ? BusinessCourse.STATUS_PUBLISHED : queryDTO.getStatus();
-            String knowledgeNodePath = StringUtils.hasText(queryDTO.getKnowledgeNodePath()) 
-                    ? "%" + queryDTO.getKnowledgeNodePath() + "%" : null;
-
             coursePage = courseRepository.findCoursesWithConditions(
                     queryDTO.getCourseType(),
                     status,
                     queryDTO.getDifficultyLevel(),
                     queryDTO.getAuthor(),
-                    knowledgeNodePath,
                     pageable
             );
         }
@@ -138,7 +136,7 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
                 .findByParentCourseIdAndIsDeletedFalseOrderBySortOrderAscCreatedTimeAsc(parentCourseId);
 
         return subCourses.stream()
-                .map(course -> convertToVO(course, userId))
+                .map(course -> convertToLightweightVO(course, userId))
                 .collect(Collectors.toList());
     }
 
@@ -176,17 +174,7 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
         return buildCoursePageVO(coursePage, null);
     }
 
-    @Override
-    public CourseListPageVO getCoursesByKnowledgePath(String knowledgeNodePath, Integer page, Integer size, String userId) {
-        log.info("根据知识点路径获取课程，knowledgeNodePath：{}，page：{}，size：{}，userId：{}", 
-                knowledgeNodePath, page, size, userId);
 
-        Pageable pageable = PageRequest.of(page, size);
-        String pathPattern = "%" + knowledgeNodePath + "%";
-        Page<BusinessCourse> coursePage = courseRepository.findByKnowledgeNodePath(pathPattern, pageable);
-
-        return buildCoursePageVO(coursePage, null);
-    }
 
     @Override
     public CourseListPageVO getCoursesByDifficulty(String difficultyLevel, Integer page, Integer size, String userId) {
@@ -344,9 +332,6 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
                 .parentCourseId(course.getParentCourseId())
                 .sortOrder(course.getSortOrder())
                 .status(course.getStatus())
-                .knowledgeNodeCode(course.getKnowledgeNodeCode())
-                .knowledgeNodePath(course.getKnowledgeNodePath())
-                .knowledgeNodeNamePath(course.getKnowledgeNodeNamePath())
                 .tags(course.getTags())
                 .durationMinutes(course.getDurationMinutes())
                 .viewCount(course.getViewCount())
@@ -358,6 +343,12 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
                 .contentUpdatedTime(course.getContentUpdatedTime())
                 .publishTime(course.getPublishTime())
                 .createdTime(course.getCreatedTime());
+
+        // 解析技能目标编码列表
+        if (StringUtils.hasText(course.getSkillTargetCodes())) {
+            List<String> skillTargetCodeList = Arrays.asList(course.getSkillTargetCodes().split(","));
+            builder.skillTargetCodes(skillTargetCodeList);
+        }
 
         // 解析难度等级列表
         if (StringUtils.hasText(course.getDifficultyLevels())) {
@@ -380,6 +371,78 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
     }
 
     /**
+     * 转换实体为轻量级VO（不包含大文本字段，适用于子课程列表）
+     */
+    private CourseVO convertToLightweightVO(BusinessCourse course, String userId) {
+        CourseVO.CourseVOBuilder builder = CourseVO.builder()
+                .id(course.getId())
+                .courseCode(course.getCourseCode())
+                .title(course.getTitle())
+                .description(course.getDescription())
+                .author(course.getAuthor())
+                .courseType(course.getCourseType())
+                .contentType(course.getContentType())
+                .difficultyLevel(course.getDifficultyLevel())
+                .difficultyLevels(course.getDifficultyLevels())
+                .parentCourseId(course.getParentCourseId())
+                .sortOrder(course.getSortOrder())
+                .status(course.getStatus())
+                .tags(course.getTags())
+                .durationMinutes(course.getDurationMinutes())
+                .viewCount(course.getViewCount())
+                .likeCount(course.getLikeCount())
+                .collectCount(course.getCollectCount())
+                .contentUrl(course.getContentUrl())
+                .coverImageUrl(course.getCoverImageUrl())
+                .thumbnailUrl(course.getThumbnailUrl())
+                // 注意：轻量级VO不包含 contentMarkdown 和 contentHtml
+                .contentUpdatedTime(course.getContentUpdatedTime())
+                .contentFileIds(course.getContentFileIds())
+                .publishTime(course.getPublishTime())
+                .createdTime(course.getCreatedTime());
+
+        // 解析技能目标编码列表
+        if (StringUtils.hasText(course.getSkillTargetCodes())) {
+            List<String> skillTargetCodeList = Arrays.asList(course.getSkillTargetCodes().split(","));
+            builder.skillTargetCodes(skillTargetCodeList);
+        }
+
+        // 解析难度等级列表
+        if (StringUtils.hasText(course.getDifficultyLevels())) {
+            List<String> difficultyLevelList = Arrays.asList(course.getDifficultyLevels().split(","));
+            builder.difficultyLevelList(difficultyLevelList);
+        }
+
+        // 解析标签列表
+        if (StringUtils.hasText(course.getTags())) {
+            List<String> tagList = Arrays.asList(course.getTags().split(","));
+            builder.tagList(tagList);
+        }
+
+        // 格式化时长
+        if (course.getDurationMinutes() != null && course.getDurationMinutes() > 0) {
+            builder.formattedDuration(formatDuration(course.getDurationMinutes()));
+        }
+
+        // 获取父课程标题
+        if (course.getParentCourseId() != null) {
+            Optional<BusinessCourse> parentCourse = courseRepository.findById(course.getParentCourseId());
+            if (parentCourse.isPresent() && !parentCourse.get().getIsDeleted()) {
+                builder.parentCourseTitle(parentCourse.get().getTitle());
+            }
+        }
+
+        // TODO: 根据useerId获取用户相关状态（收藏、点赞、学习进度等）
+        if (StringUtils.hasText(userId)) {
+            builder.isCollected(false)
+                    .isLiked(false)
+                    .progressPercent(0);
+        }
+
+        return builder.build();
+    }
+
+    /**
      * 转换实体为完整VO（包含所有字段）
      */
     private CourseVO convertToVO(BusinessCourse course, String userId) {
@@ -396,9 +459,6 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
                 .parentCourseId(course.getParentCourseId())
                 .sortOrder(course.getSortOrder())
                 .status(course.getStatus())
-                .knowledgeNodeCode(course.getKnowledgeNodeCode())
-                .knowledgeNodePath(course.getKnowledgeNodePath())
-                .knowledgeNodeNamePath(course.getKnowledgeNodeNamePath())
                 .tags(course.getTags())
                 .durationMinutes(course.getDurationMinutes())
                 .viewCount(course.getViewCount())
@@ -413,6 +473,12 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
                 .contentFileIds(course.getContentFileIds())
                 .publishTime(course.getPublishTime())
                 .createdTime(course.getCreatedTime());
+
+        // 解析技能目标编码列表
+        if (StringUtils.hasText(course.getSkillTargetCodes())) {
+            List<String> skillTargetCodeList = Arrays.asList(course.getSkillTargetCodes().split(","));
+            builder.skillTargetCodes(skillTargetCodeList);
+        }
 
         // 解析难度等级列表
         if (StringUtils.hasText(course.getDifficultyLevels())) {
@@ -634,9 +700,14 @@ public class BusinessCourseServiceImpl implements BusinessCourseService {
         entity.setParentCourseId(request.getParentCourseId());
         entity.setSortOrder(request.getSortOrder() != null ? request.getSortOrder() : 0);
         entity.setStatus(request.getStatus());
-        entity.setKnowledgeNodeCode(request.getKnowledgeNodeCode());
-        entity.setKnowledgeNodePath(request.getKnowledgeNodePath());
-        entity.setKnowledgeNodeNamePath(request.getKnowledgeNodeNamePath());
+        
+        // 处理技能目标编码列表
+        if (request.getSkillTargetCodes() != null && !request.getSkillTargetCodes().isEmpty()) {
+            entity.setSkillTargetCodes(String.join(",", request.getSkillTargetCodes()));
+        } else {
+            entity.setSkillTargetCodes(null);
+        }
+        
         entity.setTags(request.getTags());
         entity.setDurationMinutes(request.getDurationMinutes());
         entity.setContentUrl(request.getContentUrl());

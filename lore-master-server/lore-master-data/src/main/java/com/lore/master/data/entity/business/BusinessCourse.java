@@ -90,22 +90,10 @@ public class BusinessCourse {
     private String status;
 
     /**
-     * 关联的知识点节点编码
+     * 关联的技能目标编码列表（JSON格式存储）
      */
-    @Column(name = "knowledge_node_code", length = 64)
-    private String knowledgeNodeCode;
-
-    /**
-     * 知识点节点全路径（用/分隔，如：java/basic/variable）
-     */
-    @Column(name = "knowledge_node_path", length = 500)
-    private String knowledgeNodePath;
-
-    /**
-     * 知识点节点名称全路径（用/分隔，便于搜索）
-     */
-    @Column(name = "knowledge_node_name_path", length = 1000)
-    private String knowledgeNodeNamePath;
+    @Column(name = "skill_target_codes", columnDefinition = "TEXT")
+    private String skillTargetCodes;
 
     /**
      * 课程标签（用逗号分隔）

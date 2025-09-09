@@ -113,10 +113,10 @@ public class WechatLoginStrategy implements ConsumerUserLoginStrategy {
 
         // 2. 创建新用户
         ConsumerUser user = new ConsumerUser();
-        // 设置用户基本信息
-        user.setNickname(request.getWechatUserInfo() != null ? request.getWechatUserInfo().getNickname() : "微信用户");
-        user.setAvatarUrl(request.getWechatUserInfo() != null ? request.getWechatUserInfo().getAvatarUrl() : "");
-        user.setGender(request.getWechatUserInfo() != null ? request.getWechatUserInfo().getGender() : 0);
+        // 设置用户基本信息（由于前端不再提供wechatUserInfo，使用默认值）
+        user.setNickname("微信用户"); // 默认昵称，用户后续可以修改
+        user.setAvatarUrl(""); // 默认头像为空，用户后续可以上传
+        user.setGender(0); // 默认性别为未知
         user.setStatus(1); // 正常状态
         user.setIsVerified(1); // 已验证
         user.setLoginCount(1);

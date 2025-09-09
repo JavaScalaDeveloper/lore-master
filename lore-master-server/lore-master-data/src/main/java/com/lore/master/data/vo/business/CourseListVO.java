@@ -88,19 +88,9 @@ public class CourseListVO {
     private String status;
 
     /**
-     * 知识点节点编码
+     * 关联的技能目标编码列表
      */
-    private String knowledgeNodeCode;
-
-    /**
-     * 知识点节点路径
-     */
-    private String knowledgeNodePath;
-
-    /**
-     * 知识点节点名称路径
-     */
-    private String knowledgeNodeNamePath;
+    private List<String> skillTargetCodes;
 
     /**
      * 课程标签

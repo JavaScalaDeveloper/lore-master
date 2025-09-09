@@ -61,9 +61,7 @@ interface Course {
   parentCourseTitle?: string;
   sortOrder: number;
   status: string;
-  knowledgeNodeCode?: string;
-  knowledgeNodePath?: string;
-  knowledgeNodeNamePath?: string;
+  skillTargetCodes?: string[];
   tags?: string;
   tagList?: string[];
   durationMinutes?: number;
@@ -136,9 +134,12 @@ const CourseManage: React.FC = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [form] = Form.useForm();
 
-  // 知识点数据
-  const [knowledgeNodes, setKnowledgeNodes] = useState<any[]>([]);
-  const [knowledgeLoading, setKnowledgeLoading] = useState(false);
+
+
+  // 技能目标数据
+  const [skillTargets, setSkillTargets] = useState<any[]>([]);
+  const [skillTargetsLoading, setSkillTargetsLoading] = useState(false);
+  const [selectedSkillTargets, setSelectedSkillTargets] = useState<string[]>([]);
 
   // Markdown编辑器状态
   const [markdownContent, setMarkdownContent] = useState('');
@@ -190,66 +191,63 @@ const CourseManage: React.FC = () => {
     }
   };
 
-  // 加载知识点数据
-  const loadKnowledgeNodes = async (currentKnowledgeNodePath?: string) => {
-    setKnowledgeLoading(true);
+  // 加载技能目标数据
+  const loadSkillTargets = async () => {
+    setSkillTargetsLoading(true);
     try {
-      let rootCodes: string[] = [];
-
-      if (currentKnowledgeNodePath) {
-        // 从当前知识点路径提取根路径
-        const rootCode = currentKnowledgeNodePath.split('/')[0];
-        rootCodes = [rootCode];
+      const response = await adminApi.post('/api/admin/skill-catalog/tree', {
+        isActive: true,
+        treeStructure: true // 获取完整的技能目标树
+      });
+      if (response.success) {
+        // 将树形结构展开为平面列表，保留所有级别但标记级别信息
+        const flatTargets = flattenSkillTargets(response.data || []);
+        setSkillTargets(flatTargets);
       } else {
-        // 如果没有当前路径，加载所有常用的根节点
-        rootCodes = ['frontend', 'backend', 'database', 'devops', 'mobile', 'ai', 'tools'];
+        message.error('加载技能目标失败: ' + response.message);
       }
-
-      const allNodes: any[] = [];
-
-      for (const rootCode of rootCodes) {
-        try {
-          const response = await adminApi.post(`/api/admin/knowledge-map/getSkillTree?rootCode=${rootCode}`);
-          if (response.success && response.data.children) {
-            const flatNodes = flattenTreeNodes(response.data.children, response.data.rootName);
-            allNodes.push(...flatNodes);
-          }
-        } catch (error) {
-          console.warn(`加载${rootCode}技能树失败:`, error);
-        }
-      }
-
-      setKnowledgeNodes(allNodes);
     } catch (error) {
-      console.error('加载知识点数据失败:', error);
-      message.error('加载知识点数据失败');
+      console.error('加载技能目标失败:', error);
+      message.error('加载技能目标失败');
     } finally {
-      setKnowledgeLoading(false);
+      setSkillTargetsLoading(false);
     }
   };
 
-  // 扁平化树形节点数据
-  const flattenTreeNodes = (nodes: any[], parentPath = ''): any[] => {
+  // 展开技能目标树为平面列表，保留所有级别
+  const flattenSkillTargets = (targets: any[]): any[] => {
     const result: any[] = [];
 
-    nodes.forEach(node => {
-      const currentPath = parentPath ? `${parentPath}/${node.nodeNameStr || node.nodeName}` : (node.nodeNameStr || node.nodeName);
-
-      result.push({
-        nodeCode: node.nodeCode,
-        nodeName: node.nodeNameStr || node.nodeName,
-        nodeType: node.nodeType,
-        fullPath: currentPath,
-        levelDepth: node.levelDepth
+    const traverse = (nodes: any[], parentPath = '', level = 1) => {
+      nodes.forEach(node => {
+        const currentPath = parentPath ? `${parentPath} > ${node.skillName}` : node.skillName;
+        
+        // 添加所有级别的目标，但标记级别信息
+        result.push({
+          skillCode: node.skillCode,
+          skillName: node.skillName,
+          skillPath: node.skillPath,
+          fullPath: currentPath,
+          level: level, // 实际层级
+          realLevel: node.level || level, // 节点自身的level字段
+          parentCode: node.parentCode,
+          isSelectable: level === 3 // 只有3级目标可选择
+        });
+        
+        // 递归处理子节点
+        if (node.children && node.children.length > 0) {
+          traverse(node.children, currentPath, level + 1);
+        }
       });
+    };
 
-      if (node.children && node.children.length > 0) {
-        result.push(...flattenTreeNodes(node.children, currentPath));
-      }
-    });
-
+    traverse(targets);
     return result;
   };
+
+
+
+
 
   // 加载可用课程（用于合集选择）
   const loadAvailableCourses = async () => {
@@ -302,6 +300,12 @@ const CourseManage: React.FC = () => {
     });
   };
 
+  // 根据技能目标编码获取技能目标名称
+  const getSkillTargetName = (code: string): string => {
+    const target = skillTargets.find(t => t.skillCode === code);
+    return target ? target.skillName : code; // 如果找不到名称，返回编码
+  };
+
   // 查看详情
   const handleViewDetail = async (course: Course) => {
     try {
@@ -309,6 +313,10 @@ const CourseManage: React.FC = () => {
       if (response.success) {
         setSelectedCourse(response.data);
         setDetailModalVisible(true);
+        // 如果课程有技能目标编码且技能目标数据还未加载，则加载技能目标数据
+        if (response.data.skillTargetCodes && response.data.skillTargetCodes.length > 0 && skillTargets.length === 0) {
+          loadSkillTargets();
+        }
       } else {
         message.error('获取课程详情失败');
       }
@@ -423,9 +431,10 @@ const CourseManage: React.FC = () => {
     setSelectedSubCourses([]);
     setSubCourseSearchValue('');
     setFilteredAvailableCourses(availableCourses);
+    setSelectedSkillTargets([]); // 清空技能目标选择
     setEditModalVisible(true);
-    // 新增时加载所有根节点的知识点
-    loadKnowledgeNodes();
+    // 加载技能目标
+    loadSkillTargets();
     // 加载可用课程
     loadAvailableCourses();
   };
@@ -451,7 +460,7 @@ const CourseManage: React.FC = () => {
           contentType: fullCourse.contentType,
           difficultyLevel: fullCourse.difficultyLevel,
           status: fullCourse.status,
-          knowledgeNodeCode: fullCourse.knowledgeNodeCode,
+          skillTargetCodes: fullCourse.skillTargetCodes || [], // 技能目标编码列表
           tags: fullCourse.tags,
           durationMinutes: fullCourse.durationMinutes,
           sortOrder: fullCourse.sortOrder,
@@ -460,6 +469,9 @@ const CourseManage: React.FC = () => {
           thumbnailUrl: fullCourse.thumbnailUrl,
           contentMarkdown: fullCourse.contentMarkdown
         });
+
+        // 设置技能目标选择
+        setSelectedSkillTargets(fullCourse.skillTargetCodes || []);
 
         // 设置课程类型状态
         setSelectedCourseType(fullCourse.courseType || 'NORMAL');
@@ -485,13 +497,8 @@ const CourseManage: React.FC = () => {
         setUploadedFiles([]);
         setEditModalVisible(true);
 
-        // 根据当前课程的知识点路径加载相关技能树
-        if (fullCourse.knowledgeNodePath) {
-          loadKnowledgeNodes(fullCourse.knowledgeNodePath);
-        } else {
-          // 如果没有知识点路径，加载所有根节点
-          loadKnowledgeNodes();
-        }
+        // 加载技能目标数据
+        loadSkillTargets();
       } else {
         message.error('获取课程详情失败');
       }
@@ -559,11 +566,11 @@ const CourseManage: React.FC = () => {
         values.contentMarkdown = markdownContent;
       }
 
-      // 根据知识点编码设置路径信息
-      const selectedNode = knowledgeNodes.find(node => node.nodeCode === values.knowledgeNodeCode);
-      if (selectedNode) {
-        values.knowledgeNodePath = selectedNode.nodeCode;
-        values.knowledgeNodeNamePath = selectedNode.fullPath;
+      // 处理技能目标编码列表
+      if (selectedSkillTargets && selectedSkillTargets.length > 0) {
+        values.skillTargetCodes = selectedSkillTargets;
+      } else {
+        values.skillTargetCodes = [];
       }
 
       let response;
@@ -1024,7 +1031,42 @@ const CourseManage: React.FC = () => {
               </Col>
               <Col span={12}>
                 <p><strong>作者：</strong>{selectedCourse.author || '-'}</p>
-                <p><strong>知识节点：</strong>{selectedCourse.knowledgeNodeNamePath || '-'}</p>
+                {selectedCourse.skillTargetCodes && selectedCourse.skillTargetCodes.length > 0 && (
+                  <div style={{ marginBottom: '12px' }}>
+                    <p><strong>关联技能目标：</strong></p>
+                    <div style={{ marginTop: '8px' }}>
+                      {selectedCourse.skillTargetCodes.map((code, index) => {
+                        const target = skillTargets.find(t => t.skillCode === code);
+                        return (
+                          <div key={index} style={{ 
+                            marginBottom: '6px',
+                            padding: '8px 12px',
+                            background: '#f0f8ff',
+                            border: '1px solid #d6e7ff',
+                            borderRadius: '4px',
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}>
+                            <span style={{ marginRight: '8px', fontSize: '14px' }}>🎯</span>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 'bold', color: '#1890ff', marginBottom: '2px' }}>
+                                {target ? target.skillName : code}
+                              </div>
+                              {target && target.fullPath && (
+                                <div style={{ fontSize: '12px', color: '#666' }}>
+                                  {target.fullPath}
+                                </div>
+                              )}
+                            </div>
+                            <Tag color="blue" style={{ margin: 0 }}>
+                              {code}
+                            </Tag>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
                 <p><strong>观看次数：</strong>{selectedCourse.viewCount}</p>
                 <p><strong>点赞数：</strong>{selectedCourse.likeCount}</p>
                 <p><strong>收藏数：</strong>{selectedCourse.collectCount}</p>
@@ -1227,50 +1269,132 @@ const CourseManage: React.FC = () => {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={12}>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={24}>
               <Form.Item
-                name="knowledgeNodeCode"
-                label="知识点"
+                name="skillTargetCodes"
+                label="关联技能目标（支持多选，只允许选择3级目标）"
               >
                 <Select
-                  placeholder="请选择知识点"
-                  loading={knowledgeLoading}
+                  mode="multiple"
+                  placeholder="请选择技能目标，支持多选（只能选择3级目标）"
+                  loading={skillTargetsLoading}
                   showSearch
-                  filterOption={(input, option) =>
-                    option?.children?.toString().toLowerCase().includes(input.toLowerCase()) || false
-                  }
+                  value={selectedSkillTargets}
+                  onChange={(values, options) => {
+                    // 检查新选中的项目是否为3级目标
+                    const invalidSelections: string[] = [];
+                    const validSelections: string[] = [];
+                    
+                    values.forEach(value => {
+                      const target = skillTargets.find(t => t.skillCode === value);
+                      if (target && target.isSelectable) {
+                        validSelections.push(value);
+                      } else if (target) {
+                        invalidSelections.push(target.skillName);
+                      }
+                    });
+                    
+                    if (invalidSelections.length > 0) {
+                      message.warning(`以下目标不是3级目标，无法选择：${invalidSelections.join('、')}`);
+                    }
+                    
+                    setSelectedSkillTargets(validSelections);
+                    form.setFieldValue('skillTargetCodes', validSelections);
+                  }}
+                  filterOption={(input, option) => {
+                    const target = skillTargets.find(t => t.skillCode === option?.value);
+                    if (!target) return false;
+                    return target.skillName.toLowerCase().includes(input.toLowerCase()) ||
+                           target.fullPath.toLowerCase().includes(input.toLowerCase());
+                  }}
                   onFocus={() => {
-                    // 当聚焦且没有数据时，加载知识点数据
-                    if (knowledgeNodes.length === 0) {
-                      loadKnowledgeNodes();
+                    // 当聚焦且没有数据时，加载技能目标数据
+                    if (skillTargets.length === 0) {
+                      loadSkillTargets();
                     }
                   }}
                   notFoundContent={
-                    knowledgeLoading ? (
+                    skillTargetsLoading ? (
                       <div style={{ textAlign: 'center', padding: '20px' }}>
                         <span>加载中...</span>
                       </div>
-                    ) : knowledgeNodes.length === 0 ? (
+                    ) : skillTargets.length === 0 ? (
                       <div style={{ textAlign: 'center', padding: '20px' }}>
                         <div>暂无数据</div>
                         <Button
                           type="link"
                           size="small"
-                          onClick={() => loadKnowledgeNodes()}
+                          onClick={() => loadSkillTargets()}
                           style={{ padding: 0, marginTop: '8px' }}
                         >
-                          🔄 点击加载知识点
+                          🔄 点击加载技能目标
                         </Button>
                       </div>
                     ) : null
                   }
+                  maxTagCount={3}
+                  maxTagTextLength={20}
+                  dropdownStyle={{ maxHeight: '400px' }}
                 >
-                  {knowledgeNodes.map(node => (
-                    <Option key={node.nodeCode} value={node.nodeCode}>
-                      {node.fullPath}
-                    </Option>
-                  ))}
+                  {skillTargets.map(target => {
+                    // 根据级别设置不同的样式
+                    const isLevel3 = target.isSelectable;
+                    const indentLevel = (target.level - 1) * 20; // 缩进效果
+                    
+                    return (
+                      <Option 
+                        key={target.skillCode} 
+                        value={target.skillCode}
+                        disabled={!isLevel3}
+                        style={{
+                          paddingLeft: `${indentLevel + 12}px`,
+                          backgroundColor: isLevel3 ? 'transparent' : '#f5f5f5',
+                          color: isLevel3 ? '#000' : '#999'
+                        }}
+                      >
+                        <div style={{ 
+                          opacity: isLevel3 ? 1 : 0.6,
+                          cursor: isLevel3 ? 'pointer' : 'not-allowed'
+                        }}>
+                          <div style={{ 
+                            fontWeight: isLevel3 ? 'bold' : 'normal',
+                            color: isLevel3 ? '#000' : '#999'
+                          }}>
+                            {target.level === 1 && '📁 '}
+                            {target.level === 2 && '📂 '}
+                            {target.level === 3 && '🎯 '}
+                            {target.skillName}
+                            {!isLevel3 && <span style={{ fontSize: '12px', marginLeft: '8px' }}>(不可选)</span>}
+                          </div>
+                          <div style={{ fontSize: '11px', color: '#999', marginTop: '2px' }}>
+                            {target.fullPath}
+                          </div>
+                        </div>
+                      </Option>
+                    );
+                  })}
                 </Select>
+                {selectedSkillTargets.length > 0 && (
+                  <div style={{ marginTop: '8px' }}>
+                    <Text type="secondary">已选择 {selectedSkillTargets.length} 个技能目标：</Text>
+                    <div style={{ marginTop: '4px' }}>
+                      {selectedSkillTargets.map(code => {
+                        const target = skillTargets.find(t => t.skillCode === code);
+                        return target ? (
+                          <Tag key={code} style={{ marginBottom: '4px' }} color="blue">
+                            🎯 {target.skillName}
+                          </Tag>
+                        ) : null;
+                      })}
+                    </div>
+                  </div>
+                )}
+                <div style={{ marginTop: '4px', fontSize: '12px', color: '#999' }}>
+                  ℹ️ 提示：只能选择有 🎯 标记的3级技能目标，1-2级目标仅作为分类展示。
+                </div>
               </Form.Item>
             </Col>
           </Row>

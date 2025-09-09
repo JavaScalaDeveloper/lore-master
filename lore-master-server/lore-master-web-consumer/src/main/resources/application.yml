@@ -113,6 +113,13 @@ spring:
       write-dates-as-timestamps: false
     deserialization:
       fail-on-unknown-properties: false
+  
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+      enabled: true
 
 # 微信小程序配置
 wechat:
@@ -125,6 +132,7 @@ wechat:
 logging:
   level:
     com.lore.master: DEBUG
+    com.lore.master.service.consumer.impl.XfyunVoiceClient: DEBUG
     org.springframework.security: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
@@ -222,3 +230,27 @@ llm:
   max-tokens: ${LLM_MAX_TOKENS:100000}
   # 温度参数（0.0-2.0，控制回答的随机性）
   temperature: ${LLM_TEMPERATURE:0.7}
+
+# 讯飞语音识别配置
+xfyun:
+  voice:
+    # 应用ID（从讯飞开放平台获取）
+    app-id: ${XFYUN_APP_ID}
+    # API Key
+    api-key: ${XFYUN_API_KEY}
+    # API Secret
+    api-secret: ${XFYUN_API_SECRET}
+    # 语音识别URL
+    url: wss://iat-api.xfyun.cn/v2/iat
+    # 音频采样率
+    sample-rate: 16000
+    # 音频编码格式
+    encoding: raw
+    # 语言类型（zh_cn：中文，en_us：英文）
+    language: zh_cn
+    # 领域
+    domain: iat
+    # 连接超时时间（毫秒）
+    connect-timeout: 5000
+    # 读取超时时间（毫秒）
+    read-timeout: 30000
