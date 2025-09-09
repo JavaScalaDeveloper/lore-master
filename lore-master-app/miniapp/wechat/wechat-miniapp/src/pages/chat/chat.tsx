@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useLoad, navigateBack, showToast, request, uploadFile, getStorageSync, connectSocket, onSocketOpen, onSocketMessage, onSocketClose, onSocketError, sendSocketMessage, closeSocket, getRecorderManager, authorize } from '@tarojs/taro'
 import { View, Text, ScrollView, Textarea, Button, Image } from '@tarojs/components'
 import MarkdownRenderer from '../../components/MarkdownRenderer/MarkdownRenderer'
@@ -310,13 +310,11 @@ const Chat = () => {
       return
     }
 
+    // 立即初始化WebSocket，不再延迟，提升首次连接速度
+    initializeWebSocket()
+
     // 先尝试加载聊天历史，如果失败则显示欢迎消息
     loadChatHistory()
-
-    // 延迟初始化WebSocket，确保页面完全加载
-    setTimeout(() => {
-      initializeWebSocket()
-    }, 500)
   })
 
   // WebSocket连接诊断
@@ -342,6 +340,18 @@ const Chat = () => {
     }).catch(err => {
       console.error('测试后端连接失败:', err)
     })
+
+    // 如果已连接，发送诊断消息
+    if (wsConnected) {
+      try {
+        sendSocketMessage({
+          data: JSON.stringify({ type: 'diagnose', timestamp: Date.now() })
+        })
+        console.log('已发送WebSocket诊断消息')
+      } catch (error) {
+        console.error('发送WebSocket诊断消息失败:', error)
+      }
+    }
   }
 
   // 初始化WebSocket连接
@@ -459,46 +469,57 @@ const Chat = () => {
     }
   }
 
-  // 处理连接失败
-  const handleConnectionFailure = () => {
-    if (reconnectAttemptsRef.current < maxReconnectAttempts) {
-      scheduleReconnect()
-    } else {
-      console.log('WebSocket重连次数已达上限，停止重连')
+  // 添加保持WebSocket连接活跃的函数
+  const keepWebSocketAlive = () => {
+    if (wsConnected && !isLoading) {
+      // 发送心跳包保持连接活跃
+      try {
+        sendSocketMessage({
+          data: JSON.stringify({ type: 'ping', timestamp: Date.now() })
+        })
+        console.log('WebSocket心跳包已发送')
+      } catch (error) {
+        console.error('发送WebSocket心跳包失败', error)
+      }
     }
   }
 
-  // 安排重连
-  const scheduleReconnect = () => {
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current)
+  // 添加定期发送心跳包的机制
+  useEffect(() => {
+    // 每30秒发送一次心跳包保持连接活跃
+    const heartbeatInterval = setInterval(keepWebSocketAlive, 30000)
+    
+    return () => {
+      clearInterval(heartbeatInterval)
+    }
+  }, [wsConnected, isLoading])
+
+  // 添加连接状态监控
+  useEffect(() => {
+    // 页面显示时检查WebSocket连接状态
+    const handlePageShow = () => {
+      if (!wsConnected && !wsConnecting) {
+        console.log('页面显示，检查WebSocket连接状态')
+        // 如果没有连接且没有正在连接，则尝试连接
+        initializeWebSocket()
+      }
     }
 
-    const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 10000) // 指数退避，最大10秒
-    console.log(`${delay}ms后尝试重连WebSocket`)
+    // 监听页面显示事件
+    const pageShowHandler = handlePageShow
+    // 在微信小程序中，可以使用 Taro.onPageShow 和 Taro.onPageHide
+    // 这里我们简化处理，只在组件挂载时检查一次
+    
+    // 组件挂载时检查连接状态
+    handlePageShow()
 
-    reconnectTimeoutRef.current = setTimeout(() => {
-      reconnectAttemptsRef.current++
-      initializeWebSocket()
-    }, delay)
-  }
-
-  // 手动重连WebSocket
-  const reconnectWebSocket = () => {
-    console.log('手动重连WebSocket')
-    reconnectAttemptsRef.current = 0
-
-    // 先关闭现有连接
-    try {
-      closeSocket()
-    } catch (error) {
-      console.log('关闭WebSocket时出错（可能已关闭）', error)
+    return () => {
+      // 组件卸载时的清理工作
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current)
+      }
     }
-
-    setTimeout(() => {
-      initializeWebSocket()
-    }, 1000)
-  }
+  }, []) // 空依赖数组，只在组件挂载时执行一次
 
   // 处理WebSocket消息
   const handleWebSocketMessage = (data: string) => {
@@ -519,6 +540,12 @@ const Chat = () => {
           title: '身份验证失败',
           icon: 'error'
         })
+        return
+      }
+
+      // 处理心跳包响应
+      if (data === '[PONG]') {
+        console.log('收到WebSocket心跳响应')
         return
       }
 
@@ -595,7 +622,54 @@ const Chat = () => {
     }
   }
 
+  // 处理连接失败
+  const handleConnectionFailure = () => {
+    // 减少最大重连次数，避免过度重连
+    if (reconnectAttemptsRef.current < 3) {  // 从5次减少到3次
+      scheduleReconnect()
+    } else {
+      console.log('WebSocket重连次数已达上限，停止重连')
+      showToast({
+        title: '连接不稳定，请检查网络',
+        icon: 'none',
+        duration: 3000
+      })
+    }
+  }
 
+  // 安排重连
+  const scheduleReconnect = () => {
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current)
+    }
+
+    // 优化重连延迟策略，更快重连
+    const delay = Math.min(500 * Math.pow(2, reconnectAttemptsRef.current), 5000) // 从1000ms改为500ms，最大5秒
+    console.log(`${delay}ms后尝试重连WebSocket`)
+
+    reconnectTimeoutRef.current = setTimeout(() => {
+      reconnectAttemptsRef.current++
+      initializeWebSocket()
+    }, delay)
+  }
+
+  // 手动重连WebSocket
+  const reconnectWebSocket = () => {
+    console.log('手动重连WebSocket')
+    reconnectAttemptsRef.current = 0
+
+    // 先关闭现有连接
+    try {
+      closeSocket()
+    } catch (error) {
+      console.log('关闭WebSocket时出错（可能已关闭）', error)
+    }
+
+    // 更快的重连延迟
+    setTimeout(() => {
+      initializeWebSocket()
+    }, 500)  // 从1000ms改为500ms
+  }
 
   // 发送消息
   const sendMessage = async (messageContent?: string) => {
@@ -720,9 +794,25 @@ const Chat = () => {
     try {
       console.log('使用WebSocket发送消息', { message, userId, aiMessageId, wsConnected, wsConnecting })
 
-      // 检查连接状态
-      if (!checkWebSocketConnection()) {
-        return false
+      // 检查连接状态，如果未连接则立即尝试连接
+      if (!wsConnected) {
+        console.log('WebSocket未连接，立即尝试连接')
+        initializeWebSocket()
+        
+        // 等待连接建立，最多等待3秒
+        const maxWaitTime = 3000
+        const checkInterval = 100
+        let waitedTime = 0
+        
+        while (!wsConnected && waitedTime < maxWaitTime) {
+          await new Promise(resolve => setTimeout(resolve, checkInterval))
+          waitedTime += checkInterval
+        }
+        
+        if (!wsConnected) {
+          console.log('等待WebSocket连接超时')
+          return false
+        }
       }
 
       // 如果正在连接中，等待一下

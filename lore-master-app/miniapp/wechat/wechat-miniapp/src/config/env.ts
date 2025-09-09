@@ -8,7 +8,7 @@ import type { Environment } from './api';
 /**
  * 手动设置当前环境
  * 在开发过程中可以通过修改这个值来切换环境
- * 
+ *
  * 可选值：
  * - 'development': 开发环境 (localhost:8082)
  * - 'test': 测试环境 (test-api.loremaster.com)
@@ -30,19 +30,19 @@ export const USE_MANUAL_ENV = true;
 export const DEV_CONFIG = {
   // 本地开发服务器地址
   LOCAL_API_URL: process.env.TARO_APP_API_BASE_URL || 'http://localhost:8082',
-  
+
   // 远程开发环境服务器地址
   REMOTE_API_URL: process.env.TARO_APP_DEV_API_URL || 'https://ly112978940c.vicp.fun',
-  
+
   // 局域网开发服务器地址（用于真机调试）
   // 请将 192.168.1.100 替换为你的电脑IP地址
   NETWORK_API_URL: 'http://192.168.1.100:8082',
-  
+
   // 一键切换配置：
   // - false: 使用本地地址 (localhost:8082)
   // - true: 使用远程地址 (ly112978940c.vicp.fun)
-  USE_REMOTE_URL: false,
-  
+  USE_REMOTE_URL: true,
+
   // 是否使用局域网地址（用于真机调试）
   USE_NETWORK_URL: false,
 };
@@ -56,7 +56,7 @@ export function getDevApiUrl(): string {
     console.log('使用局域网地址：', DEV_CONFIG.NETWORK_API_URL);
     return DEV_CONFIG.NETWORK_API_URL;
   }
-  
+
   // 一键切换：本地 vs 远程
   if (DEV_CONFIG.USE_REMOTE_URL) {
     console.log('使用远程地址：', DEV_CONFIG.REMOTE_API_URL);
