@@ -28,9 +28,9 @@ public class BusinessCourseController {
      */
     @PostMapping("/queryCourseList")
     public ApiResponse<CourseListPageVO> queryCourseList(@RequestBody CourseQueryDTO queryDTO) {
-        
+
         log.info("分页查询课程，参数：{}", queryDTO);
-        
+
         try {
             CourseListPageVO result = courseService.getCourses(queryDTO);
             return ApiResponse.success("查询成功", result);
@@ -45,17 +45,17 @@ public class BusinessCourseController {
      */
     @PostMapping("/getCourseByCode")
     public ApiResponse<CourseVO> getCourseByCode(@RequestBody CourseDetailQueryDTO queryDTO) {
-        
+
         log.info("根据课程编码获取课程详情，参数：{}", queryDTO);
-        
+
         try {
             CourseVO result = courseService.getCourseByCode(queryDTO.getCourseCode(), queryDTO.getUserId());
-            
+
             // 增加观看次数
             if (result != null) {
                 courseService.incrementViewCount(result.getId(), queryDTO.getUserId());
             }
-            
+
             return ApiResponse.success("查询成功", result);
         } catch (Exception e) {
             log.error("查询课程详情失败，参数：{}", queryDTO, e);
@@ -68,17 +68,17 @@ public class BusinessCourseController {
      */
     @PostMapping("/getCourseById")
     public ApiResponse<CourseVO> getCourseById(@RequestBody CourseDetailQueryDTO queryDTO) {
-        
+
         log.info("根据课程ID获取课程详情，参数：{}", queryDTO);
-        
+
         try {
             CourseVO result = courseService.getCourseById(queryDTO.getCourseId(), queryDTO.getUserId());
-            
+
             // 增加观看次数
             if (result != null) {
                 courseService.incrementViewCount(queryDTO.getCourseId(), queryDTO.getUserId());
             }
-            
+
             return ApiResponse.success("查询成功", result);
         } catch (Exception e) {
             log.error("查询课程详情失败，参数：{}", queryDTO, e);
@@ -91,9 +91,9 @@ public class BusinessCourseController {
      */
     @PostMapping("/getSubCourses")
     public ApiResponse<List<CourseVO>> getSubCourses(@RequestBody SubCourseQueryDTO queryDTO) {
-        
+
         log.info("获取合集子课程，参数：{}", queryDTO);
-        
+
         try {
             List<CourseVO> result = courseService.getSubCourses(queryDTO.getParentCourseId(), queryDTO.getUserId());
             return ApiResponse.success("查询成功", result);
@@ -108,14 +108,14 @@ public class BusinessCourseController {
      */
     @PostMapping("/searchCourses")
     public ApiResponse<CourseListPageVO> searchCourses(@RequestBody CourseSearchDTO searchDTO) {
-        
+
         log.info("搜索课程，参数：{}", searchDTO);
-        
+
         try {
             CourseListPageVO result = courseService.searchCourses(
-                    searchDTO.getKeyword(), 
-                    searchDTO.getPage(), 
-                    searchDTO.getSize(), 
+                    searchDTO.getKeyword(),
+                    searchDTO.getPage(),
+                    searchDTO.getSize(),
                     searchDTO.getUserId()
             );
             return ApiResponse.success("搜索成功", result);
@@ -130,13 +130,13 @@ public class BusinessCourseController {
      */
     @PostMapping("/getPopularCourses")
     public ApiResponse<CourseListPageVO> getPopularCourses(@RequestBody PageQueryDTO queryDTO) {
-        
+
         log.info("获取热门课程，参数：{}", queryDTO);
-        
+
         try {
             CourseListPageVO result = courseService.getPopularCourses(
-                    queryDTO.getPage(), 
-                    queryDTO.getSize(), 
+                    queryDTO.getPage(),
+                    queryDTO.getSize(),
                     queryDTO.getUserId()
             );
             return ApiResponse.success("查询成功", result);
@@ -151,13 +151,13 @@ public class BusinessCourseController {
      */
     @PostMapping("/getLatestCourses")
     public ApiResponse<CourseListPageVO> getLatestCourses(@RequestBody PageQueryDTO queryDTO) {
-        
+
         log.info("获取最新课程，参数：{}", queryDTO);
-        
+
         try {
             CourseListPageVO result = courseService.getLatestCourses(
-                    queryDTO.getPage(), 
-                    queryDTO.getSize(), 
+                    queryDTO.getPage(),
+                    queryDTO.getSize(),
                     queryDTO.getUserId()
             );
             return ApiResponse.success("查询成功", result);
@@ -172,16 +172,17 @@ public class BusinessCourseController {
      */
     @PostMapping("/getCoursesByKnowledgePath")
     public ApiResponse<CourseListPageVO> getCoursesByKnowledgePath(@RequestBody KnowledgePathQueryDTO queryDTO) {
-        
+
         log.info("根据知识点路径获取课程，参数：{}", queryDTO);
-        
+
         try {
-            CourseListPageVO result = courseService.getCoursesByKnowledgePath(
-                    queryDTO.getKnowledgeNodePath(), 
-                    queryDTO.getPage(), 
-                    queryDTO.getSize(), 
-                    queryDTO.getUserId()
-            );
+            CourseListPageVO result = null;
+//            CourseListPageVO result = courseService.getCoursesByKnowledgePath(
+//                    queryDTO.getKnowledgeNodePath(),
+//                    queryDTO.getPage(),
+//                    queryDTO.getSize(),
+//                    queryDTO.getUserId()
+//            );
             return ApiResponse.success("查询成功", result);
         } catch (Exception e) {
             log.error("根据知识点路径查询课程失败，参数：{}", queryDTO, e);
@@ -194,14 +195,14 @@ public class BusinessCourseController {
      */
     @PostMapping("/getCoursesByDifficulty")
     public ApiResponse<CourseListPageVO> getCoursesByDifficulty(@RequestBody DifficultyQueryDTO queryDTO) {
-        
+
         log.info("根据难度等级获取课程，参数：{}", queryDTO);
-        
+
         try {
             CourseListPageVO result = courseService.getCoursesByDifficulty(
-                    queryDTO.getDifficultyLevel(), 
-                    queryDTO.getPage(), 
-                    queryDTO.getSize(), 
+                    queryDTO.getDifficultyLevel(),
+                    queryDTO.getPage(),
+                    queryDTO.getSize(),
                     queryDTO.getUserId()
             );
             return ApiResponse.success("查询成功", result);
@@ -216,14 +217,14 @@ public class BusinessCourseController {
      */
     @PostMapping("/getCoursesByAuthor")
     public ApiResponse<CourseListPageVO> getCoursesByAuthor(@RequestBody AuthorQueryDTO queryDTO) {
-        
+
         log.info("根据作者获取课程，参数：{}", queryDTO);
-        
+
         try {
             CourseListPageVO result = courseService.getCoursesByAuthor(
-                    queryDTO.getAuthor(), 
-                    queryDTO.getPage(), 
-                    queryDTO.getSize(), 
+                    queryDTO.getAuthor(),
+                    queryDTO.getPage(),
+                    queryDTO.getSize(),
                     queryDTO.getUserId()
             );
             return ApiResponse.success("查询成功", result);
@@ -238,9 +239,9 @@ public class BusinessCourseController {
      */
     @PostMapping("/getCourseStatistics")
     public ApiResponse<CoursePageVO.CourseStatisticsVO> getCourseStatistics() {
-        
+
         log.info("获取课程统计信息");
-        
+
         try {
             CoursePageVO.CourseStatisticsVO result = courseService.getCourseStatistics();
             return ApiResponse.success("查询成功", result);
@@ -255,13 +256,13 @@ public class BusinessCourseController {
      */
     @PostMapping("/getRecommendedCourses")
     public ApiResponse<CourseListPageVO> getRecommendedCourses(@RequestBody PageQueryDTO queryDTO) {
-        
+
         log.info("获取推荐课程，参数：{}", queryDTO);
-        
+
         try {
             CourseListPageVO result = courseService.getRecommendedCourses(
-                    queryDTO.getUserId(), 
-                    queryDTO.getPage(), 
+                    queryDTO.getUserId(),
+                    queryDTO.getPage(),
                     queryDTO.getSize()
             );
             return ApiResponse.success("查询成功", result);

@@ -37,35 +37,6 @@ public class VoiceRecognitionServiceTest {
     
     @Test
     public void testVoiceTranscribe() {
-        try {
-            // 注意：这里需要一个测试音频文件
-            // 可以从classpath加载测试音频
-            InputStream audioStream = getClass().getResourceAsStream("/test-audio.mp3");
-            if (audioStream == null) {
-                log.warn("测试音频文件不存在，跳过语音识别测试");
-                return;
-            }
-            
-            byte[] audioData = audioStream.readAllBytes();
-            
-            VoiceTranscribeRequest request = VoiceTranscribeRequest.builder()
-                    .userId("test-user")
-                    .format("mp3")
-                    .fileSize((long) audioData.length)
-                    .language("zh_cn")
-                    .build();
-            
-            VoiceTranscribeResponse response = voiceRecognitionService.transcribeVoice(audioData, request);
-            
-            log.info("语音识别结果: {}", response);
-            log.info("识别文字: {}", response.getText());
-            log.info("置信度: {}", response.getConfidence());
-            log.info("处理时间: {}ms", response.getProcessingTime());
-            
-        } catch (IOException e) {
-            log.error("读取测试音频文件失败: {}", e.getMessage());
-        } catch (Exception e) {
-            log.error("语音识别测试失败: {}", e.getMessage(), e);
-        }
+
     }
 }

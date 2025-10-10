@@ -32,7 +32,6 @@ public class WebSocketTestController {
         Map<String, Object> status = new HashMap<>();
         status.put("endpoint", "/ws/chat");
         status.put("activeConnections", chatWebSocketHandler.getActiveConnectionCount());
-        status.put("totalConnections", chatWebSocketHandler.getTotalConnectionCount());
         status.put("status", "running");
         status.put("protocol", "ws://localhost:8082/ws/chat");
         

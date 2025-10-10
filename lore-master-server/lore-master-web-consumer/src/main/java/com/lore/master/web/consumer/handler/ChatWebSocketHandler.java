@@ -15,7 +15,6 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Component
@@ -27,22 +26,18 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     
     // 存储活跃的WebSocket会话
     private final ConcurrentHashMap<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
-    
-    // 连接计数器
-    private final AtomicInteger connectionCount = new AtomicInteger(0);
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         String sessionId = session.getId();
         sessions.put(sessionId, session);
-        int currentConnections = connectionCount.incrementAndGet();
 
         // 获取认证信息
         Boolean authenticated = (Boolean) session.getAttributes().get("authenticated");
         String userId = (String) session.getAttributes().get("userId");
 
-        log.info("WebSocket连接建立: sessionId={}, authenticated={}, userId={}, 当前连接数={}",
-            sessionId, authenticated, userId, currentConnections);
+        log.info("WebSocket连接建立: sessionId={}, authenticated={}, userId={}",
+            sessionId, authenticated, userId);
 
         // 发送连接成功消息
         if (Boolean.TRUE.equals(authenticated)) {
@@ -67,14 +62,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             // 处理认证消息
             if ("auth".equals(messageType)) {
                 handleAuthMessage(session, jsonNode);
-                return;
-            }
-
-            // 处理心跳消息
-            if ("ping".equals(messageType)) {
-                log.debug("收到WebSocket心跳包: sessionId={}", sessionId);
-                // 回复pong消息
-                sendMessage(session, "[PONG]");
                 return;
             }
 
@@ -189,15 +176,13 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         String sessionId = session.getId();
         log.error("WebSocket传输错误: sessionId={}", sessionId, exception);
         sessions.remove(sessionId);
-        connectionCount.decrementAndGet();
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
         String sessionId = session.getId();
         sessions.remove(sessionId);
-        int currentConnections = connectionCount.decrementAndGet();
-        log.info("WebSocket连接关闭: sessionId={}, status={}, 当前连接数={}", sessionId, closeStatus, currentConnections);
+        log.info("WebSocket连接关闭: sessionId={}, status={}", sessionId, closeStatus);
     }
 
     /**
@@ -227,12 +212,5 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
      */
     public int getActiveConnectionCount() {
         return sessions.size();
-    }
-    
-    /**
-     * 获取总连接数
-     */
-    public int getTotalConnectionCount() {
-        return connectionCount.get();
     }
 }
