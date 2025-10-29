@@ -9,13 +9,13 @@
 
 ### 1. 启动开发服务器
 ```bash
-cd lore-master-app/miniapp/wechat/wechat-miniapp
+cd lore-master-front/miniapp/wechat/wechat-miniapp
 npm run dev:weapp
 ```
 
 ### 2. 打开微信开发者工具
 1. 启动微信开发者工具
-2. 导入项目：选择 `lore-master-app/miniapp/wechat/wechat-miniapp/dist` 目录
+2. 导入项目：选择 `lore-master-front/miniapp/wechat/wechat-miniapp/dist` 目录
 3. 确保项目类型为"小程序"
 
 ### 3. 测试页面功能

@@ -13,7 +13,7 @@
 ### 1. 安装依赖
 打开命令行，进入小程序目录:
 ```bash
-cd d:\Workspace\code\lore-master\lore-master-app\miniapp\wechat\wechat-miniapp
+cd d:\Workspace\code\lore-master\lore-master-front\miniapp\wechat\wechat-miniapp
 ```
 
 安装项目依赖:

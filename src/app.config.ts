@@ -17,7 +17,7 @@ export default {
   window: {
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#fff',
-    navigationBarTitleText: 'Lore Master',
+    navigationBarTitleText: '个人中心',
     navigationBarTextStyle: 'black'
   },
   // 启用组件按需注入，优化小程序性能
@@ -58,7 +58,7 @@ export default {
   // 配置服务器域名
   request: {
     domainList: [
-      'http://localhost:8082',
+      'https://ly112978940c.vicp.fun',
       'https://your-production-domain.com'
     ],
     // 开发环境下允许HTTP请求
@@ -68,6 +68,9 @@ export default {
   permission: {
     'scope.userLocation': {
       'desc': '你的位置信息将用于小程序定位'
+    },
+    'scope.record': {
+      'desc': '你的录音权限将用于语音输入功能'
     }
   }
 }

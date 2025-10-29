@@ -7,14 +7,14 @@
 
 ### 1. 检查编译状态
 ```bash
-cd lore-master-app/miniapp/wechat/wechat-miniapp
+cd lore-master-front/miniapp/wechat/wechat-miniapp
 npm run build:weapp
 ```
 确保编译成功，没有错误信息。
 
 ### 2. 检查微信开发者工具
 1. 打开微信开发者工具
-2. 导入项目：选择 `lore-master-app/miniapp/wechat/wechat-miniapp` 目录
+2. 导入项目：选择 `lore-master-front/miniapp/wechat/wechat-miniapp` 目录
 3. 确保项目正确加载
 4. 查看控制台是否有错误信息
 
