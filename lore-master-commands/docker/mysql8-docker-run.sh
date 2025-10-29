@@ -10,4 +10,15 @@ docker run -d \
   -v $(pwd)/mysql-data:/var/lib/mysql \
   mysql:8
 
-echo "MySQL8容器已启动，root密码为123456，端口映射为3306。" 
+echo "MySQL8容器已启动，root密码为123456，端口映射为3306。"
+
+#docker stop mysql8-demo
+#docker rm mysql8-demo
+# 备选方案：使用 :Z 标签运行（一次性设置 SELinux 上下文）
+#docker run -d \
+#  --name mysql8-demo \
+#  -e MYSQL_ROOT_PASSWORD=123456 \
+#  -p 3306:3306 \
+#  -v $(pwd)/mysql-data:/var/lib/mysql:Z \
+#  mysql:8
+

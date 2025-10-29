@@ -8,6 +8,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>lore-master-server</module>
-        <!-- lore-master-app 前端模块可选纳入管理，若用maven前端插件可加 -->
+        <!-- lore-master-front 前端模块可选纳入管理，若用maven前端插件可加 -->
     </modules>
 </project> 
