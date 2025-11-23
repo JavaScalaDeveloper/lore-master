@@ -1,13 +1,12 @@
-import { useState, useRef } from 'react'
-import { useLoad, navigateBack, showToast, request, uploadFile, getStorageSync, connectSocket, onSocketOpen, onSocketMessage, onSocketClose, onSocketError, sendSocketMessage, closeSocket, getRecorderManager, authorize } from '@tarojs/taro'
+﻿﻿﻿﻿﻿﻿﻿﻿import { useState, useRef } from 'react'
+import { useLoad, navigateBack, showToast, request, getStorageSync, connectSocket, onSocketOpen, onSocketMessage, onSocketClose, onSocketError, sendSocketMessage, closeSocket } from '@tarojs/taro'
 import { View, Text, ScrollView, Textarea, Button, Image } from '@tarojs/components'
 import MarkdownRenderer from '../../components/MarkdownRenderer/MarkdownRenderer'
-import { API_CONFIG } from '../../config/api'
 import './chat.css'
 
 // API配置
-const API_BASE_URL = API_CONFIG.baseUrl
-const WS_BASE_URL = API_BASE_URL.replace('http://', 'ws://').replace('https://', 'wss://')
+const API_BASE_URL = 'http://localhost:8082'
+const WS_BASE_URL = 'ws://localhost:8082'
 const API_ENDPOINTS = {
   CHAT_STREAM: `${API_BASE_URL}/api/chat/stream`,
   CHAT_MINIAPP_STREAM: `${API_BASE_URL}/api/chat/miniapp-stream`,
@@ -67,29 +66,16 @@ const Chat = () => {
   const [inputText, setInputText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingHistory, setIsLoadingHistory] = useState(true)
-  const [isLoadingMoreHistory, setIsLoadingMoreHistory] = useState(false) // 加载更多历史记录状态
-  const [hasMoreHistory, setHasMoreHistory] = useState(true) // 是否还有更多历史记录
-  const [currentPage, setCurrentPage] = useState(0) // 当前页码
   const [currentTypingId, setCurrentTypingId] = useState<string | null>(null)
   const [wsConnected, setWsConnected] = useState(false)
   const [wsConnecting, setWsConnecting] = useState(false)
   const [userInfo, setUserInfo] = useState<any>(null)
-  
-  // 语音录制相关状态
-  const [isRecording, setIsRecording] = useState(false)
-  const [recordingTime, setRecordingTime] = useState(0)
-  const [inputMode, setInputMode] = useState<'text' | 'voice'>('text')
-  const [isConverting, setIsConverting] = useState(false)
 
   const scrollViewRef = useRef<any>()
   const currentMessageIdRef = useRef<string | null>(null)
   const reconnectTimeoutRef = useRef<any>(null)
   const reconnectAttemptsRef = useRef(0)
   const maxReconnectAttempts = 5
-  
-  // 录音管理器和定时器
-  const recorderManagerRef = useRef<any>(null)
-  const recordingTimerRef = useRef<any>(null)
 
   // 生成唯一ID
   const generateId = () => {
@@ -121,25 +107,17 @@ const Chat = () => {
   }
 
   // 获取聊天历史
-  const loadChatHistory = async (showToastOnSuccess = false, page = 0, append = false) => {
+  const loadChatHistory = async (showToastOnSuccess = false) => {
     try {
-      console.log(`开始加载聊天历史... page=${page}, append=${append}`)
-      
-      if (append) {
-        setIsLoadingMoreHistory(true)
-      } else {
-        setIsLoadingHistory(true)
-      }
+      console.log('开始加载聊天历史...')
+      setIsLoadingHistory(true)
 
       // 获取token
       const token = getStorageSync('token')
       if (!token) {
         console.log('未找到token，跳过加载聊天历史')
-        if (!append) {
-          initializeWelcomeMessage()
-        }
+        initializeWelcomeMessage()
         setIsLoadingHistory(false)
-        setIsLoadingMoreHistory(false)
         return
       }
 
@@ -150,8 +128,8 @@ const Chat = () => {
           'content-type': 'application/json'
         },
         data: {
-          page: page,
-          size: 20 // 每页获取20条消息
+          page: 0,
+          size: 20 // 获取最近20条消息
         }
       })
 
@@ -159,7 +137,7 @@ const Chat = () => {
 
       if (response.statusCode === 200 && response.data && response.data.success) {
         const historyMessages = response.data.data || []
-        console.log(`获取到第${page}页聊天历史:`, historyMessages.length, '条')
+        console.log('获取到聊天历史:', historyMessages.length, '条')
 
         // 转换历史消息格式
         const convertedMessages: Message[] = historyMessages.map((msg: any) => ({
@@ -170,68 +148,41 @@ const Chat = () => {
           isComplete: true
         }))
 
-        if (append) {
-          // 追加模式：将新消息添加到现有消息的开头（历史记录在上方）
-          if (convertedMessages.length > 0) {
-            // 后端返回的是按时间倒序的数据，对于追加模式，我们需要将其反转
-            // 因为更早的消息应该插入到现有消息列表的开头
-            const reversedMessages = [...convertedMessages].reverse()
-            setMessages(prevMessages => [...reversedMessages, ...prevMessages])
-            setCurrentPage(page)
-            console.log(`已追加${convertedMessages.length}条历史消息到第${page}页`)
-          } else {
-            // 没有更多数据了
-            setHasMoreHistory(false)
+        // 如果有历史消息，设置到状态中
+        if (convertedMessages.length > 0) {
+          setMessages(convertedMessages)
+          console.log('已加载', convertedMessages.length, '条历史消息')
+
+          // 如果是手动刷新，显示成功提示
+          if (showToastOnSuccess) {
             showToast({
-              title: '没有更多历史记录了',
-              icon: 'none',
+              title: `已加载${convertedMessages.length}条历史消息`,
+              icon: 'success',
               duration: 2000
             })
           }
         } else {
-          // 初始加载模式：后端返回最近20条消息（倒序），需要反转为正序显示
-          if (convertedMessages.length > 0) {
-            // 将后端返回的倒序数据反转为正序，确保最新消息在下面
-            const sortedMessages = [...convertedMessages].reverse()
-            setMessages(sortedMessages)
-            setCurrentPage(0)
-            setHasMoreHistory(convertedMessages.length === 20) // 如果返回了满20条，可能还有更多
-            console.log('已加载', sortedMessages.length, '条历史消息，按时间正序排列')
+          // 没有历史消息时显示欢迎消息
+          initializeWelcomeMessage()
 
-            // 如果是手动刷新，显示成功提示
-            if (showToastOnSuccess) {
-              showToast({
-                title: `已加载${convertedMessages.length}条历史消息`,
-                icon: 'success',
-                duration: 2000
-              })
-            }
-          } else {
-            // 没有历史消息时显示欢迎消息
-            initializeWelcomeMessage()
-            setHasMoreHistory(false)
-
-            // 如果是手动刷新，显示无历史消息提示
-            if (showToastOnSuccess) {
-              showToast({
-                title: '暂无聊天历史',
-                icon: 'none',
-                duration: 2000
-              })
-            }
+          // 如果是手动刷新，显示无历史消息提示
+          if (showToastOnSuccess) {
+            showToast({
+              title: '暂无聊天历史',
+              icon: 'none',
+              duration: 2000
+            })
           }
         }
       } else {
         console.error('获取聊天历史失败:', (response.data && response.data.message) || '未知错误')
-        if (!append) {
-          // 失败时显示欢迎消息
-          initializeWelcomeMessage()
-        }
+        // 失败时显示欢迎消息
+        initializeWelcomeMessage()
 
         // 显示错误提示（可选）
         if (response.statusCode !== 200) {
           showToast({
-            title: append ? '加载更多历史失败' : '加载聊天历史失败',
+            title: '加载聊天历史失败',
             icon: 'none',
             duration: 2000
           })
@@ -239,10 +190,8 @@ const Chat = () => {
       }
     } catch (error) {
       console.error('加载聊天历史出错:', error)
-      if (!append) {
-        // 出错时显示欢迎消息
-        initializeWelcomeMessage()
-      }
+      // 出错时显示欢迎消息
+      initializeWelcomeMessage()
 
       // 显示网络错误提示
       showToast({
@@ -252,31 +201,7 @@ const Chat = () => {
       })
     } finally {
       setIsLoadingHistory(false)
-      setIsLoadingMoreHistory(false)
     }
-  }
-
-  // 加载更多历史记录
-  const loadMoreHistory = async () => {
-    if (isLoadingMoreHistory || !hasMoreHistory) {
-      console.log('正在加载中或没有更多历史记录')
-      return
-    }
-
-    const nextPage = currentPage + 1
-    console.log(`加载第${nextPage}页历史记录`)
-    await loadChatHistory(false, nextPage, true)
-  }
-
-  // 处理滚动事件，实现上拉加载
-  const handleScrollToUpper = () => {
-    console.log('用户滚动到顶部，尝试加载更多历史记录')
-    loadMoreHistory()
-  }
-
-  // 确保消息数组始终按时间正序排列（最早的在上，最新的在下）
-  const sortMessagesByTime = (messages: Message[]) => {
-    return [...messages].sort((a, b) => a.timestamp - b.timestamp)
   }
 
   // 初始化欢迎消息
@@ -289,8 +214,6 @@ const Chat = () => {
       isComplete: true
     }
     setMessages([welcomeMessage])
-    setCurrentPage(0)
-    setHasMoreHistory(false)
   }
 
   useLoad(() => {
@@ -572,21 +495,18 @@ const Chat = () => {
       }
 
       // 处理普通流式内容
-      setMessages(prev => {
-        const updatedMessages = prev.map(msg => {
-          if (msg.id === messageId) {
-            const newContent = msg.content + data
-            return {
-              ...msg,
-              content: newContent,
-              isTyping: true,
-              isComplete: false
-            }
+      setMessages(prev => prev.map(msg => {
+        if (msg.id === messageId) {
+          const newContent = msg.content + data
+          return {
+            ...msg,
+            content: newContent,
+            isTyping: true,
+            isComplete: false
           }
-          return msg
-        })
-        return sortMessagesByTime(updatedMessages)
-      })
+        }
+        return msg
+      }))
 
       // 滚动到底部
       scrollToBottom()
@@ -598,9 +518,8 @@ const Chat = () => {
 
 
   // 发送消息
-  const sendMessage = async (messageContent?: string) => {
-    const content = messageContent || inputText.trim()
-    if (!content) return
+  const sendMessage = async () => {
+    if (!inputText.trim()) return
 
     // 检查登录状态
     if (!checkLoginStatus()) {
@@ -610,16 +529,12 @@ const Chat = () => {
     const userMessage: Message = {
       id: generateId(),
       type: 'user',
-      content: content,
+      content: inputText.trim(),
       timestamp: Date.now(),
       isComplete: true
     }
 
-    // 添加用户消息并按时间排序
-    setMessages(prev => {
-      const newMessages = [...prev, userMessage]
-      return sortMessagesByTime(newMessages)
-    })
+    setMessages(prev => [...prev, userMessage])
     setInputText('')
     setIsLoading(true)
 
@@ -629,16 +544,12 @@ const Chat = () => {
       id: aiMessageId,
       type: 'ai',
       content: '',
-      timestamp: Date.now() + 1, // 稍微延后一点，确保在用户消息之后
+      timestamp: Date.now(),
       isTyping: true,
       isComplete: false
     }
 
-    // 添加AI消息并按时间排序
-    setMessages(prev => {
-      const newMessages = [...prev, aiMessage]
-      return sortMessagesByTime(newMessages)
-    })
+    setMessages(prev => [...prev, aiMessage])
     setCurrentTypingId(aiMessageId)
 
     try {
@@ -647,19 +558,16 @@ const Chat = () => {
       console.error('发送消息失败', error)
 
       // 更新消息为错误状态
-      setMessages(prev => {
-        const updatedMessages = prev.map(msg =>
-          msg.id === aiMessageId
-            ? {
-                ...msg,
-                content: '抱歉，我现在无法回复。请稍后再试。\n\n可能的原因：\n• 网络连接问题\n• 服务器暂时不可用\n• 请求超时',
-                isTyping: false,
-                isComplete: true
-              }
-            : msg
-        )
-        return sortMessagesByTime(updatedMessages)
-      })
+      setMessages(prev => prev.map(msg =>
+        msg.id === aiMessageId
+          ? {
+              ...msg,
+              content: '抱歉，我现在无法回复。请稍后再试。\n\n可能的原因：\n• 网络连接问题\n• 服务器暂时不可用\n• 请求超时',
+              isTyping: false,
+              isComplete: true
+            }
+          : msg
+      ))
 
       showToast({
         title: '发送失败，请重试',
@@ -877,249 +785,6 @@ const Chat = () => {
     setInputText(e.detail.value)
   }
 
-  // 初始化录音管理器
-  const initRecorderManager = () => {
-    if (recorderManagerRef.current) {
-      return recorderManagerRef.current
-    }
-
-    const recorderManager = getRecorderManager()
-    recorderManagerRef.current = recorderManager
-
-    // 录音开始
-    recorderManager.onStart(() => {
-      console.log('录音开始')
-      setIsRecording(true)
-      setRecordingTime(0)
-      
-      // 开始计时
-      recordingTimerRef.current = setInterval(() => {
-        setRecordingTime(prev => prev + 1)
-      }, 1000)
-    })
-
-    // 录音结束
-    recorderManager.onStop((result) => {
-      console.log('录音结束', result)
-      setIsRecording(false)
-      setRecordingTime(0)
-      
-      // 清除计时器
-      if (recordingTimerRef.current) {
-        clearInterval(recordingTimerRef.current)
-        recordingTimerRef.current = null
-      }
-
-      // 处理录音结果
-      if (result.tempFilePath) {
-        handleVoiceToText(result.tempFilePath)
-      } else {
-        showToast({
-          title: '录音失败，请重试',
-          icon: 'none'
-        })
-      }
-    })
-
-    // 录音错误
-    recorderManager.onError((error) => {
-      console.error('录音错误', error)
-      setIsRecording(false)
-      setRecordingTime(0)
-      
-      if (recordingTimerRef.current) {
-        clearInterval(recordingTimerRef.current)
-        recordingTimerRef.current = null
-      }
-
-      showToast({
-        title: '录音失败：' + (error.errMsg || '未知错误'),
-        icon: 'none'
-      })
-    })
-
-    return recorderManager
-  }
-
-  // 开始录音
-  const startRecording = async () => {
-    try {
-      // 检查录音权限
-      const authResult = await authorize({
-        scope: 'scope.record'
-      })
-      
-      console.log('录音权限检查结果:', authResult)
-      
-      const recorderManager = initRecorderManager()
-      
-      // 开始录音
-      recorderManager.start({
-        duration: 60000, // 最长60秒
-        sampleRate: 16000, // 采样率
-        numberOfChannels: 1, // 声道数
-        encodeBitRate: 96000, // 编码码率
-        format: 'mp3' // 音频格式
-      })
-    } catch (error) {
-      console.error('开始录音失败', error)
-      showToast({
-        title: '无法开始录音，请检查权限',
-        icon: 'none'
-      })
-    }
-  }
-
-  // 停止录音
-  const stopRecording = () => {
-    if (recorderManagerRef.current && isRecording) {
-      recorderManagerRef.current.stop()
-    }
-  }
-
-  // 语音转文字
-  const handleVoiceToText = async (filePath: string) => {
-    try {
-      setIsConverting(true)
-      
-      showToast({
-        title: '正在转换语音...',
-        icon: 'loading',
-        duration: 3000
-      })
-
-      console.log('开始语音转文字，文件路径:', filePath)
-      
-      // 获取用户信息
-      const token = getStorageSync('token')
-      
-      if (!token) {
-        throw new Error('未找到登录token，请重新登录')
-      }
-
-      // 读取文件并转换为Base64
-      const fileManager = wx.getFileSystemManager()
-      const fileData = fileManager.readFileSync(filePath, 'base64')
-      const fileInfo = fileManager.statSync(filePath)
-      
-      console.log('文件信息:', { 
-        path: filePath, 
-        size: fileInfo.size,
-        base64Length: fileData.length 
-      })
-
-      // 构建请求数据
-      const requestData = {
-        audioData: fileData,
-        format: 'mp3',
-        fileSize: fileInfo.size,
-        fileName: 'voice_record.mp3',
-        language: 'zh_cn'
-      }
-      
-      console.log('请求数据:', {
-        format: requestData.format,
-        fileSize: requestData.fileSize,
-        fileName: requestData.fileName,
-        audioDataLength: requestData.audioData.length
-      })
-      
-      // 调用后端语音转文字API
-      const response = await request({
-        url: `${API_BASE_URL}/api/voice/transcribe`,
-        method: 'POST',
-        data: requestData,
-        header: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        timeout: 30000 // 30秒超时
-      })
-      
-      console.log('语音转文字API响应:', response)
-      
-      if (response.statusCode === 200 && response.data) {
-        const result = typeof response.data === 'string' ? JSON.parse(response.data) : response.data
-        
-        if (result.success && result.data && result.data.text) {
-          const recognizedText = result.data.text.trim()
-          
-          if (recognizedText) {
-            setInputText(recognizedText)
-            
-            showToast({
-              title: '语音转换完成',
-              icon: 'success'
-            })
-            
-            console.log('语音识别结果:', recognizedText)
-            
-            // 自动发送转换后的文字
-            setTimeout(() => {
-              sendMessage(recognizedText)
-            }, 500)
-          } else {
-            throw new Error('语音识别结果为空，请重新录音')
-          }
-        } else {
-          throw new Error(result.message || '语音转换服务返回错误')
-        }
-      } else {
-        throw new Error(`语音转换请求失败，状态码: ${response.statusCode}`)
-      }
-    } catch (error) {
-      console.error('语音转文字失败:', error)
-      setIsConverting(false)
-      
-      let errorMessage = '语音转换失败'
-      
-      if (error.message) {
-        if (error.message.includes('网络')) {
-          errorMessage = '网络连接失败，请检查网络后重试'
-        } else if (error.message.includes('token')) {
-          errorMessage = '登录已过期，请重新登录'
-        } else if (error.message.includes('timeout')) {
-          errorMessage = '语音转换超时，请重试'
-        } else {
-          errorMessage = error.message
-        }
-      }
-      
-      showToast({
-        title: errorMessage,
-        icon: 'none',
-        duration: 3000
-      })
-      
-      // 如果是登录问题，清除token
-      if (errorMessage.includes('登录')) {
-        // 可以考虑跳转到登录页面
-        console.log('需要重新登录')
-      }
-    } finally {
-      setIsConverting(false)
-    }
-  }
-
-  // 切换输入模式
-  const toggleInputMode = () => {
-    setInputMode(prev => prev === 'text' ? 'voice' : 'text')
-  }
-
-  // 处理长按开始录音
-  const handleTouchStart = () => {
-    if (inputMode === 'voice') {
-      startRecording()
-    }
-  }
-
-  // 处理松开结束录音
-  const handleTouchEnd = () => {
-    if (inputMode === 'voice' && isRecording) {
-      stopRecording()
-    }
-  }
-
   // 返回首页
   const handleBack = () => {
     navigateBack()
@@ -1173,23 +838,7 @@ const Chat = () => {
         scrollY
         ref={scrollViewRef}
         scrollIntoView={`msg-${messages.length - 1}`}
-        onScrollToUpper={handleScrollToUpper}
-        upperThreshold={50}
-        enableBackToTop={false}
       >
-        {/* 加载更多历史记录的提示 */}
-        {isLoadingMoreHistory && (
-          <View className='loading-more-history'>
-            <Text className='loading-text'>正在加载更多历史记录...</Text>
-          </View>
-        )}
-        
-        {/* 没有更多历史记录的提示 */}
-        {!hasMoreHistory && messages.length > 20 && (
-          <View className='no-more-history'>
-            <Text className='no-more-text'>没有更多历史记录了</Text>
-          </View>
-        )}
         {/* 加载历史消息指示器 */}
         {isLoadingHistory && (
           <View className='loading-history'>
@@ -1197,13 +846,13 @@ const Chat = () => {
           </View>
         )}
 
+        {/* 调试信息：显示消息数量和登录状态 */}
         {!isLoadingHistory && (
           <View className='debug-info'>
             <Text className='debug-text'>
               消息: {messages.length} 条 |
               登录: {getStorageSync('token') ? '✓' : '✗'} |
-              WS: {wsConnected ? '✓' : '✗'} |
-              排序: {messages.length > 1 && messages.every((msg, i) => i === 0 || messages[i-1].timestamp <= msg.timestamp) ? '✓' : '✗'}
+              WS: {wsConnected ? '✓' : '✗'}
             </Text>
           </View>
         )}
@@ -1275,75 +924,26 @@ const Chat = () => {
       {/* 输入区域 */}
       <View className='input-container'>
         <View className='input-row'>
-          {/* 输入模式切换按钮 */}
-          <View className='mode-switch-btn' onClick={toggleInputMode}>
-            <Text className='mode-icon'>
-              {inputMode === 'text' ? '🎤' : '⌨️'}
-            </Text>
-          </View>
-          
           <View className='input-wrapper'>
-            {inputMode === 'text' ? (
-              /* 文字输入模式 */
-              <Textarea
-                className='message-input'
-                placeholder='输入消息...'
-                value={inputText}
-                onInput={handleInput}
-                maxlength={1000}
-                autoHeight
-                showConfirmBar={false}
-              />
-            ) : (
-              /* 语音输入模式 */
-              <View
-                className={`voice-input ${isRecording ? 'recording' : ''}`}
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
-                onTouchCancel={handleTouchEnd}
-              >
-                {isRecording ? (
-                  <View className='recording-indicator'>
-                    <Text className='recording-text'>🎙️ 正在录音 {recordingTime}s</Text>
-                    <Text className='recording-hint'>松开发送</Text>
-                  </View>
-                ) : isConverting ? (
-                  <View className='converting-indicator'>
-                    <Text className='converting-text'>🔄 正在转换语音...</Text>
-                  </View>
-                ) : (
-                  <View className='voice-prompt'>
-                    <Text className='voice-text'>🎤 按住说话</Text>
-                  </View>
-                )}
-              </View>
-            )}
+            <Textarea
+              className='message-input'
+              placeholder='输入消息...'
+              value={inputText}
+              onInput={handleInput}
+              maxlength={1000}
+              autoHeight
+              showConfirmBar={false}
+            />
           </View>
           
-          {inputMode === 'text' && (
-            <Button 
-              className={`send-btn ${inputText.trim() ? 'active' : ''}`}
-              onClick={() => sendMessage()}
-              disabled={!inputText.trim() || isLoading}
-            >
-              <Text className='send-icon'>➤</Text>
-            </Button>
-          )}
+          <Button 
+            className={`send-btn ${inputText.trim() ? 'active' : ''}`}
+            onClick={sendMessage}
+            disabled={!inputText.trim() || isLoading}
+          >
+            <Text className='send-icon'>➤</Text>
+          </Button>
         </View>
-        
-        {/* 录音状态提示 */}
-        {isRecording && (
-          <View className='recording-status'>
-            <View className='recording-wave'>
-              <View className='wave-bar'></View>
-              <View className='wave-bar'></View>
-              <View className='wave-bar'></View>
-              <View className='wave-bar'></View>
-              <View className='wave-bar'></View>
-            </View>
-            <Text className='recording-status-text'>正在录音中，松开手指发送</Text>
-          </View>
-        )}
       </View>
     </View>
   )

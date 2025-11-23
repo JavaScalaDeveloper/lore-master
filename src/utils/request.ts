@@ -1,8 +1,7 @@
 import Taro from '@tarojs/taro'
-import { API_CONFIG } from '../config/api'
 
 // 请求配置
-const BASE_URL = API_CONFIG.baseUrl
+const BASE_URL = 'http://localhost:8082'
 
 interface RequestOptions {
   url: string

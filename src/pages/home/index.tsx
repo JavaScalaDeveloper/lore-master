@@ -1,4 +1,4 @@
-import { View, Text, Input, Swiper, SwiperItem, Image, Button } from '@tarojs/components';
+import { View, Text, Input, Swiper, SwiperItem, Image } from '@tarojs/components';
 import { useEffect, useState } from 'react';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { get, post } from '../../utils/request';
@@ -15,6 +15,12 @@ interface CarouselBanner {
   createdTime: string;
 }
 
+// API响应类型
+interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+}
 
 // 最近学习课程数据类型
 interface RecentLearningCourse {
@@ -187,29 +193,9 @@ export default function Index() {
     }
   };
 
-  // 处理搜索输入
-  const handleSearchInput = (e: any) => {
+  // 处理搜索
+  const handleSearch = (e: any) => {
     setSearchValue(e.detail.value);
-  };
-
-  // 处理搜索提交
-  const handleSearch = () => {
-    const keyword = searchValue.trim();
-    if (keyword) {
-      // 跳转到学习页面并传递搜索关键词
-      Taro.switchTab({
-        url: '/pages/study/study'
-      }).then(() => {
-        // 使用事件总线传递搜索关键词到学习页面
-        Taro.eventCenter.trigger('searchFromHome', keyword);
-      });
-    } else {
-      Taro.showToast({
-        title: '请输入搜索内容',
-        icon: 'none',
-        duration: 1500
-      });
-    }
   };
 
   // 处理功能点击
@@ -232,15 +218,6 @@ export default function Index() {
 
   // 处理最近学习课程点击
   const handleRecentCourseClick = (course: RecentLearningCourse) => {
-    // 添加详细的调试信息
-    console.log('点击课程详情:', {
-      courseCode: course.courseCode,
-      title: course.title,
-      courseType: course.courseType,
-      contentType: course.contentType,
-      fullCourse: course
-    });
-    
     const learningTimeText = formatLearningTime(course.learningDuration);
     const lastLearningText = formatDate(course.lastLearningDate);
 
@@ -256,33 +233,13 @@ export default function Index() {
           try {
             let url = ''
 
-            console.log('开始构建跳转URL，courseType:', course.courseType, 'contentType:', course.contentType);
-
             if (course.courseType === 'COLLECTION') {
               url = `/pages/course/collection/collection?courseCode=${course.courseCode}&title=${encodeURIComponent(course.title)}`
-              console.log('跳转到合集页面:', url);
-            } else if (course.courseType === 'NORMAL') {
-              // NORMAL类型的课程，根据描述内容判断是文章还是视频
-              // 先默认跳转到文章页面，因为从调试信息看大部分是文章内容
-              if (course.contentType === 'VIDEO') {
-                url = `/pages/course/video/video?courseCode=${course.courseCode}&title=${encodeURIComponent(course.title)}`
-                console.log('NORMAL课程跳转到视频页面:', url);
-              } else {
-                // 默认跳转到文章页面（包括contentType为ARTICLE或未定义的情况）
-                url = `/pages/course/article/article?courseCode=${course.courseCode}&title=${encodeURIComponent(course.title)}`
-                console.log('NORMAL课程跳转到文章页面:', url);
-              }
             } else if (course.contentType === 'ARTICLE') {
               url = `/pages/course/article/article?courseCode=${course.courseCode}&title=${encodeURIComponent(course.title)}`
-              console.log('跳转到文章页面:', url);
             } else if (course.contentType === 'VIDEO') {
               url = `/pages/course/video/video?courseCode=${course.courseCode}&title=${encodeURIComponent(course.title)}`
-              console.log('跳转到视频页面:', url);
             } else {
-              console.log('无法识别的课程类型:', {
-                courseType: course.courseType,
-                contentType: course.contentType
-              });
               Taro.showToast({
                 title: '暂不支持此类型内容',
                 icon: 'none'
@@ -357,22 +314,13 @@ export default function Index() {
     <View className='index'>
       {/* 顶部搜索框 */}
       <View className='search-container'>
-        <View className='search-box'>
-          <Input
-            className='search-input'
-            placeholder='搜索课程、知识点...'
-            type='text'
-            value={searchValue}
-            onInput={handleSearchInput}
-            onConfirm={handleSearch}
-          />
-          <Button
-            className='search-btn'
-            onClick={handleSearch}
-          >
-            🔍 搜索
-          </Button>
-        </View>
+        <Input
+          className='search-input'
+          placeholder='🔍 搜索课程、知识点...'
+          type='text'
+          value={searchValue}
+          onInput={handleSearch}
+        />
       </View>
 
       {/* Swiper滑动视图卡片 */}
