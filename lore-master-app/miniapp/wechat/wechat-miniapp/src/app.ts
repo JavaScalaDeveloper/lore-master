@@ -1,7 +1,13 @@
-import { PropsWithChildren } from 'react'
+import { PropsWithChildren, useEffect } from 'react'
 import { useLaunch } from '@tarojs/taro'
+import { Platform } from 'react-native'
+import * as SplashScreen from 'expo-splash-screen'
+import { StatusBar } from 'expo-status-bar'
 
 import './app.css'
+
+// Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync()
 
 function App({ children }: PropsWithChildren<any>) {
   useLaunch(() => {
@@ -10,7 +16,7 @@ function App({ children }: PropsWithChildren<any>) {
 
     // 定义Taro组件库需要的常量
     if (typeof window !== 'undefined') {
-      window.DEPRECATED_ADAPTER_COMPONENT = false;
+      (window as any).DEPRECATED_ADAPTER_COMPONENT = false;
     }
 
     
@@ -49,10 +55,26 @@ function App({ children }: PropsWithChildren<any>) {
     }
   })
 
+  // Hide splash screen when app is ready
+  useEffect(() => {
+    async function prepare() {
+      try {
+        // 在这里可以加载任何需要的资源
+        // await loadResources()
+      } catch (e) {
+        console.warn(e)
+      } finally {
+        // 隐藏启动屏幕
+        await SplashScreen.hideAsync()
+      }
+    }
+
+    prepare()
+  }, [])
+
   // children 是将要会渲染的页面
   return children
 }
   
-
 
 export default App

@@ -99,6 +99,22 @@ export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
         cssModules: {
           enable: false, // 默认为 false，如需使用 css modules 功能，则设为 true
         }
+      },
+      // 添加 Expo 支持配置
+      expo: {
+        entry: 'main',
+        platforms: ['ios', 'android'],
+        ios: {
+          bundleIdentifier: 'com.taro.demo',
+          supportsTablet: true
+        },
+        android: {
+          package: 'com.taro.demo',
+          adaptiveIcon: {
+            foregroundImage: './assets/adaptive-icon.png',
+            backgroundColor: '#FFFFFF'
+          }
+        }
       }
     }
   }

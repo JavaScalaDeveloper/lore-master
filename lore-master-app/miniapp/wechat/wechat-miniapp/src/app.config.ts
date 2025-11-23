@@ -72,5 +72,12 @@ export default {
     'scope.record': {
       'desc': '你的录音权限将用于语音输入功能'
     }
+  },
+  // React Native 配置
+  rn: {
+    screenOptions: {
+      // 全局屏幕选项
+      headerShown: true,
+    }
   }
 }
