@@ -1,0 +1,202 @@
+/* 可编辑树形组件样式 */
+
+.editableTree {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.treeNode {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.treeNode:hover {
+  background-color: #f5f5f5;
+}
+
+.nodeContent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 300px;
+  flex: 1;
+}
+
+.nodeIcon {
+  font-size: 16px;
+  margin-right: 4px;
+}
+
+.nodeName {
+  font-weight: normal;
+  color: #333;
+  margin-right: 8px;
+}
+
+.nodeName.root {
+  font-weight: bold;
+  color: #1890ff;
+}
+
+.nodeActions {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.treeNode:hover .nodeActions {
+  opacity: 1;
+}
+
+.editForm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 400px;
+  flex: 1;
+}
+
+.editInput {
+  flex: 1;
+}
+
+.editSelect {
+  width: 80px;
+}
+
+.editNumber {
+  width: 80px;
+}
+
+.difficultyTag {
+  font-size: 12px;
+  border-radius: 12px;
+  padding: 2px 8px;
+  height: auto;
+  line-height: 1.2;
+  display: inline-block;
+}
+
+/* 难度标签样式通过Ant Design的color属性控制 */
+
+.hoursTag {
+  background-color: #e6f7ff;
+  border-color: #91d5ff;
+  color: #1890ff;
+  font-size: 12px;
+  border-radius: 12px;
+  padding: 2px 8px;
+  height: auto;
+  line-height: 1.2;
+  display: inline-block;
+}
+
+.descriptionIcon {
+  color: #999;
+  font-size: 12px;
+  cursor: help;
+}
+
+.actionButton {
+  border: none;
+  background: transparent;
+  color: #666;
+  transition: color 0.2s ease;
+}
+
+.actionButton:hover {
+  color: #1890ff;
+}
+
+.actionButton.danger:hover {
+  color: #ff4d4f;
+}
+
+.saveButton {
+  background-color: #52c41a;
+  border-color: #52c41a;
+  color: white;
+}
+
+.saveButton:hover {
+  background-color: #73d13d;
+  border-color: #73d13d;
+}
+
+.cancelButton {
+  background-color: #f5f5f5;
+  border-color: #d9d9d9;
+  color: #666;
+}
+
+.cancelButton:hover {
+  background-color: #e6e6e6;
+  border-color: #bfbfbf;
+}
+
+.addModal .ant-modal-header {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 24px;
+}
+
+.addModal .ant-modal-body {
+  padding: 24px;
+}
+
+.addModal .ant-form-item {
+  margin-bottom: 16px;
+}
+
+.addModal .ant-form-item-label {
+  font-weight: 500;
+}
+
+/* 拖拽样式 */
+.ant-tree-node-content-wrapper.ant-tree-node-content-wrapper-open,
+.ant-tree-node-content-wrapper.ant-tree-node-content-wrapper-close {
+  padding: 0;
+}
+
+.ant-tree-node-content-wrapper:hover {
+  background-color: transparent;
+}
+
+.ant-tree-draggable-icon {
+  color: #bfbfbf;
+  transition: color 0.2s ease;
+}
+
+.ant-tree-draggable-icon:hover {
+  color: #1890ff;
+}
+
+/* 树形线条样式 */
+.ant-tree-show-line .ant-tree-indent-unit::before {
+  border-left: 1px solid #d9d9d9;
+}
+
+.ant-tree-show-line .ant-tree-switcher {
+  background: #fff;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .nodeContent {
+    min-width: 200px;
+  }
+  
+  .editForm {
+    min-width: 300px;
+    flex-wrap: wrap;
+  }
+  
+  .editSelect,
+  .editNumber {
+    width: 60px;
+  }
+}

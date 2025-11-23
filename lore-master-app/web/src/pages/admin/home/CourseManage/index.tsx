@@ -1,0 +1,1684 @@
+import React, { useEffect, useState } from 'react';
+import { marked } from 'marked';
+import './markdown-preview.css';
+import {
+  Card,
+  Table,
+  Button,
+  Space,
+  Input,
+  Select,
+  message,
+  Tag,
+  Typography,
+  Row,
+  Col,
+  Statistic,
+  Tooltip,
+  Modal,
+  Form,
+  DatePicker,
+  InputNumber,
+  Switch,
+  Tabs,
+  Upload
+} from 'antd';
+import {
+  SearchOutlined,
+  ReloadOutlined,
+  EyeOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+  BookOutlined,
+  UserOutlined,
+  ClockCircleOutlined,
+  StarOutlined,
+  UploadOutlined,
+  FileMarkdownOutlined,
+  EyeInvisibleOutlined
+} from '@ant-design/icons';
+import { adminApi } from '../../../../utils/request';
+
+const { Title, Text } = Typography;
+const { Search, TextArea } = Input;
+const { Option } = Select;
+const { RangePicker } = DatePicker;
+
+// 课程接口定义
+interface Course {
+  id: number;
+  courseCode: string;
+  title: string;
+  description?: string;
+  author: string;
+  courseType: string;
+  contentType?: string;
+  difficultyLevel: string;
+  difficultyLevels?: string;
+  difficultyLevelList?: string[];
+  parentCourseId?: number;
+  parentCourseTitle?: string;
+  sortOrder: number;
+  status: string;
+  skillTargetCodes?: string[];
+  tags?: string;
+  tagList?: string[];
+  durationMinutes?: number;
+  formattedDuration?: string;
+  viewCount: number;
+  likeCount: number;
+  collectCount: number;
+  contentUrl?: string;
+  coverImageUrl?: string;
+  thumbnailUrl?: string;
+  contentMarkdown?: string;
+  contentHtml?: string;
+  contentUpdatedTime?: string;
+  contentFileIds?: string;
+  publishTime?: string;
+  createdTime: string;
+  subCourseCount?: number;
+  subCourses?: Course[];
+  isCollected?: boolean;
+  isLiked?: boolean;
+  progressPercent?: number;
+}
+
+// 统计信息接口
+interface CourseStatistics {
+  totalCourses: number;
+  publishedCourses: number;
+  draftCourses: number;
+  totalEnrollments: number;
+  averageRating: number;
+  totalRevenue: number;
+}
+
+// 查询参数接口
+interface QueryParams {
+  page: number;
+  size: number;
+  keyword?: string;
+  courseType?: string;
+  contentType?: string;
+  difficultyLevel?: string;
+  status?: string;
+  publishedOnly?: boolean;
+}
+
+const CourseManage: React.FC = () => {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [total, setTotal] = useState(0);
+  const [statistics, setStatistics] = useState<CourseStatistics>({
+    totalCourses: 0,
+    publishedCourses: 0,
+    draftCourses: 0,
+    totalEnrollments: 0,
+    averageRating: 0,
+    totalRevenue: 0
+  });
+  
+  // 查询参数
+  const [queryParams, setQueryParams] = useState<QueryParams>({
+    page: 1,
+    size: 10
+  });
+
+  // 表单相关
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [form] = Form.useForm();
+
+
+
+  // 技能目标数据
+  const [skillTargets, setSkillTargets] = useState<any[]>([]);
+  const [skillTargetsLoading, setSkillTargetsLoading] = useState(false);
+  const [selectedSkillTargets, setSelectedSkillTargets] = useState<string[]>([]);
+
+  // Markdown编辑器状态
+  const [markdownContent, setMarkdownContent] = useState('');
+  const [markdownPreview, setMarkdownPreview] = useState('');
+  const [previewMode, setPreviewMode] = useState('split');
+  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+  
+  // 课程类型状态
+  const [selectedCourseType, setSelectedCourseType] = useState('NORMAL');
+  
+  // 合集子课程管理状态
+  const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
+  const [selectedSubCourses, setSelectedSubCourses] = useState<Course[]>([]);
+  const [filteredAvailableCourses, setFilteredAvailableCourses] = useState<Course[]>([]);
+  const [subCourseSearchValue, setSubCourseSearchValue] = useState('');
+
+  // 加载课程列表
+  const loadCourses = async () => {
+    setLoading(true);
+    try {
+      const requestParams = {
+        ...queryParams,
+        page: Math.max(0, queryParams.page - 1) // 转换为后端期望的从0开始的页码，确保不会小于0
+      };
+      const response = await adminApi.post('/api/admin/course/list', requestParams);
+      if (response.success) {
+        setCourses(response.data.courses || []);
+        setTotal(response.data.totalElements || 0);
+      } else {
+        message.error('加载课程列表失败: ' + response.message);
+      }
+    } catch (error) {
+      console.error('加载课程列表失败:', error);
+      message.error('加载课程列表失败，请检查网络连接');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 加载统计信息
+  const loadStatistics = async () => {
+    try {
+      const response = await adminApi.get('/api/admin/course/statistics');
+      if (response.success) {
+        setStatistics(response.data);
+      }
+    } catch (error) {
+      console.error('加载统计信息失败:', error);
+    }
+  };
+
+  // 加载技能目标数据
+  const loadSkillTargets = async () => {
+    setSkillTargetsLoading(true);
+    try {
+      const response = await adminApi.post('/api/admin/skill-catalog/tree', {
+        isActive: true,
+        treeStructure: true // 获取完整的技能目标树
+      });
+      if (response.success) {
+        // 将树形结构展开为平面列表，保留所有级别但标记级别信息
+        const flatTargets = flattenSkillTargets(response.data || []);
+        setSkillTargets(flatTargets);
+      } else {
+        message.error('加载技能目标失败: ' + response.message);
+      }
+    } catch (error) {
+      console.error('加载技能目标失败:', error);
+      message.error('加载技能目标失败');
+    } finally {
+      setSkillTargetsLoading(false);
+    }
+  };
+
+  // 展开技能目标树为平面列表，保留所有级别
+  const flattenSkillTargets = (targets: any[]): any[] => {
+    const result: any[] = [];
+
+    const traverse = (nodes: any[], parentPath = '', level = 1) => {
+      nodes.forEach(node => {
+        const currentPath = parentPath ? `${parentPath} > ${node.skillName}` : node.skillName;
+        
+        // 添加所有级别的目标，但标记级别信息
+        result.push({
+          skillCode: node.skillCode,
+          skillName: node.skillName,
+          skillPath: node.skillPath,
+          fullPath: currentPath,
+          level: level, // 实际层级
+          realLevel: node.level || level, // 节点自身的level字段
+          parentCode: node.parentCode,
+          isSelectable: level === 3 // 只有3级目标可选择
+        });
+        
+        // 递归处理子节点
+        if (node.children && node.children.length > 0) {
+          traverse(node.children, currentPath, level + 1);
+        }
+      });
+    };
+
+    traverse(targets);
+    return result;
+  };
+
+
+
+
+
+  // 加载可用课程（用于合集选择）
+  const loadAvailableCourses = async () => {
+    try {
+      const response = await adminApi.post('/api/admin/course/list', {
+        page: 0,
+        size: 1000,
+        courseType: 'NORMAL' // 只加载普通课程
+      });
+      if (response.success) {
+        const courses = response.data.courses || [];
+        setAvailableCourses(courses);
+        setFilteredAvailableCourses(courses); // 初始化过滤列表
+      }
+    } catch (error) {
+      console.error('加载可用课程失败:', error);
+      message.error('加载可用课程失败');
+    }
+  };
+
+  // 初始化加载
+  useEffect(() => {
+    loadCourses();
+    loadStatistics();
+  }, [queryParams]);
+
+  // 搜索处理
+  const handleSearch = (value: string) => {
+    setQueryParams(prev => ({
+      ...prev,
+      page: 1,
+      keyword: value
+    }));
+  };
+
+  // 筛选处理
+  const handleFilter = (key: string, value: any) => {
+    setQueryParams(prev => ({
+      ...prev,
+      page: 1,
+      [key]: value
+    }));
+  };
+
+  // 重置筛选
+  const handleReset = () => {
+    setQueryParams({
+      page: 1,
+      size: 10
+    });
+  };
+
+  // 根据技能目标编码获取技能目标名称
+  const getSkillTargetName = (code: string): string => {
+    const target = skillTargets.find(t => t.skillCode === code);
+    return target ? target.skillName : code; // 如果找不到名称，返回编码
+  };
+
+  // 查看详情
+  const handleViewDetail = async (course: Course) => {
+    try {
+      const response = await adminApi.get(`/api/admin/course/detail/${course.id}`);
+      if (response.success) {
+        setSelectedCourse(response.data);
+        setDetailModalVisible(true);
+        // 如果课程有技能目标编码且技能目标数据还未加载，则加载技能目标数据
+        if (response.data.skillTargetCodes && response.data.skillTargetCodes.length > 0 && skillTargets.length === 0) {
+          loadSkillTargets();
+        }
+      } else {
+        message.error('获取课程详情失败');
+      }
+    } catch (error) {
+      console.error('获取课程详情失败:', error);
+      message.error('获取课程详情失败');
+    }
+  };
+
+  // 文件上传处理
+  const handleFileUpload = async (file: any) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('bucketName', 'course-content');
+    formData.append('isPublic', 'true');
+    formData.append('remark', '课程内容文件');
+
+    try {
+      const response = await adminApi.post('/api/admin/file/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.success) {
+        const fileInfo = response.data;
+        setUploadedFiles(prev => [...prev, fileInfo]);
+
+        // 根据文件类型生成Markdown语法
+        let markdownSyntax = '';
+        if (fileInfo.fileType.startsWith('image/')) {
+          markdownSyntax = `![${fileInfo.originalName}](/api/file/view?fileId=${fileInfo.fileId})`;
+        } else {
+          markdownSyntax = `[${fileInfo.originalName}](/api/file/view?fileId=${fileInfo.fileId})`;
+        }
+
+        // 插入到当前光标位置或末尾
+        const currentContent = form.getFieldValue('contentMarkdown') || '';
+        const newContent = currentContent + '\n' + markdownSyntax + '\n';
+        form.setFieldValue('contentMarkdown', newContent);
+        handleMarkdownChange(newContent);
+
+        message.success('文件上传成功');
+        return false; // 阻止默认上传行为
+      } else {
+        message.error('文件上传失败：' + response.message);
+        return false;
+      }
+    } catch (error) {
+      console.error('文件上传失败:', error);
+      message.error('文件上传失败');
+      return false;
+    }
+  };
+
+  // 图片代理处理函数
+  const processImageUrls = (html: string): string => {
+    // 匹配所有img标签中的src属性
+    return html.replace(/<img([^>]*?)src=["']([^"']*)["']([^>]*?)>/gi, (match, before, src, after) => {
+      console.log('Processing image:', src); // 调试日志
+      // 检查是否是外部链接（http/https开头且不是本站链接）
+      if (src.startsWith('http') && !src.includes(window.location.hostname)) {
+        // 使用免费的图片代理服务
+        const proxySrc = `https://images.weserv.nl/?url=${encodeURIComponent(src)}`;
+        console.log('Converting to proxy URL:', proxySrc); // 调试日志
+        return `<img${before}src="${proxySrc}"${after} onerror="this.onerror=null;this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWbvueJh+WKoOi9veWksei0pTwvdGV4dD48L3N2Zz4=';this.title='图片加载失败: ${src}'">`;
+      }
+      console.log('Keeping original URL:', src); // 调试日志
+      return match;
+    });
+  };
+
+  // Markdown内容变化处理
+  const handleMarkdownChange = (value: string) => {
+    console.log('Markdown content changed:', value); // 调试日志
+    setMarkdownContent(value);
+    // 同步更新表单字段值
+    form.setFieldValue('contentMarkdown', value);
+
+    // 使用专业的 marked 库解析 Markdown
+    try {
+      // 配置 marked 选项
+      marked.setOptions({
+        breaks: true, // 支持 GFM 换行
+        gfm: true,   // 启用 GitHub Flavored Markdown
+      });
+      
+      let htmlContent = marked(value) as string;
+      console.log('Original HTML content:', htmlContent); // 调试日志
+      
+      // 处理外部图片链接
+      htmlContent = processImageUrls(htmlContent);
+      console.log('Processed HTML content:', htmlContent); // 调试日志
+      
+      setMarkdownPreview(htmlContent);
+    } catch (error) {
+      console.error('Markdown 解析失败:', error);
+      // 如果解析失败，回退到简单的文本显示
+      setMarkdownPreview(value.replace(/\n/g, '<br>'));
+    }
+  };
+
+  // 新增课程
+  const handleCreate = () => {
+    setIsCreating(true);
+    setEditingCourse(null);
+    form.resetFields();
+    setMarkdownContent('');
+    setMarkdownPreview('');
+    setUploadedFiles([]);
+    setSelectedCourseType('NORMAL');
+    setSelectedSubCourses([]);
+    setSubCourseSearchValue('');
+    setFilteredAvailableCourses(availableCourses);
+    setSelectedSkillTargets([]); // 清空技能目标选择
+    setEditModalVisible(true);
+    // 加载技能目标
+    loadSkillTargets();
+    // 加载可用课程
+    loadAvailableCourses();
+  };
+
+  // 编辑课程
+  const handleEdit = async (course: Course) => {
+    setIsCreating(false);
+    setEditingCourse(course);
+
+    try {
+      // 获取完整的课程详情（包含Markdown内容）
+      const response = await adminApi.get(`/api/admin/course/detail/${course.id}`);
+      if (response.success) {
+        const fullCourse = response.data;
+        
+        // 设置表单初始值
+        form.setFieldsValue({
+          courseCode: fullCourse.courseCode,
+          title: fullCourse.title,
+          description: fullCourse.description,
+          author: fullCourse.author,
+          courseType: fullCourse.courseType,
+          contentType: fullCourse.contentType,
+          difficultyLevel: fullCourse.difficultyLevel,
+          status: fullCourse.status,
+          skillTargetCodes: fullCourse.skillTargetCodes || [], // 技能目标编码列表
+          tags: fullCourse.tags,
+          durationMinutes: fullCourse.durationMinutes,
+          sortOrder: fullCourse.sortOrder,
+          contentUrl: fullCourse.contentUrl,
+          coverImageUrl: fullCourse.coverImageUrl,
+          thumbnailUrl: fullCourse.thumbnailUrl,
+          contentMarkdown: fullCourse.contentMarkdown
+        });
+
+        // 设置技能目标选择
+        setSelectedSkillTargets(fullCourse.skillTargetCodes || []);
+
+        // 设置课程类型状态
+        setSelectedCourseType(fullCourse.courseType || 'NORMAL');
+        
+        // 设置Markdown内容（仅当不是合集类型时）
+        if (fullCourse.courseType !== 'COLLECTION') {
+          const markdownValue = fullCourse.contentMarkdown || '';
+          setMarkdownContent(markdownValue);
+          handleMarkdownChange(markdownValue);
+        }
+
+        // 如果是合集类型，加载子课程
+        if (fullCourse.courseType === 'COLLECTION') {
+          setSelectedSubCourses(fullCourse.subCourses || []);
+          loadAvailableCourses();
+          setSubCourseSearchValue('');
+          // 在加载完成后初始化过滤列表
+          setTimeout(() => {
+            setFilteredAvailableCourses(availableCourses);
+          }, 100);
+        }
+
+        setUploadedFiles([]);
+        setEditModalVisible(true);
+
+        // 加载技能目标数据
+        loadSkillTargets();
+      } else {
+        message.error('获取课程详情失败');
+      }
+    } catch (error) {
+      console.error('获取课程详情失败:', error);
+      message.error('获取课程详情失败');
+    }
+  };
+
+  // 课程类型变化处理
+  const handleCourseTypeChange = (value: string) => {
+    setSelectedCourseType(value);
+    
+    // 如果切换到合集类型，清空Markdown内容并加载可用课程
+    if (value === 'COLLECTION') {
+      setMarkdownContent('');
+      setMarkdownPreview('');
+      form.setFieldValue('contentMarkdown', '');
+      form.setFieldValue('contentType', undefined); // 合集不需要内容类型
+      loadAvailableCourses();
+      setSubCourseSearchValue('');
+      setFilteredAvailableCourses(availableCourses);
+    } else {
+      // 如果切换到普通课程，清空子课程选择
+      setSelectedSubCourses([]);
+      setSubCourseSearchValue('');
+      form.setFieldValue('contentType', 'ARTICLE'); // 设置默认内容类型
+    }
+  };
+
+  // 子课程选择处理
+  const handleSubCourseSelect = (courseIds: number[]) => {
+    const selected = availableCourses.filter(course => courseIds.includes(course.id));
+    setSelectedSubCourses(selected);
+  };
+
+  // 子课程搜索处理
+  const handleSubCourseSearch = (value: string) => {
+    setSubCourseSearchValue(value);
+    if (!value.trim()) {
+      setFilteredAvailableCourses(availableCourses);
+    } else {
+      const filtered = availableCourses.filter(course => 
+        course.title.toLowerCase().includes(value.toLowerCase()) ||
+        course.courseCode.toLowerCase().includes(value.toLowerCase()) ||
+        course.author.toLowerCase().includes(value.toLowerCase()) ||
+        (course.description && course.description.toLowerCase().includes(value.toLowerCase()))
+      );
+      setFilteredAvailableCourses(filtered);
+    }
+  };
+
+  // 保存课程
+  const handleSave = async () => {
+    try {
+      const values = await form.validateFields();
+
+      // 根据课程类型处理不同的数据
+      if (selectedCourseType === 'COLLECTION') {
+        // 合集类型：传递子课程ID列表
+        values.subCourseIds = selectedSubCourses.map(course => course.id);
+        values.contentMarkdown = null; // 合集不需要Markdown内容
+      } else {
+        // 普通课程：确保传递原始Markdown内容
+        values.contentMarkdown = markdownContent;
+      }
+
+      // 处理技能目标编码列表
+      if (selectedSkillTargets && selectedSkillTargets.length > 0) {
+        values.skillTargetCodes = selectedSkillTargets;
+      } else {
+        values.skillTargetCodes = [];
+      }
+
+      let response;
+      if (isCreating) {
+        response = await adminApi.post('/api/admin/course/create', values);
+      } else {
+        values.id = editingCourse?.id;
+        response = await adminApi.post('/api/admin/course/update', values);
+      }
+
+      if (response.success) {
+        message.success(isCreating ? '创建课程成功' : '更新课程成功');
+        setEditModalVisible(false);
+        loadCourses();
+        loadStatistics();
+      } else {
+        message.error(response.message || '操作失败');
+      }
+    } catch (error) {
+      console.error('保存课程失败:', error);
+      message.error('保存课程失败');
+    }
+  };
+
+  // 删除课程
+  const handleDelete = (course: Course) => {
+    Modal.confirm({
+      title: '确认删除',
+      content: `确定要删除课程"${course.title}"吗？此操作不可恢复。`,
+      okText: '确定',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+          const response = await adminApi.delete(`/api/admin/course/delete/${course.id}`);
+          if (response.success) {
+            message.success('删除课程成功');
+            loadCourses();
+            loadStatistics();
+          } else {
+            message.error(response.message || '删除失败');
+          }
+        } catch (error) {
+          console.error('删除课程失败:', error);
+          message.error('删除课程失败');
+        }
+      }
+    });
+  };
+
+  // 获取课程类型标签
+  const getCourseTypeTag = (courseType: string, contentType?: string) => {
+    if (courseType === 'COLLECTION') {
+      return <Tag color="purple">合集</Tag>;
+    }
+    
+    // 普通课程根据内容类型显示
+    if (contentType === 'VIDEO') {
+      return <Tag color="blue">视频</Tag>;
+    } else if (contentType === 'ARTICLE') {
+      return <Tag color="green">图文</Tag>;
+    } else {
+      return <Tag color="default">未知</Tag>;
+    }
+  };
+
+  // 获取难度标签
+  const getDifficultyTag = (difficulty: string) => {
+    const difficultyMap: { [key: string]: { color: string; text: string } } = {
+      'L1': { color: 'green', text: 'L1-入门' },
+      'L2': { color: 'blue', text: 'L2-初级' },
+      'L3': { color: 'orange', text: 'L3-中级' },
+      'L4': { color: 'red', text: 'L4-高级' },
+      'L5': { color: 'purple', text: 'L5-专家' },
+      'BEGINNER': { color: 'green', text: '初级' },
+      'INTERMEDIATE': { color: 'orange', text: '中级' },
+      'ADVANCED': { color: 'red', text: '高级' },
+      'EXPERT': { color: 'purple', text: '专家' }
+    };
+    const config = difficultyMap[difficulty] || { color: 'default', text: difficulty };
+    return <Tag color={config.color}>{config.text}</Tag>;
+  };
+
+  // 获取状态标签
+  const getStatusTag = (status: string) => {
+    const statusMap: { [key: string]: { color: string; text: string } } = {
+      'PUBLISHED': { color: 'green', text: '已发布' },
+      'DRAFT': { color: 'orange', text: '草稿' },
+      'ARCHIVED': { color: 'red', text: '已归档' },
+      'ACTIVE': { color: 'green', text: '启用' },
+      'INACTIVE': { color: 'red', text: '禁用' }
+    };
+    const config = statusMap[status] || { color: 'default', text: status };
+    return <Tag color={config.color}>{config.text}</Tag>;
+  };
+
+
+
+  // 表格列定义
+  const columns = [
+    {
+      title: '课程编码',
+      dataIndex: 'courseCode',
+      key: 'courseCode',
+      width: 120,
+      fixed: 'left' as const,
+    },
+    {
+      title: '课程名称',
+      dataIndex: 'title',
+      key: 'title',
+      width: 200,
+      render: (text: string) => (
+        <Space>
+          <BookOutlined style={{ color: '#1890ff' }} />
+          <span>{text}</span>
+        </Space>
+      ),
+    },
+    {
+      title: '课程类型',
+      dataIndex: 'courseType',
+      key: 'courseType',
+      width: 100,
+      render: (courseType: string, record: Course) => getCourseTypeTag(courseType, record.contentType),
+    },
+    {
+      title: '难度等级',
+      dataIndex: 'difficultyLevel',
+      key: 'difficultyLevel',
+      width: 100,
+      render: (difficulty: string) => getDifficultyTag(difficulty),
+    },
+    {
+      title: '时长(分钟)',
+      dataIndex: 'durationMinutes',
+      key: 'durationMinutes',
+      width: 100,
+      render: (duration: number) => duration ? (
+        <Space>
+          <ClockCircleOutlined />
+          <span>{duration}分钟</span>
+        </Space>
+      ) : '-',
+    },
+    {
+      title: '内容类型',
+      dataIndex: 'contentType',
+      key: 'contentType',
+      width: 100,
+      render: (type: string) => type ? (
+        <Tag color={type === 'ARTICLE' ? 'blue' : 'green'}>
+          {type === 'ARTICLE' ? '图文' : type === 'VIDEO' ? '视频' : type}
+        </Tag>
+      ) : '-',
+    },
+    {
+      title: '作者',
+      dataIndex: 'author',
+      key: 'author',
+      width: 120,
+      render: (name: string) => name ? (
+        <Space>
+          <UserOutlined />
+          <span>{name}</span>
+        </Space>
+      ) : '-',
+    },
+    {
+      title: '观看次数',
+      dataIndex: 'viewCount',
+      key: 'viewCount',
+      width: 100,
+      render: (count: number) => (
+        <Text type={count > 0 ? 'success' : 'secondary'}>{count}</Text>
+      ),
+    },
+    {
+      title: '点赞数',
+      dataIndex: 'likeCount',
+      key: 'likeCount',
+      width: 80,
+      render: (count: number) => count > 0 ? (
+        <Space>
+          <StarOutlined style={{ color: '#faad14' }} />
+          <span>{count}</span>
+        </Space>
+      ) : '-',
+    },
+    {
+      title: '收藏数',
+      dataIndex: 'collectCount',
+      key: 'collectCount',
+      width: 80,
+      render: (count: number) => (
+        <Text type={count > 0 ? 'success' : 'secondary'}>{count}</Text>
+      ),
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      key: 'status',
+      width: 100,
+      render: (status: string) => getStatusTag(status),
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'createdTime',
+      key: 'createdTime',
+      width: 180,
+      render: (time: string) => time ? new Date(time).toLocaleString() : '-',
+    },
+    {
+      title: '操作',
+      key: 'action',
+      width: 150,
+      fixed: 'right' as const,
+      render: (_: any, record: Course) => (
+        <Space>
+          <Tooltip title="查看详情">
+            <Button
+              type="link"
+              icon={<EyeOutlined />}
+              onClick={() => handleViewDetail(record)}
+            />
+          </Tooltip>
+          <Tooltip title="编辑">
+            <Button
+              type="link"
+              icon={<EditOutlined />}
+              onClick={() => handleEdit(record)}
+            />
+          </Tooltip>
+          <Tooltip title="删除">
+            <Button
+              type="link"
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => handleDelete(record)}
+            />
+          </Tooltip>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <div style={{ padding: 24 }}>
+      <Title level={2}>📚 课程管理</Title>
+      
+      {/* 统计卡片 */}
+      <Row gutter={16} style={{ marginBottom: 24 }}>
+        <Col span={4}>
+          <Card>
+            <Statistic
+              title="总课程数"
+              value={statistics.totalCourses}
+              prefix={<BookOutlined />}
+              valueStyle={{ color: '#1890ff' }}
+            />
+          </Card>
+        </Col>
+        <Col span={4}>
+          <Card>
+            <Statistic
+              title="已发布"
+              value={statistics.publishedCourses}
+              prefix={<BookOutlined />}
+              valueStyle={{ color: '#52c41a' }}
+            />
+          </Card>
+        </Col>
+        <Col span={4}>
+          <Card>
+            <Statistic
+              title="草稿"
+              value={statistics.draftCourses}
+              prefix={<BookOutlined />}
+              valueStyle={{ color: '#faad14' }}
+            />
+          </Card>
+        </Col>
+        <Col span={4}>
+          <Card>
+            <Statistic
+              title="总报名数"
+              value={statistics.totalEnrollments}
+              prefix={<UserOutlined />}
+              valueStyle={{ color: '#722ed1' }}
+            />
+          </Card>
+        </Col>
+        <Col span={4}>
+          <Card>
+            <Statistic
+              title="平均评分"
+              value={statistics.averageRating}
+              precision={1}
+              prefix={<StarOutlined />}
+              valueStyle={{ color: '#faad14' }}
+            />
+          </Card>
+        </Col>
+        <Col span={4}>
+          <Card>
+            <Statistic
+              title="总收入"
+              value={statistics.totalRevenue}
+              precision={2}
+              prefix="¥"
+              valueStyle={{ color: '#f5222d' }}
+            />
+          </Card>
+        </Col>
+      </Row>
+
+      {/* 搜索和筛选 */}
+      <Card style={{ marginBottom: 16 }}>
+        <Row gutter={16} align="middle">
+          <Col span={6}>
+            <Search
+              placeholder="搜索课程名称、编码、讲师..."
+              allowClear
+              onSearch={handleSearch}
+              style={{ width: '100%' }}
+            />
+          </Col>
+          <Col span={3}>
+            <Select
+              placeholder="课程类型"
+              allowClear
+              style={{ width: '100%' }}
+              onChange={(value) => handleFilter('courseType', value)}
+              value={queryParams.courseType}
+            >
+              <Option value="NORMAL">普通课程</Option>
+              <Option value="COLLECTION">合集</Option>
+            </Select>
+          </Col>
+          <Col span={3}>
+            <Select
+              placeholder="内容类型"
+              allowClear
+              style={{ width: '100%' }}
+              onChange={(value) => handleFilter('contentType', value)}
+              value={queryParams.contentType}
+            >
+              <Option value="ARTICLE">图文</Option>
+              <Option value="VIDEO">视频</Option>
+            </Select>
+          </Col>
+          <Col span={3}>
+            <Select
+              placeholder="难度等级"
+              allowClear
+              style={{ width: '100%' }}
+              onChange={(value) => handleFilter('difficultyLevel', value)}
+              value={queryParams.difficultyLevel}
+            >
+              <Option value="L1">L1-入门</Option>
+              <Option value="L2">L2-初级</Option>
+              <Option value="L3">L3-中级</Option>
+              <Option value="L4">L4-高级</Option>
+              <Option value="L5">L5-专家</Option>
+            </Select>
+          </Col>
+          <Col span={2}>
+            <Select
+              placeholder="状态"
+              allowClear
+              style={{ width: '100%' }}
+              onChange={(value) => handleFilter('status', value)}
+              value={queryParams.status}
+            >
+              <Option value="PUBLISHED">已发布</Option>
+              <Option value="DRAFT">草稿</Option>
+              <Option value="ARCHIVED">已归档</Option>
+            </Select>
+          </Col>
+
+          <Col span={8}>
+            <Space>
+              <Button icon={<ReloadOutlined />} onClick={loadCourses}>
+                刷新
+              </Button>
+              <Button onClick={handleReset}>
+                重置
+              </Button>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={handleCreate}
+              >
+                添加课程
+              </Button>
+            </Space>
+          </Col>
+        </Row>
+      </Card>
+
+      {/* 课程列表 */}
+      <Card>
+        <Table
+          columns={columns}
+          dataSource={courses}
+          rowKey="id"
+          loading={loading}
+          scroll={{ x: 1500 }}
+          pagination={{
+            current: queryParams.page,
+            pageSize: queryParams.size,
+            total: total,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条 (共 ${Math.ceil(total / queryParams.size)} 页)`,
+            pageSizeOptions: [10, 20, 50, 100, 200],
+            onChange: (page, size) => {
+              // 确保页码不会小于1
+              const newPage = Math.max(1, page);
+              setQueryParams(prev => ({ 
+                ...prev, 
+                page: newPage, 
+                size: size || prev.size || 10 
+              }));
+            },
+            onShowSizeChange: (current, size) => {
+              // 分页大小变化时，重置到第1页
+              setQueryParams(prev => ({ 
+                ...prev, 
+                page: 1, 
+                size: size || 10 
+              }));
+            },
+          }}
+        />
+      </Card>
+
+      {/* 课程详情模态框 */}
+      <Modal
+        title="课程详情"
+        open={detailModalVisible}
+        onCancel={() => setDetailModalVisible(false)}
+        footer={null}
+        width={1200}
+      >
+        {selectedCourse && (
+          <div>
+            <Row gutter={16}>
+              <Col span={12}>
+                <p><strong>课程编码：</strong>{selectedCourse.courseCode}</p>
+                <p><strong>课程名称：</strong>{selectedCourse.title}</p>
+                <p><strong>课程类型：</strong>{getCourseTypeTag(selectedCourse.courseType, selectedCourse.contentType)}</p>
+                {selectedCourse.courseType !== 'COLLECTION' && (
+                  <p><strong>内容类型：</strong>{selectedCourse.contentType || '-'}</p>
+                )}
+                <p><strong>难度等级：</strong>{getDifficultyTag(selectedCourse.difficultyLevel)}</p>
+                <p><strong>时长：</strong>{selectedCourse.durationMinutes ? `${selectedCourse.durationMinutes}分钟` : '-'}</p>
+                <p><strong>排序：</strong>{selectedCourse.sortOrder}</p>
+              </Col>
+              <Col span={12}>
+                <p><strong>作者：</strong>{selectedCourse.author || '-'}</p>
+                {selectedCourse.skillTargetCodes && selectedCourse.skillTargetCodes.length > 0 && (
+                  <div style={{ marginBottom: '12px' }}>
+                    <p><strong>关联技能目标：</strong></p>
+                    <div style={{ marginTop: '8px' }}>
+                      {selectedCourse.skillTargetCodes.map((code, index) => {
+                        const target = skillTargets.find(t => t.skillCode === code);
+                        return (
+                          <div key={index} style={{ 
+                            marginBottom: '6px',
+                            padding: '8px 12px',
+                            background: '#f0f8ff',
+                            border: '1px solid #d6e7ff',
+                            borderRadius: '4px',
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}>
+                            <span style={{ marginRight: '8px', fontSize: '14px' }}>🎯</span>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 'bold', color: '#1890ff', marginBottom: '2px' }}>
+                                {target ? target.skillName : code}
+                              </div>
+                              {target && target.fullPath && (
+                                <div style={{ fontSize: '12px', color: '#666' }}>
+                                  {target.fullPath}
+                                </div>
+                              )}
+                            </div>
+                            <Tag color="blue" style={{ margin: 0 }}>
+                              {code}
+                            </Tag>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                <p><strong>观看次数：</strong>{selectedCourse.viewCount}</p>
+                <p><strong>点赞数：</strong>{selectedCourse.likeCount}</p>
+                <p><strong>收藏数：</strong>{selectedCourse.collectCount}</p>
+                <p><strong>状态：</strong>{getStatusTag(selectedCourse.status)}</p>
+                <p><strong>发布时间：</strong>{selectedCourse.publishTime ? new Date(selectedCourse.publishTime).toLocaleString() : '-'}</p>
+              </Col>
+            </Row>
+            {selectedCourse.description && (
+              <div>
+                <p><strong>课程描述：</strong></p>
+                <p style={{ background: '#f5f5f5', padding: 12, borderRadius: 4 }}>
+                  {selectedCourse.description}
+                </p>
+              </div>
+            )}
+            {selectedCourse.tagList && selectedCourse.tagList.length > 0 && (
+              <div>
+                <p><strong>标签：</strong></p>
+                <Space wrap>
+                  {selectedCourse.tagList.map((tag, index) => (
+                    <Tag key={index}>{tag}</Tag>
+                  ))}
+                </Space>
+              </div>
+            )}
+            {selectedCourse.courseType === 'COLLECTION' && selectedCourse.subCourses && selectedCourse.subCourses.length > 0 && (
+              <div>
+                <p><strong>子课程列表（{selectedCourse.subCourses.length}个）：</strong></p>
+                <div style={{ maxHeight: '300px', overflowY: 'auto', border: '1px solid #d9d9d9', borderRadius: '6px', padding: '8px' }}>
+                  {selectedCourse.subCourses.map((subCourse, index) => (
+                    <div key={subCourse.id} style={{ 
+                      padding: '8px 12px', 
+                      borderBottom: index < selectedCourse.subCourses!.length - 1 ? '1px solid #f0f0f0' : 'none',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+                          [{subCourse.courseCode}] {subCourse.title}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#666' }}>
+                          <Space size="middle">
+                            <span>作者：{subCourse.author}</span>
+                            <span>难度：{getDifficultyTag(subCourse.difficultyLevel)}</span>
+                            <span>类型：{getCourseTypeTag(subCourse.courseType, subCourse.contentType)}</span>
+                            <span>观看：{subCourse.viewCount}</span>
+                          </Space>
+                        </div>
+                      </div>
+                      <div>
+                        {getStatusTag(subCourse.status)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {selectedCourse.courseType !== 'COLLECTION' && selectedCourse.contentMarkdown && (
+              <div>
+                <p><strong>课程内容：</strong></p>
+                <div
+                  style={{
+                    maxHeight: '400px',
+                    padding: '16px',
+                    border: '1px solid #d9d9d9',
+                    borderRadius: '6px',
+                    backgroundColor: '#fafafa',
+                    overflow: 'auto'
+                  }}
+                  className="markdown-preview"
+                  dangerouslySetInnerHTML={{ 
+                    __html: processImageUrls(marked(selectedCourse.contentMarkdown) as string) 
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
+
+      {/* 编辑/新增课程模态框 */}
+      <Modal
+        title={isCreating ? '新增课程' : '编辑课程'}
+        open={editModalVisible}
+        onCancel={() => setEditModalVisible(false)}
+        onOk={handleSave}
+        width={1400}
+        okText="保存"
+        cancelText="取消"
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          initialValues={{
+            courseType: 'NORMAL',
+            contentType: 'ARTICLE',
+            status: 'DRAFT',
+            sortOrder: 0
+          }}
+        >
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="courseCode"
+                label="课程编码"
+                rules={[{ required: true, message: '请输入课程编码' }]}
+              >
+                <Input placeholder="请输入课程编码" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="title"
+                label="课程标题"
+                rules={[{ required: true, message: '请输入课程标题' }]}
+              >
+                <Input placeholder="请输入课程标题" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Form.Item
+            name="description"
+            label="课程描述"
+          >
+            <TextArea rows={3} placeholder="请输入课程描述" />
+          </Form.Item>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="author"
+                label="作者"
+                rules={[{ required: true, message: '请输入作者' }]}
+              >
+                <Input placeholder="请输入作者" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="courseType"
+                label="课程类型"
+                rules={[{ required: true, message: '请选择课程类型' }]}
+              >
+                <Select 
+                  placeholder="请选择课程类型"
+                  onChange={handleCourseTypeChange}
+                  value={selectedCourseType}
+                >
+                  <Option value="NORMAL">普通课程</Option>
+                  <Option value="COLLECTION">合集</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            {selectedCourseType !== 'COLLECTION' && (
+              <Col span={12}>
+                <Form.Item
+                  name="contentType"
+                  label="内容类型"
+                  rules={selectedCourseType !== 'COLLECTION' ? [{ required: true, message: '请选择内容类型' }] : []}
+                >
+                  <Select placeholder="请选择内容类型">
+                    <Option value="ARTICLE">图文</Option>
+                    <Option value="VIDEO">视频</Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+            )}
+            <Col span={12}>
+              <Form.Item
+                name="difficultyLevel"
+                label="难度等级"
+              >
+                <Select placeholder="请选择难度等级">
+                  <Option value="L1">L1-入门</Option>
+                  <Option value="L2">L2-初级</Option>
+                  <Option value="L3">L3-中级</Option>
+                  <Option value="L4">L4-高级</Option>
+                  <Option value="L5">L5-专家</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="status"
+                label="状态"
+                rules={[{ required: true, message: '请选择状态' }]}
+              >
+                <Select placeholder="请选择状态">
+                  <Option value="DRAFT">草稿</Option>
+                  <Option value="PUBLISHED">已发布</Option>
+                  <Option value="ARCHIVED">已归档</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                name="skillTargetCodes"
+                label="关联技能目标（支持多选，只允许选择3级目标）"
+              >
+                <Select
+                  mode="multiple"
+                  placeholder="请选择技能目标，支持多选（只能选择3级目标）"
+                  loading={skillTargetsLoading}
+                  showSearch
+                  value={selectedSkillTargets}
+                  onChange={(values, options) => {
+                    // 检查新选中的项目是否为3级目标
+                    const invalidSelections: string[] = [];
+                    const validSelections: string[] = [];
+                    
+                    values.forEach(value => {
+                      const target = skillTargets.find(t => t.skillCode === value);
+                      if (target && target.isSelectable) {
+                        validSelections.push(value);
+                      } else if (target) {
+                        invalidSelections.push(target.skillName);
+                      }
+                    });
+                    
+                    if (invalidSelections.length > 0) {
+                      message.warning(`以下目标不是3级目标，无法选择：${invalidSelections.join('、')}`);
+                    }
+                    
+                    setSelectedSkillTargets(validSelections);
+                    form.setFieldValue('skillTargetCodes', validSelections);
+                  }}
+                  filterOption={(input, option) => {
+                    const target = skillTargets.find(t => t.skillCode === option?.value);
+                    if (!target) return false;
+                    return target.skillName.toLowerCase().includes(input.toLowerCase()) ||
+                           target.fullPath.toLowerCase().includes(input.toLowerCase());
+                  }}
+                  onFocus={() => {
+                    // 当聚焦且没有数据时，加载技能目标数据
+                    if (skillTargets.length === 0) {
+                      loadSkillTargets();
+                    }
+                  }}
+                  notFoundContent={
+                    skillTargetsLoading ? (
+                      <div style={{ textAlign: 'center', padding: '20px' }}>
+                        <span>加载中...</span>
+                      </div>
+                    ) : skillTargets.length === 0 ? (
+                      <div style={{ textAlign: 'center', padding: '20px' }}>
+                        <div>暂无数据</div>
+                        <Button
+                          type="link"
+                          size="small"
+                          onClick={() => loadSkillTargets()}
+                          style={{ padding: 0, marginTop: '8px' }}
+                        >
+                          🔄 点击加载技能目标
+                        </Button>
+                      </div>
+                    ) : null
+                  }
+                  maxTagCount={3}
+                  maxTagTextLength={20}
+                  dropdownStyle={{ maxHeight: '400px' }}
+                >
+                  {skillTargets.map(target => {
+                    // 根据级别设置不同的样式
+                    const isLevel3 = target.isSelectable;
+                    const indentLevel = (target.level - 1) * 20; // 缩进效果
+                    
+                    return (
+                      <Option 
+                        key={target.skillCode} 
+                        value={target.skillCode}
+                        disabled={!isLevel3}
+                        style={{
+                          paddingLeft: `${indentLevel + 12}px`,
+                          backgroundColor: isLevel3 ? 'transparent' : '#f5f5f5',
+                          color: isLevel3 ? '#000' : '#999'
+                        }}
+                      >
+                        <div style={{ 
+                          opacity: isLevel3 ? 1 : 0.6,
+                          cursor: isLevel3 ? 'pointer' : 'not-allowed'
+                        }}>
+                          <div style={{ 
+                            fontWeight: isLevel3 ? 'bold' : 'normal',
+                            color: isLevel3 ? '#000' : '#999'
+                          }}>
+                            {target.level === 1 && '📁 '}
+                            {target.level === 2 && '📂 '}
+                            {target.level === 3 && '🎯 '}
+                            {target.skillName}
+                            {!isLevel3 && <span style={{ fontSize: '12px', marginLeft: '8px' }}>(不可选)</span>}
+                          </div>
+                          <div style={{ fontSize: '11px', color: '#999', marginTop: '2px' }}>
+                            {target.fullPath}
+                          </div>
+                        </div>
+                      </Option>
+                    );
+                  })}
+                </Select>
+                {selectedSkillTargets.length > 0 && (
+                  <div style={{ marginTop: '8px' }}>
+                    <Text type="secondary">已选择 {selectedSkillTargets.length} 个技能目标：</Text>
+                    <div style={{ marginTop: '4px' }}>
+                      {selectedSkillTargets.map(code => {
+                        const target = skillTargets.find(t => t.skillCode === code);
+                        return target ? (
+                          <Tag key={code} style={{ marginBottom: '4px' }} color="blue">
+                            🎯 {target.skillName}
+                          </Tag>
+                        ) : null;
+                      })}
+                    </div>
+                  </div>
+                )}
+                <div style={{ marginTop: '4px', fontSize: '12px', color: '#999' }}>
+                  ℹ️ 提示：只能选择有 🎯 标记的3级技能目标，1-2级目标仅作为分类展示。
+                </div>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="durationMinutes"
+                label="时长(分钟)"
+              >
+                <InputNumber min={0} placeholder="请输入时长" style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="sortOrder"
+                label="排序"
+              >
+                <InputNumber min={0} placeholder="请输入排序" style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Form.Item
+            name="tags"
+            label="标签"
+          >
+            <Input placeholder="请输入标签，用逗号分隔" />
+          </Form.Item>
+
+          <Form.Item
+            name="contentUrl"
+            label="内容链接"
+          >
+            <Input placeholder="请输入内容链接" />
+          </Form.Item>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="coverImageUrl"
+                label="封面图片"
+              >
+                <Input placeholder="请输入封面图片链接" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="thumbnailUrl"
+                label="缩略图"
+              >
+                <Input placeholder="请输入缩略图链接" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          {/* 合集类型：子课程选择 */}
+          {selectedCourseType === 'COLLECTION' && (
+            <Form.Item
+              label="选择子课程"
+              required
+            >
+              <div>
+                <Select
+                  mode="multiple"
+                  placeholder="搜索并选择要添加到合集的课程（支持课程名称、编码、作者搜索）"
+                  value={selectedSubCourses.map(course => course.id)}
+                  onChange={handleSubCourseSelect}
+                  showSearch
+                  allowClear
+                  filterOption={false}
+                  searchValue={subCourseSearchValue}
+                  onSearch={handleSubCourseSearch}
+                  notFoundContent={
+                    filteredAvailableCourses.length === 0 && subCourseSearchValue ? (
+                      <div style={{ textAlign: 'center', padding: '20px', color: '#999' }}>
+                        <div>未找到匹配 "{subCourseSearchValue}" 的课程</div>
+                        <Button 
+                          type="link" 
+                          size="small" 
+                          onClick={() => handleSubCourseSearch('')}
+                          style={{ padding: 0, marginTop: '8px' }}
+                        >
+                          清除搜索条件
+                        </Button>
+                      </div>
+                    ) : 
+                    "暂无可用课程"
+                  }
+                  style={{ width: '100%' }}
+                  optionLabelProp="label"
+                  dropdownStyle={{ maxHeight: '400px' }}
+                >
+                  {filteredAvailableCourses.map(course => (
+                    <Option 
+                      key={course.id} 
+                      value={course.id}
+                      label={`[${course.courseCode}] ${course.title}`}
+                    >
+                      <div style={{ padding: '4px 0' }}>
+                        <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>
+                          [{course.courseCode}] {course.title}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#666', display: 'flex', justifyContent: 'space-between' }}>
+                          <span>作者：{course.author}</span>
+                          <span>类型：{course.contentType === 'VIDEO' ? '视频' : '图文'}</span>
+                          <span>难度：{course.difficultyLevel}</span>
+                          <span>观看：{course.viewCount}</span>
+                        </div>
+                      </div>
+                    </Option>
+                  ))}
+                </Select>
+                {subCourseSearchValue && (
+                  <div style={{ marginTop: '8px', textAlign: 'right' }}>
+                    <Text type="secondary" style={{ fontSize: '12px' }}>
+                      已搜索：{subCourseSearchValue} • 显示 {filteredAvailableCourses.length} 个结果
+                    </Text>
+                    <Button 
+                      type="link" 
+                      size="small" 
+                      onClick={() => handleSubCourseSearch('')}
+                      style={{ marginLeft: '8px', padding: 0 }}
+                    >
+                      清除
+                    </Button>
+                  </div>
+                )}
+              </div>
+              {selectedSubCourses.length > 0 && (
+                <div style={{ marginTop: 8 }}>
+                  <Text type="secondary">已选择 {selectedSubCourses.length} 个课程：</Text>
+                  <div style={{ marginTop: 4, maxHeight: '120px', overflowY: 'auto' }}>
+                    {selectedSubCourses.map(course => (
+                      <Tag 
+                        key={course.id} 
+                        style={{ marginBottom: 4, display: 'block', padding: '4px 8px' }}
+                        closable
+                        onClose={() => {
+                          const newSelected = selectedSubCourses.filter(c => c.id !== course.id);
+                          setSelectedSubCourses(newSelected);
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontWeight: 'bold' }}>[{course.courseCode}] {course.title}</span>
+                          <span style={{ fontSize: '12px', color: '#666', marginLeft: '8px' }}>
+                            {course.author} | {course.contentType === 'VIDEO' ? '视频' : '图文'}
+                          </span>
+                        </div>
+                      </Tag>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </Form.Item>
+          )}
+
+          {/* Markdown内容编辑器（仅普通课程显示） */}
+          {selectedCourseType !== 'COLLECTION' && (
+            <Form.Item
+              name="contentMarkdown"
+              label="课程详情内容"
+            >
+            <Tabs
+              activeKey={previewMode}
+              onChange={(key) => setPreviewMode(key)}
+              tabBarExtraContent={
+                <Space>
+                  <Upload
+                    beforeUpload={handleFileUpload}
+                    showUploadList={false}
+                    accept="image/*,video/*,.pdf,.doc,.docx"
+                  >
+                    <Button icon={<UploadOutlined />} size="small">
+                      上传文件
+                    </Button>
+                  </Upload>
+                </Space>
+              }
+              items={[
+                {
+                  key: 'edit',
+                  label: (
+                    <span>
+                      <FileMarkdownOutlined />
+                      编辑
+                    </span>
+                  ),
+                  children: (
+                    <TextArea
+                      placeholder="请输入Markdown格式的课程详情内容..."
+                      rows={15}
+                      style={{ fontFamily: 'Monaco, Consolas, monospace' }}
+                      value={markdownContent}
+                      onChange={(e) => handleMarkdownChange(e.target.value)}
+                    />
+                  )
+                },
+                {
+                  key: 'preview',
+                  label: (
+                    <span>
+                      <EyeOutlined />
+                      预览
+                    </span>
+                  ),
+                  children: (
+                    <div
+                      style={{
+                        minHeight: '400px',
+                        padding: '16px',
+                        border: '1px solid #d9d9d9',
+                        borderRadius: '6px',
+                        backgroundColor: '#fafafa',
+                        overflow: 'auto'
+                      }}
+                      className="markdown-preview"
+                      dangerouslySetInnerHTML={{ __html: markdownPreview || '暂无内容' }}
+                    />
+                  )
+                },
+                {
+                  key: 'split',
+                  label: (
+                    <span>
+                      <EyeOutlined />
+                      分屏
+                    </span>
+                  ),
+                  children: (
+                    <div style={{ display: 'flex', gap: '16px', height: '400px' }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ marginBottom: '8px', fontWeight: 'bold' }}>编辑</div>
+                        <TextArea
+                          placeholder="请输入Markdown格式的课程详情内容..."
+                          value={markdownContent}
+                          onChange={(e) => handleMarkdownChange(e.target.value)}
+                          style={{ 
+                            height: '370px',
+                            fontFamily: 'Monaco, Consolas, monospace',
+                            fontSize: '13px',
+                            resize: 'none'
+                          }}
+                        />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ marginBottom: '8px', fontWeight: 'bold' }}>预览</div>
+                        <div
+                          style={{
+                            height: '370px',
+                            padding: '12px',
+                            border: '1px solid #d9d9d9',
+                            borderRadius: '6px',
+                            backgroundColor: '#fafafa',
+                            overflow: 'auto'
+                          }}
+                          className="markdown-preview"
+                          dangerouslySetInnerHTML={{ __html: markdownPreview || '暂无内容' }}
+                        />
+                      </div>
+                    </div>
+                  )
+                }
+              ]}
+            />
+          </Form.Item>
+          )}
+
+          {/* 上传文件列表 */}
+          {uploadedFiles.length > 0 && (
+            <Form.Item label="已上传文件">
+              <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                {uploadedFiles.map((file, index) => (
+                  <Tag key={index} style={{ margin: '2px' }}>
+                    {file.originalName}
+                  </Tag>
+                ))}
+              </div>
+            </Form.Item>
+          )}
+        </Form>
+      </Modal>
+    </div>
+  );
+};
+
+export default CourseManage;

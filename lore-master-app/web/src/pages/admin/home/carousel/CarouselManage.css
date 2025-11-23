@@ -1,0 +1,230 @@
+.carousel-manage {
+  padding: 24px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.carousel-manage .ant-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-manage h2 {
+  margin: 0;
+  color: #262626;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.carousel-manage .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+  color: #262626;
+}
+
+.carousel-manage .ant-table-tbody > tr:hover > td {
+  background: #f5f5f5;
+}
+
+.carousel-manage .ant-btn-link {
+  padding: 0;
+  height: auto;
+  border: none;
+  box-shadow: none;
+}
+
+.carousel-manage .ant-btn-link:hover {
+  background: transparent;
+}
+
+.carousel-manage .ant-modal-header {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 24px;
+}
+
+.carousel-manage .ant-modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.carousel-manage .ant-form-item-label > label {
+  font-weight: 500;
+  color: #262626;
+}
+
+.carousel-manage .ant-input,
+.carousel-manage .ant-input-number,
+.carousel-manage .ant-select-selector {
+  border-radius: 6px;
+}
+
+.carousel-manage .ant-input:focus,
+.carousel-manage .ant-input-number:focus,
+.carousel-manage .ant-select-focused .ant-select-selector {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.carousel-manage .ant-btn-primary {
+  background: #1890ff;
+  border-color: #1890ff;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.carousel-manage .ant-btn-primary:hover {
+  background: #40a9ff;
+  border-color: #40a9ff;
+}
+
+.carousel-manage .ant-switch-checked {
+  background-color: #52c41a;
+}
+
+.carousel-manage .ant-image {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.carousel-manage .ant-table-pagination {
+  margin: 24px 0 0 0;
+}
+
+.carousel-manage .ant-pagination-total-text {
+  color: #8c8c8c;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .carousel-manage {
+    padding: 16px;
+  }
+  
+  .carousel-manage .ant-modal {
+    margin: 0;
+    max-width: 100vw;
+    top: 0;
+  }
+  
+  .carousel-manage .ant-modal-content {
+    border-radius: 0;
+  }
+  
+  .carousel-manage .ant-table-thead > tr > th,
+  .carousel-manage .ant-table-tbody > tr > td {
+    padding: 8px;
+    font-size: 12px;
+  }
+  
+  .carousel-manage .ant-btn {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+}
+
+/* 拖拽排序样式 */
+.carousel-manage .ant-table-tbody > tr.drag-over {
+  background: #e6f7ff;
+  border: 2px dashed #1890ff;
+}
+
+.carousel-manage .drag-handle {
+  cursor: move;
+  color: #8c8c8c;
+}
+
+.carousel-manage .drag-handle:hover {
+  color: #1890ff;
+}
+
+/* 状态标签样式 */
+.carousel-manage .status-tag {
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.carousel-manage .status-active {
+  background: #f6ffed;
+  border-color: #b7eb8f;
+  color: #52c41a;
+}
+
+.carousel-manage .status-inactive {
+  background: #fff2e8;
+  border-color: #ffbb96;
+  color: #fa8c16;
+}
+
+/* 图片预览样式 */
+.carousel-manage .image-preview {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.carousel-manage .image-preview:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.carousel-manage .image-preview::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.carousel-manage .image-preview:hover::after {
+  opacity: 1;
+}
+
+/* 表单样式优化 */
+.carousel-manage .ant-form-vertical .ant-form-item-label {
+  padding: 0 0 4px;
+}
+
+.carousel-manage .ant-form-item-explain-error {
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.carousel-manage .ant-input-number {
+  width: 100%;
+}
+
+.carousel-manage .ant-select {
+  width: 100%;
+}
+
+/* 操作按钮组样式 */
+.carousel-manage .action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.carousel-manage .action-buttons .ant-btn {
+  min-width: 60px;
+  text-align: center;
+}
+
+/* 加载状态样式 */
+.carousel-manage .ant-spin-container {
+  min-height: 200px;
+}
+
+.carousel-manage .ant-empty {
+  padding: 40px 0;
+}
+
+.carousel-manage .ant-empty-description {
+  color: #8c8c8c;
+}

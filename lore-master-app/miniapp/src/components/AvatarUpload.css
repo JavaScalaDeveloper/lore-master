@@ -1,0 +1,206 @@
+.avatar-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar-container {
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 3px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.avatar-container:hover {
+  border-color: #4A90E2;
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.2);
+  transform: scale(1.05);
+}
+
+.avatar-container.uploading {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.avatar-image {
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.3s ease;
+}
+
+.avatar-container:hover .avatar-image {
+  opacity: 0.7;
+}
+
+.upload-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  border-radius: 50%;
+}
+
+.upload-hint {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.avatar-container:hover .upload-hint {
+  opacity: 1;
+}
+
+.upload-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 4px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.upload-icon {
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.upload-text {
+  font-size: 10px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.avatar-tips {
+  text-align: center;
+  color: #666;
+  font-size: 11px;
+  line-height: 1.4;
+  max-width: 200px;
+}
+
+.avatar-tips p {
+  margin: 2px 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+  .avatar-upload {
+    gap: 8px;
+  }
+  
+  .avatar-tips {
+    font-size: 10px;
+    max-width: 180px;
+  }
+  
+  .upload-text {
+    font-size: 9px;
+  }
+}
+
+/* 大尺寸头像样式 */
+.avatar-upload.large .avatar-container {
+  border-width: 4px;
+}
+
+.avatar-upload.large .upload-icon {
+  font-size: 24px;
+}
+
+.avatar-upload.large .upload-text {
+  font-size: 12px;
+}
+
+/* 小尺寸头像样式 */
+.avatar-upload.small .avatar-container {
+  border-width: 2px;
+}
+
+.avatar-upload.small .upload-icon {
+  font-size: 12px;
+}
+
+.avatar-upload.small .upload-text {
+  font-size: 8px;
+}
+
+.avatar-upload.small .avatar-tips {
+  font-size: 9px;
+}
+
+/* 成功状态动画 */
+.avatar-upload.success .avatar-container {
+  animation: successPulse 0.6s ease-in-out;
+}
+
+@keyframes successPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); border-color: #4CAF50; }
+  100% { transform: scale(1); }
+}
+
+/* 错误状态样式 */
+.avatar-upload.error .avatar-container {
+  border-color: #f44336;
+  animation: errorShake 0.5s ease-in-out;
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* 禁用状态 */
+.avatar-upload.disabled .avatar-container {
+  cursor: not-allowed;
+  opacity: 0.5;
+  filter: grayscale(100%);
+}
+
+.avatar-upload.disabled .avatar-container:hover {
+  transform: none;
+  border-color: #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 加载状态的脉冲效果 */
+.avatar-container.uploading {
+  animation: uploadPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes uploadPulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
