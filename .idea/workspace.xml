@@ -1,0 +1,839 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="78885a38-2024-4f5e-8be7-a1e7ea070994" name="更改" comment="重命名" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="JUnit4 Test Class" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="dev/0.1/react-native" />
+        <entry key="$PROJECT_DIR$/lore-master-front/miniapp/wechat/wechat-miniapp" value="dev/0.1/react-native" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="ROOT_SYNC" value="SYNC" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;JavaScalaDeveloper&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/JavaScalaDeveloper/lore-master.git&quot;,
+    &quot;accountId&quot;: &quot;7b604a5d-d7db-4e6b-9f73-8e564fe94da9&quot;
+  }
+}</component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="30MwIuU1GZa4jb5B1GD0kHrq7Eo" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ApiPost:METDOD_SEND_RECORD:Manual APIs&quot;: &quot;{\&quot;b4770ef6-9373-4061-b688-17c2791e26a5\&quot;:[{\&quot;url\&quot;:\&quot;localhost:8082/api/chat/send\&quot;,\&quot;header\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;},{\&quot;key\&quot;:\&quot;userId\&quot;,\&quot;value\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;}],\&quot;query\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？你支持Function calling吗？请简单回答\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;String\&quot;}],\&quot;rest\&quot;:[],\&quot;cookie\&quot;:[],\&quot;body\&quot;:{\&quot;mode\&quot;:\&quot;none\&quot;,\&quot;parameter\&quot;:[],\&quot;raw\&quot;:\&quot;\&quot;,\&quot;raw_para\&quot;:[]},\&quot;responseBody\&quot;:\&quot;{\\\&quot;code\\\&quot;:200,\\\&quot;message\\\&quot;:\\\&quot;消息发送成功\\\&quot;,\\\&quot;data\\\&quot;:{\\\&quot;available\\\&quot;:true,\\\&quot;message\\\&quot;:\\\&quot;抱歉，处理您的请求时出现了错误：LLM API调用失败: 404 Not Found: [no body]\\\&quot;,\\\&quot;userId\\\&quot;:null,\\\&quot;timestamp\\\&quot;:1753722184156},\\\&quot;success\\\&quot;:true,\\\&quot;timestamp\\\&quot;:1753722184156}\&quot;,\&quot;responseHeader\&quot;:{\&quot;null\&quot;:[\&quot;HTTP/1.1 200\&quot;],\&quot;Transfer-Encoding\&quot;:[\&quot;chunked\&quot;],\&quot;Keep-Alive\&quot;:[\&quot;timeout\\u003d60\&quot;],\&quot;Connection\&quot;:[\&quot;keep-alive\&quot;],\&quot;Vary\&quot;:[\&quot;Origin\&quot;,\&quot;Access-Control-Request-Method\&quot;,\&quot;Access-Control-Request-Headers\&quot;],\&quot;Date\&quot;:[\&quot;Mon, 28 Jul 2025 17:03:04 GMT\&quot;],\&quot;Content-Type\&quot;:[\&quot;application/json;charset\\u003dUTF-8\&quot;]},\&quot;responseCookieList\&quot;:[],\&quot;selectedItem\&quot;:\&quot;POST\&quot;,\&quot;time\&quot;:{\&quot;date\&quot;:{\&quot;year\&quot;:2025.0,\&quot;month\&quot;:7.0,\&quot;day\&quot;:29.0},\&quot;time\&quot;:{\&quot;hour\&quot;:1.0,\&quot;minute\&quot;:3.0,\&quot;second\&quot;:4.0,\&quot;nano\&quot;:1.778607E8}}},{\&quot;url\&quot;:\&quot;localhost:8082/api/chat/send\&quot;,\&quot;header\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;},{\&quot;key\&quot;:\&quot;userId\&quot;,\&quot;value\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;}],\&quot;query\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？你支持Function calling吗？请简单回答\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;String\&quot;}],\&quot;rest\&quot;:[],\&quot;cookie\&quot;:[],\&quot;body\&quot;:{\&quot;mode\&quot;:\&quot;none\&quot;,\&quot;parameter\&quot;:[],\&quot;raw\&quot;:\&quot;\&quot;,\&quot;raw_para\&quot;:[]},\&quot;responseBody\&quot;:\&quot;{\\\&quot;code\\\&quot;:200,\\\&quot;message\\\&quot;:\\\&quot;消息发送成功\\\&quot;,\\\&quot;data\\\&quot;:{\\\&quot;available\\\&quot;:true,\\\&quot;message\\\&quot;:\\\&quot;抱歉，处理您的请求时出现了错误：LLM API调用失败: 404 Not Found: [no body]\\\&quot;,\\\&quot;userId\\\&quot;:null,\\\&quot;timestamp\\\&quot;:1753722257449},\\\&quot;success\\\&quot;:true,\\\&quot;timestamp\\\&quot;:1753722257449}\&quot;,\&quot;responseHeader\&quot;:{\&quot;null\&quot;:[\&quot;HTTP/1.1 200\&quot;],\&quot;Transfer-Encoding\&quot;:[\&quot;chunked\&quot;],\&quot;Keep-Alive\&quot;:[\&quot;timeout\\u003d60\&quot;],\&quot;Connection\&quot;:[\&quot;keep-alive\&quot;],\&quot;Vary\&quot;:[\&quot;Origin\&quot;,\&quot;Access-Control-Request-Method\&quot;,\&quot;Access-Control-Request-Headers\&quot;],\&quot;Date\&quot;:[\&quot;Mon, 28 Jul 2025 17:04:17 GMT\&quot;],\&quot;Content-Type\&quot;:[\&quot;application/json;charset\\u003dUTF-8\&quot;]},\&quot;responseCookieList\&quot;:[],\&quot;selectedItem\&quot;:\&quot;POST\&quot;,\&quot;time\&quot;:{\&quot;date\&quot;:{\&quot;year\&quot;:2025.0,\&quot;month\&quot;:7.0,\&quot;day\&quot;:29.0},\&quot;time\&quot;:{\&quot;hour\&quot;:1.0,\&quot;minute\&quot;:4.0,\&quot;second\&quot;:17.0,\&quot;nano\&quot;:4.927846E8}}},{\&quot;url\&quot;:\&quot;localhost:8082/api/chat/send\&quot;,\&quot;header\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;},{\&quot;key\&quot;:\&quot;userId\&quot;,\&quot;value\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;}],\&quot;query\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？你支持Function calling吗？请简单回答\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;String\&quot;}],\&quot;rest\&quot;:[],\&quot;cookie\&quot;:[],\&quot;body\&quot;:{\&quot;mode\&quot;:\&quot;none\&quot;,\&quot;parameter\&quot;:[],\&quot;raw\&quot;:\&quot;\&quot;,\&quot;raw_para\&quot;:[]},\&quot;responseBody\&quot;:\&quot;{\\\&quot;code\\\&quot;:200,\\\&quot;message\\\&quot;:\\\&quot;消息发送成功\\\&quot;,\\\&quot;data\\\&quot;:{\\\&quot;available\\\&quot;:true,\\\&quot;message\\\&quot;:\\\&quot;抱歉，处理您的请求时出现了错误：LLM API调用失败: 404 Not Found: [no body]\\\&quot;,\\\&quot;userId\\\&quot;:null,\\\&quot;timestamp\\\&quot;:1753722287801},\\\&quot;success\\\&quot;:true,\\\&quot;timestamp\\\&quot;:1753722287801}\&quot;,\&quot;responseHeader\&quot;:{\&quot;null\&quot;:[\&quot;HTTP/1.1 200\&quot;],\&quot;Transfer-Encoding\&quot;:[\&quot;chunked\&quot;],\&quot;Keep-Alive\&quot;:[\&quot;timeout\\u003d60\&quot;],\&quot;Connection\&quot;:[\&quot;keep-alive\&quot;],\&quot;Vary\&quot;:[\&quot;Origin\&quot;,\&quot;Access-Control-Request-Method\&quot;,\&quot;Access-Control-Request-Headers\&quot;],\&quot;Date\&quot;:[\&quot;Mon, 28 Jul 2025 17:04:47 GMT\&quot;],\&quot;Content-Type\&quot;:[\&quot;application/json;charset\\u003dUTF-8\&quot;]},\&quot;responseCookieList\&quot;:[],\&quot;selectedItem\&quot;:\&quot;POST\&quot;,\&quot;time\&quot;:{\&quot;date\&quot;:{\&quot;year\&quot;:2025.0,\&quot;month\&quot;:7.0,\&quot;day\&quot;:29.0},\&quot;time\&quot;:{\&quot;hour\&quot;:1.0,\&quot;minute\&quot;:4.0,\&quot;second\&quot;:47.0,\&quot;nano\&quot;:8.199299E8}}},{\&quot;url\&quot;:\&quot;localhost:8082/api/chat/send\&quot;,\&quot;header\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;},{\&quot;key\&quot;:\&quot;userId\&quot;,\&quot;value\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;}],\&quot;query\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？你支持Function calling吗？请简单回答\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;String\&quot;}],\&quot;rest\&quot;:[],\&quot;cookie\&quot;:[],\&quot;body\&quot;:{\&quot;mode\&quot;:\&quot;none\&quot;,\&quot;parameter\&quot;:[],\&quot;raw\&quot;:\&quot;\&quot;,\&quot;raw_para\&quot;:[]},\&quot;responseBody\&quot;:\&quot;{\\\&quot;code\\\&quot;:200,\\\&quot;message\\\&quot;:\\\&quot;消息发送成功\\\&quot;,\\\&quot;data\\\&quot;:{\\\&quot;available\\\&quot;:true,\\\&quot;message\\\&quot;:\\\&quot;抱歉，处理您的请求时出现了错误：LLM API调用失败: 404 Not Found: [no body]\\\&quot;,\\\&quot;userId\\\&quot;:null,\\\&quot;timestamp\\\&quot;:1753722289509},\\\&quot;success\\\&quot;:true,\\\&quot;timestamp\\\&quot;:1753722289509}\&quot;,\&quot;responseHeader\&quot;:{\&quot;null\&quot;:[\&quot;HTTP/1.1 200\&quot;],\&quot;Transfer-Encoding\&quot;:[\&quot;chunked\&quot;],\&quot;Keep-Alive\&quot;:[\&quot;timeout\\u003d60\&quot;],\&quot;Connection\&quot;:[\&quot;keep-alive\&quot;],\&quot;Vary\&quot;:[\&quot;Origin\&quot;,\&quot;Access-Control-Request-Method\&quot;,\&quot;Access-Control-Request-Headers\&quot;],\&quot;Date\&quot;:[\&quot;Mon, 28 Jul 2025 17:04:49 GMT\&quot;],\&quot;Content-Type\&quot;:[\&quot;application/json;charset\\u003dUTF-8\&quot;]},\&quot;responseCookieList\&quot;:[],\&quot;selectedItem\&quot;:\&quot;POST\&quot;,\&quot;time\&quot;:{\&quot;date\&quot;:{\&quot;year\&quot;:2025.0,\&quot;month\&quot;:7.0,\&quot;day\&quot;:29.0},\&quot;time\&quot;:{\&quot;hour\&quot;:1.0,\&quot;minute\&quot;:4.0,\&quot;second\&quot;:49.0,\&quot;nano\&quot;:5.102128E8}}},{\&quot;url\&quot;:\&quot;localhost:8082/api/chat/send\&quot;,\&quot;header\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;},{\&quot;key\&quot;:\&quot;userId\&quot;,\&quot;value\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;}],\&quot;query\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？你支持Function calling吗？请简单回答\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;String\&quot;}],\&quot;rest\&quot;:[],\&quot;cookie\&quot;:[],\&quot;body\&quot;:{\&quot;mode\&quot;:\&quot;none\&quot;,\&quot;parameter\&quot;:[],\&quot;raw\&quot;:\&quot;\&quot;,\&quot;raw_para\&quot;:[]},\&quot;responseBody\&quot;:\&quot;{\\\&quot;code\\\&quot;:200,\\\&quot;message\\\&quot;:\\\&quot;消息发送成功\\\&quot;,\\\&quot;data\\\&quot;:{\\\&quot;available\\\&quot;:true,\\\&quot;message\\\&quot;:\\\&quot;抱歉，处理您的请求时出现了错误：LLM API调用失败: 404 Not Found: [no body]\\\&quot;,\\\&quot;userId\\\&quot;:null,\\\&quot;timestamp\\\&quot;:1753722308598},\\\&quot;success\\\&quot;:true,\\\&quot;timestamp\\\&quot;:1753722308598}\&quot;,\&quot;responseHeader\&quot;:{\&quot;null\&quot;:[\&quot;HTTP/1.1 200\&quot;],\&quot;Transfer-Encoding\&quot;:[\&quot;chunked\&quot;],\&quot;Keep-Alive\&quot;:[\&quot;timeout\\u003d60\&quot;],\&quot;Connection\&quot;:[\&quot;keep-alive\&quot;],\&quot;Vary\&quot;:[\&quot;Origin\&quot;,\&quot;Access-Control-Request-Method\&quot;,\&quot;Access-Control-Request-Headers\&quot;],\&quot;Date\&quot;:[\&quot;Mon, 28 Jul 2025 17:05:08 GMT\&quot;],\&quot;Content-Type\&quot;:[\&quot;application/json;charset\\u003dUTF-8\&quot;]},\&quot;responseCookieList\&quot;:[],\&quot;selectedItem\&quot;:\&quot;POST\&quot;,\&quot;time\&quot;:{\&quot;date\&quot;:{\&quot;year\&quot;:2025.0,\&quot;month\&quot;:7.0,\&quot;day\&quot;:29.0},\&quot;time\&quot;:{\&quot;hour\&quot;:1.0,\&quot;minute\&quot;:5.0,\&quot;second\&quot;:8.0,\&quot;nano\&quot;:6.176235E8}}},{\&quot;url\&quot;:\&quot;localhost:8082/api/chat/send\&quot;,\&quot;header\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;},{\&quot;key\&quot;:\&quot;userId\&quot;,\&quot;value\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;}],\&quot;query\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？你支持Function calling吗？请简单回答\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;String\&quot;}],\&quot;rest\&quot;:[],\&quot;cookie\&quot;:[],\&quot;body\&quot;:{\&quot;mode\&quot;:\&quot;none\&quot;,\&quot;parameter\&quot;:[],\&quot;raw\&quot;:\&quot;\&quot;,\&quot;raw_para\&quot;:[]},\&quot;responseBody\&quot;:\&quot;{\\\&quot;code\\\&quot;:200,\\\&quot;message\\\&quot;:\\\&quot;消息发送成功\\\&quot;,\\\&quot;data\\\&quot;:{\\\&quot;available\\\&quot;:true,\\\&quot;message\\\&quot;:\\\&quot;抱歉，处理您的请求时出现了错误：LLM API调用失败: I/O error on POST request for \\\\\\\&quot;https://api.openai.com/v1/chat/completions\\\\\\\&quot;: Connection timed out: connect\\\&quot;,\\\&quot;userId\\\&quot;:null,\\\&quot;timestamp\\\&quot;:1753722943512},\\\&quot;success\\\&quot;:true,\\\&quot;timestamp\\\&quot;:1753722943512}\&quot;,\&quot;responseHeader\&quot;:{\&quot;null\&quot;:[\&quot;HTTP/1.1 200\&quot;],\&quot;Transfer-Encoding\&quot;:[\&quot;chunked\&quot;],\&quot;Keep-Alive\&quot;:[\&quot;timeout\\u003d60\&quot;],\&quot;Connection\&quot;:[\&quot;keep-alive\&quot;],\&quot;Vary\&quot;:[\&quot;Origin\&quot;,\&quot;Access-Control-Request-Method\&quot;,\&quot;Access-Control-Request-Headers\&quot;],\&quot;Date\&quot;:[\&quot;Mon, 28 Jul 2025 17:15:43 GMT\&quot;],\&quot;Content-Type\&quot;:[\&quot;application/json;charset\\u003dUTF-8\&quot;]},\&quot;responseCookieList\&quot;:[],\&quot;selectedItem\&quot;:\&quot;POST\&quot;,\&quot;time\&quot;:{\&quot;date\&quot;:{\&quot;year\&quot;:2025.0,\&quot;month\&quot;:7.0,\&quot;day\&quot;:29.0},\&quot;time\&quot;:{\&quot;hour\&quot;:1.0,\&quot;minute\&quot;:15.0,\&quot;second\&quot;:43.0,\&quot;nano\&quot;:5.459658E8}}},{\&quot;url\&quot;:\&quot;localhost:8082/api/chat/send\&quot;,\&quot;header\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;},{\&quot;key\&quot;:\&quot;userId\&quot;,\&quot;value\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;}],\&quot;query\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？你支持Function calling吗？请简单回答\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;String\&quot;}],\&quot;rest\&quot;:[],\&quot;cookie\&quot;:[],\&quot;body\&quot;:{\&quot;mode\&quot;:\&quot;none\&quot;,\&quot;parameter\&quot;:[],\&quot;raw\&quot;:\&quot;\&quot;,\&quot;raw_para\&quot;:[]},\&quot;responseBody\&quot;:\&quot;{\\\&quot;code\\\&quot;:200,\\\&quot;message\\\&quot;:\\\&quot;消息发送成功\\\&quot;,\\\&quot;data\\\&quot;:{\\\&quot;available\\\&quot;:true,\\\&quot;message\\\&quot;:\\\&quot;抱歉，处理您的请求时出现了错误：LLM API调用失败: I/O error on POST request for \\\\\\\&quot;https://api.openai.com/v1/chat/completions\\\\\\\&quot;: Connection timed out: connect\\\&quot;,\\\&quot;userId\\\&quot;:null,\\\&quot;timestamp\\\&quot;:1753723018580},\\\&quot;success\\\&quot;:true,\\\&quot;timestamp\\\&quot;:1753723018580}\&quot;,\&quot;responseHeader\&quot;:{\&quot;null\&quot;:[\&quot;HTTP/1.1 200\&quot;],\&quot;Transfer-Encoding\&quot;:[\&quot;chunked\&quot;],\&quot;Keep-Alive\&quot;:[\&quot;timeout\\u003d60\&quot;],\&quot;Connection\&quot;:[\&quot;keep-alive\&quot;],\&quot;Vary\&quot;:[\&quot;Origin\&quot;,\&quot;Access-Control-Request-Method\&quot;,\&quot;Access-Control-Request-Headers\&quot;],\&quot;Date\&quot;:[\&quot;Mon, 28 Jul 2025 17:16:58 GMT\&quot;],\&quot;Content-Type\&quot;:[\&quot;application/json;charset\\u003dUTF-8\&quot;]},\&quot;responseCookieList\&quot;:[],\&quot;selectedItem\&quot;:\&quot;POST\&quot;,\&quot;time\&quot;:{\&quot;date\&quot;:{\&quot;year\&quot;:2025.0,\&quot;month\&quot;:7.0,\&quot;day\&quot;:29.0},\&quot;time\&quot;:{\&quot;hour\&quot;:1.0,\&quot;minute\&quot;:16.0,\&quot;second\&quot;:58.0,\&quot;nano\&quot;:5.840002E8}}},{\&quot;url\&quot;:\&quot;localhost:8082/api/chat/send\&quot;,\&quot;header\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;},{\&quot;key\&quot;:\&quot;userId\&quot;,\&quot;value\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;}],\&quot;query\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你好\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;String\&quot;}],\&quot;rest\&quot;:[],\&quot;cookie\&quot;:[],\&quot;body\&quot;:{\&quot;mode\&quot;:\&quot;none\&quot;,\&quot;parameter\&quot;:[],\&quot;raw\&quot;:\&quot;\&quot;,\&quot;raw_para\&quot;:[]},\&quot;responseBody\&quot;:\&quot;{\\\&quot;code\\\&quot;:200,\\\&quot;message\\\&quot;:\\\&quot;消息发送成功\\\&quot;,\\\&quot;data\\\&quot;:{\\\&quot;available\\\&quot;:true,\\\&quot;message\\\&quot;:\\\&quot;抱歉，处理您的请求时出现了错误：LLM API调用失败: I/O error on POST request for \\\\\\\&quot;https://api.openai.com/v1/chat/completions\\\\\\\&quot;: Connection timed out: connect\\\&quot;,\\\&quot;userId\\\&quot;:null,\\\&quot;timestamp\\\&quot;:1753723054536},\\\&quot;success\\\&quot;:true,\\\&quot;timestamp\\\&quot;:1753723054536}\&quot;,\&quot;responseHeader\&quot;:{\&quot;null\&quot;:[\&quot;HTTP/1.1 200\&quot;],\&quot;Transfer-Encoding\&quot;:[\&quot;chunked\&quot;],\&quot;Keep-Alive\&quot;:[\&quot;timeout\\u003d60\&quot;],\&quot;Connection\&quot;:[\&quot;keep-alive\&quot;],\&quot;Vary\&quot;:[\&quot;Origin\&quot;,\&quot;Access-Control-Request-Method\&quot;,\&quot;Access-Control-Request-Headers\&quot;],\&quot;Date\&quot;:[\&quot;Mon, 28 Jul 2025 17:17:34 GMT\&quot;],\&quot;Content-Type\&quot;:[\&quot;application/json;charset\\u003dUTF-8\&quot;]},\&quot;responseCookieList\&quot;:[],\&quot;selectedItem\&quot;:\&quot;POST\&quot;,\&quot;time\&quot;:{\&quot;date\&quot;:{\&quot;year\&quot;:2025.0,\&quot;month\&quot;:7.0,\&quot;day\&quot;:29.0},\&quot;time\&quot;:{\&quot;hour\&quot;:1.0,\&quot;minute\&quot;:17.0,\&quot;second\&quot;:34.0,\&quot;nano\&quot;:5.39075E8}}},{\&quot;url\&quot;:\&quot;localhost:8082/api/chat/send\&quot;,\&quot;header\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;},{\&quot;key\&quot;:\&quot;userId\&quot;,\&quot;value\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;}],\&quot;query\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你好\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;String\&quot;}],\&quot;rest\&quot;:[],\&quot;cookie\&quot;:[],\&quot;body\&quot;:{\&quot;mode\&quot;:\&quot;none\&quot;,\&quot;parameter\&quot;:[],\&quot;raw\&quot;:\&quot;\&quot;,\&quot;raw_para\&quot;:[]},\&quot;responseBody\&quot;:\&quot;{\\\&quot;code\\\&quot;:200,\\\&quot;message\\\&quot;:\\\&quot;消息发送成功\\\&quot;,\\\&quot;data\\\&quot;:{\\\&quot;available\\\&quot;:true,\\\&quot;message\\\&quot;:\\\&quot;抱歉，处理您的请求时出现了错误：LLM API调用失败: I/O error on POST request for \\\\\\\&quot;https://api.openai.com/v1/chat/completions\\\\\\\&quot;: Connection timed out: connect\\\&quot;,\\\&quot;userId\\\&quot;:null,\\\&quot;timestamp\\\&quot;:1753792504905},\\\&quot;success\\\&quot;:true,\\\&quot;timestamp\\\&quot;:1753792504906}\&quot;,\&quot;responseHeader\&quot;:{\&quot;null\&quot;:[\&quot;HTTP/1.1 200\&quot;],\&quot;Transfer-Encoding\&quot;:[\&quot;chunked\&quot;],\&quot;Keep-Alive\&quot;:[\&quot;timeout\\u003d60\&quot;],\&quot;Connection\&quot;:[\&quot;keep-alive\&quot;],\&quot;Vary\&quot;:[\&quot;Origin\&quot;,\&quot;Access-Control-Request-Method\&quot;,\&quot;Access-Control-Request-Headers\&quot;],\&quot;Date\&quot;:[\&quot;Tue, 29 Jul 2025 12:35:04 GMT\&quot;],\&quot;Content-Type\&quot;:[\&quot;application/json;charset\\u003dUTF-8\&quot;]},\&quot;responseCookieList\&quot;:[],\&quot;selectedItem\&quot;:\&quot;POST\&quot;,\&quot;time\&quot;:{\&quot;date\&quot;:{\&quot;year\&quot;:2025.0,\&quot;month\&quot;:7.0,\&quot;day\&quot;:29.0},\&quot;time\&quot;:{\&quot;hour\&quot;:20.0,\&quot;minute\&quot;:35.0,\&quot;second\&quot;:4.0,\&quot;nano\&quot;:9.280777E8}}},{\&quot;url\&quot;:\&quot;localhost:8082/api/chat/send\&quot;,\&quot;header\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;},{\&quot;key\&quot;:\&quot;userId\&quot;,\&quot;value\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;}],\&quot;query\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你好\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;String\&quot;}],\&quot;rest\&quot;:[],\&quot;cookie\&quot;:[],\&quot;body\&quot;:{\&quot;mode\&quot;:\&quot;none\&quot;,\&quot;parameter\&quot;:[],\&quot;raw\&quot;:\&quot;\&quot;,\&quot;raw_para\&quot;:[]},\&quot;responseBody\&quot;:\&quot;{\\\&quot;code\\\&quot;:200,\\\&quot;message\\\&quot;:\\\&quot;消息发送成功\\\&quot;,\\\&quot;data\\\&quot;:{\\\&quot;available\\\&quot;:true,\\\&quot;message\\\&quot;:\\\&quot;抱歉，处理您的请求时出现了错误：LLM API调用失败: I/O error on POST request for \\\\\\\&quot;https://api.openai.com/v1/chat/completions\\\\\\\&quot;: Connection refused: connect\\\&quot;,\\\&quot;userId\\\&quot;:null,\\\&quot;timestamp\\\&quot;:1753792511708},\\\&quot;success\\\&quot;:true,\\\&quot;timestamp\\\&quot;:1753792511708}\&quot;,\&quot;responseHeader\&quot;:{\&quot;null\&quot;:[\&quot;HTTP/1.1 200\&quot;],\&quot;Transfer-Encoding\&quot;:[\&quot;chunked\&quot;],\&quot;Keep-Alive\&quot;:[\&quot;timeout\\u003d60\&quot;],\&quot;Connection\&quot;:[\&quot;keep-alive\&quot;],\&quot;Vary\&quot;:[\&quot;Origin\&quot;,\&quot;Access-Control-Request-Method\&quot;,\&quot;Access-Control-Request-Headers\&quot;],\&quot;Date\&quot;:[\&quot;Tue, 29 Jul 2025 12:35:11 GMT\&quot;],\&quot;Content-Type\&quot;:[\&quot;application/json;charset\\u003dUTF-8\&quot;]},\&quot;responseCookieList\&quot;:[],\&quot;selectedItem\&quot;:\&quot;POST\&quot;,\&quot;time\&quot;:{\&quot;date\&quot;:{\&quot;year\&quot;:2025.0,\&quot;month\&quot;:7.0,\&quot;day\&quot;:29.0},\&quot;time\&quot;:{\&quot;hour\&quot;:20.0,\&quot;minute\&quot;:35.0,\&quot;second\&quot;:11.0,\&quot;nano\&quot;:7.109002E8}}},{\&quot;url\&quot;:\&quot;localhost:8082/api/chat/send\&quot;,\&quot;header\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;},{\&quot;key\&quot;:\&quot;userId\&quot;,\&quot;value\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;}],\&quot;query\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你好\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;String\&quot;}],\&quot;rest\&quot;:[],\&quot;cookie\&quot;:[],\&quot;body\&quot;:{\&quot;mode\&quot;:\&quot;none\&quot;,\&quot;parameter\&quot;:[],\&quot;raw\&quot;:\&quot;\&quot;,\&quot;raw_para\&quot;:[]},\&quot;responseBody\&quot;:\&quot;Fail to send:http://localhost:8082/api/chat/send?message\\u003d你好\\n\\nConnection reset\&quot;,\&quot;responseHeader\&quot;:{},\&quot;responseCookieList\&quot;:[],\&quot;selectedItem\&quot;:\&quot;POST\&quot;,\&quot;time\&quot;:{\&quot;date\&quot;:{\&quot;year\&quot;:2025.0,\&quot;month\&quot;:7.0,\&quot;day\&quot;:29.0},\&quot;time\&quot;:{\&quot;hour\&quot;:20.0,\&quot;minute\&quot;:38.0,\&quot;second\&quot;:11.0,\&quot;nano\&quot;:4.736543E8}}},{\&quot;url\&quot;:\&quot;localhost:8082/api/chat/send\&quot;,\&quot;header\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;},{\&quot;key\&quot;:\&quot;userId\&quot;,\&quot;value\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;}],\&quot;query\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你好\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;String\&quot;}],\&quot;rest\&quot;:[],\&quot;cookie\&quot;:[],\&quot;body\&quot;:{\&quot;mode\&quot;:\&quot;none\&quot;,\&quot;parameter\&quot;:[],\&quot;raw\&quot;:\&quot;\&quot;,\&quot;raw_para\&quot;:[]},\&quot;responseBody\&quot;:\&quot;{\\\&quot;code\\\&quot;:200,\\\&quot;message\\\&quot;:\\\&quot;消息发送成功\\\&quot;,\\\&quot;data\\\&quot;:{\\\&quot;available\\\&quot;:true,\\\&quot;message\\\&quot;:\\\&quot;抱歉，处理您的请求时出现了错误：LLM API调用失败: {\\\\\\\&quot;statusCode\\\\\\\&quot;:404,\\\\\\\&quot;message\\\\\\\&quot;:\\\\\\\&quot;Not Found\\\\\\\&quot;,\\\\\\\&quot;code\\\\\\\&quot;:\\\\\\\&quot;response_error\\\\\\\&quot;,\\\\\\\&quot;isJson\\\\\\\&quot;:false}\\\&quot;,\\\&quot;userId\\\&quot;:null,\\\&quot;timestamp\\\&quot;:1753792702655},\\\&quot;success\\\&quot;:true,\\\&quot;timestamp\\\&quot;:1753792702655}\&quot;,\&quot;responseHeader\&quot;:{\&quot;null\&quot;:[\&quot;HTTP/1.1 200\&quot;],\&quot;Transfer-Encoding\&quot;:[\&quot;chunked\&quot;],\&quot;Keep-Alive\&quot;:[\&quot;timeout\\u003d60\&quot;],\&quot;Connection\&quot;:[\&quot;keep-alive\&quot;],\&quot;Vary\&quot;:[\&quot;Origin\&quot;,\&quot;Access-Control-Request-Method\&quot;,\&quot;Access-Control-Request-Headers\&quot;],\&quot;Date\&quot;:[\&quot;Tue, 29 Jul 2025 12:38:22 GMT\&quot;],\&quot;Content-Type\&quot;:[\&quot;application/json;charset\\u003dUTF-8\&quot;]},\&quot;responseCookieList\&quot;:[],\&quot;selectedItem\&quot;:\&quot;POST\&quot;,\&quot;time\&quot;:{\&quot;date\&quot;:{\&quot;year\&quot;:2025.0,\&quot;month\&quot;:7.0,\&quot;day\&quot;:29.0},\&quot;time\&quot;:{\&quot;hour\&quot;:20.0,\&quot;minute\&quot;:38.0,\&quot;second\&quot;:22.0,\&quot;nano\&quot;:7.638106E8}}},{\&quot;url\&quot;:\&quot;localhost:8082/api/chat/send\&quot;,\&quot;header\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;},{\&quot;key\&quot;:\&quot;userId\&quot;,\&quot;value\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;}],\&quot;query\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你好\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;String\&quot;}],\&quot;rest\&quot;:[],\&quot;cookie\&quot;:[],\&quot;body\&quot;:{\&quot;mode\&quot;:\&quot;none\&quot;,\&quot;parameter\&quot;:[],\&quot;raw\&quot;:\&quot;\&quot;,\&quot;raw_para\&quot;:[]},\&quot;responseBody\&quot;:\&quot;{\\\&quot;code\\\&quot;:200,\\\&quot;message\\\&quot;:\\\&quot;消息发送成功\\\&quot;,\\\&quot;data\\\&quot;:{\\\&quot;available\\\&quot;:true,\\\&quot;message\\\&quot;:\\\&quot;抱歉，处理您的请求时出现了错误：LLM API调用失败: {\\\\\\\&quot;statusCode\\\\\\\&quot;:-1,\\\\\\\&quot;message\\\\\\\&quot;:\\\\\\\&quot;ConnectException: Failed to connect to api.openai.com/47.88.58.234:443\\\\\\\&quot;,\\\\\\\&quot;code\\\\\\\&quot;:\\\\\\\&quot;network error\\\\\\\&quot;,\\\\\\\&quot;isJson\\\\\\\&quot;:false}\\\&quot;,\\\&quot;userId\\\&quot;:null,\\\&quot;timestamp\\\&quot;:1753792738942},\\\&quot;success\\\&quot;:true,\\\&quot;timestamp\\\&quot;:1753792738943}\&quot;,\&quot;responseHeader\&quot;:{\&quot;null\&quot;:[\&quot;HTTP/1.1 200\&quot;],\&quot;Transfer-Encoding\&quot;:[\&quot;chunked\&quot;],\&quot;Keep-Alive\&quot;:[\&quot;timeout\\u003d60\&quot;],\&quot;Connection\&quot;:[\&quot;keep-alive\&quot;],\&quot;Vary\&quot;:[\&quot;Origin\&quot;,\&quot;Access-Control-Request-Method\&quot;,\&quot;Access-Control-Request-Headers\&quot;],\&quot;Date\&quot;:[\&quot;Tue, 29 Jul 2025 12:38:59 GMT\&quot;],\&quot;Content-Type\&quot;:[\&quot;application/json;charset\\u003dUTF-8\&quot;]},\&quot;responseCookieList\&quot;:[],\&quot;selectedItem\&quot;:\&quot;POST\&quot;,\&quot;time\&quot;:{\&quot;date\&quot;:{\&quot;year\&quot;:2025.0,\&quot;month\&quot;:7.0,\&quot;day\&quot;:29.0},\&quot;time\&quot;:{\&quot;hour\&quot;:20.0,\&quot;minute\&quot;:38.0,\&quot;second\&quot;:59.0,\&quot;nano\&quot;:5.15325E7}}},{\&quot;url\&quot;:\&quot;localhost:8082/api/chat/send\&quot;,\&quot;header\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;},{\&quot;key\&quot;:\&quot;userId\&quot;,\&quot;value\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;}],\&quot;query\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你好\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;String\&quot;}],\&quot;rest\&quot;:[],\&quot;cookie\&quot;:[],\&quot;body\&quot;:{\&quot;mode\&quot;:\&quot;none\&quot;,\&quot;parameter\&quot;:[],\&quot;raw\&quot;:\&quot;\&quot;,\&quot;raw_para\&quot;:[]},\&quot;responseBody\&quot;:\&quot;{\\\&quot;code\\\&quot;:200,\\\&quot;message\\\&quot;:\\\&quot;消息发送成功\\\&quot;,\\\&quot;data\\\&quot;:{\\\&quot;available\\\&quot;:true,\\\&quot;message\\\&quot;:\\\&quot;抱歉，处理您的请求时出现了错误：LLM API调用失败: {\\\\\\\&quot;statusCode\\\\\\\&quot;:-1,\\\\\\\&quot;message\\\\\\\&quot;:\\\\\\\&quot;ConnectException: Failed to connect to api.openai.com/47.88.58.234:443\\\\\\\&quot;,\\\\\\\&quot;code\\\\\\\&quot;:\\\\\\\&quot;network error\\\\\\\&quot;,\\\\\\\&quot;isJson\\\\\\\&quot;:false}\\\&quot;,\\\&quot;userId\\\&quot;:null,\\\&quot;timestamp\\\&quot;:1753792773418},\\\&quot;success\\\&quot;:true,\\\&quot;timestamp\\\&quot;:1753792773418}\&quot;,\&quot;responseHeader\&quot;:{\&quot;null\&quot;:[\&quot;HTTP/1.1 200\&quot;],\&quot;Transfer-Encoding\&quot;:[\&quot;chunked\&quot;],\&quot;Keep-Alive\&quot;:[\&quot;timeout\\u003d60\&quot;],\&quot;Connection\&quot;:[\&quot;keep-alive\&quot;],\&quot;Vary\&quot;:[\&quot;Origin\&quot;,\&quot;Access-Control-Request-Method\&quot;,\&quot;Access-Control-Request-Headers\&quot;],\&quot;Date\&quot;:[\&quot;Tue, 29 Jul 2025 12:39:33 GMT\&quot;],\&quot;Content-Type\&quot;:[\&quot;application/json;charset\\u003dUTF-8\&quot;]},\&quot;responseCookieList\&quot;:[],\&quot;selectedItem\&quot;:\&quot;POST\&quot;,\&quot;time\&quot;:{\&quot;date\&quot;:{\&quot;year\&quot;:2025.0,\&quot;month\&quot;:7.0,\&quot;day\&quot;:29.0},\&quot;time\&quot;:{\&quot;hour\&quot;:20.0,\&quot;minute\&quot;:39.0,\&quot;second\&quot;:33.0,\&quot;nano\&quot;:4.211204E8}}},{\&quot;url\&quot;:\&quot;localhost:8082/api/chat/send\&quot;,\&quot;header\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;},{\&quot;key\&quot;:\&quot;userId\&quot;,\&quot;value\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;}],\&quot;query\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你好\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;String\&quot;}],\&quot;rest\&quot;:[],\&quot;cookie\&quot;:[],\&quot;body\&quot;:{\&quot;mode\&quot;:\&quot;none\&quot;,\&quot;parameter\&quot;:[],\&quot;raw\&quot;:\&quot;\&quot;,\&quot;raw_para\&quot;:[]},\&quot;responseBody\&quot;:\&quot;{\\\&quot;code\\\&quot;:200,\\\&quot;message\\\&quot;:\\\&quot;消息发送成功\\\&quot;,\\\&quot;data\\\&quot;:{\\\&quot;available\\\&quot;:true,\\\&quot;message\\\&quot;:\\\&quot;抱歉，处理您的请求时出现了错误：LLM API调用失败: {\\\\\\\&quot;statusCode\\\\\\\&quot;:-1,\\\\\\\&quot;message\\\\\\\&quot;:\\\\\\\&quot;ConnectException: Failed to connect to api.openai.com/47.88.58.234:443\\\\\\\&quot;,\\\\\\\&quot;code\\\\\\\&quot;:\\\\\\\&quot;network error\\\\\\\&quot;,\\\\\\\&quot;isJson\\\\\\\&quot;:false}\\\&quot;,\\\&quot;userId\\\&quot;:null,\\\&quot;timestamp\\\&quot;:1753792820321},\\\&quot;success\\\&quot;:true,\\\&quot;timestamp\\\&quot;:1753792820321}\&quot;,\&quot;responseHeader\&quot;:{\&quot;null\&quot;:[\&quot;HTTP/1.1 200\&quot;],\&quot;Transfer-Encoding\&quot;:[\&quot;chunked\&quot;],\&quot;Keep-Alive\&quot;:[\&quot;timeout\\u003d60\&quot;],\&quot;Connection\&quot;:[\&quot;keep-alive\&quot;],\&quot;Vary\&quot;:[\&quot;Origin\&quot;,\&quot;Access-Control-Request-Method\&quot;,\&quot;Access-Control-Request-Headers\&quot;],\&quot;Date\&quot;:[\&quot;Tue, 29 Jul 2025 12:40:20 GMT\&quot;],\&quot;Content-Type\&quot;:[\&quot;application/json;charset\\u003dUTF-8\&quot;]},\&quot;responseCookieList\&quot;:[],\&quot;selectedItem\&quot;:\&quot;POST\&quot;,\&quot;time\&quot;:{\&quot;date\&quot;:{\&quot;year\&quot;:2025.0,\&quot;month\&quot;:7.0,\&quot;day\&quot;:29.0},\&quot;time\&quot;:{\&quot;hour\&quot;:20.0,\&quot;minute\&quot;:40.0,\&quot;second\&quot;:20.0,\&quot;nano\&quot;:4.214176E8}}},{\&quot;url\&quot;:\&quot;localhost:8082/api/chat/send\&quot;,\&quot;header\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;},{\&quot;key\&quot;:\&quot;userId\&quot;,\&quot;value\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;}],\&quot;query\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你好\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;String\&quot;}],\&quot;rest\&quot;:[],\&quot;cookie\&quot;:[],\&quot;body\&quot;:{\&quot;mode\&quot;:\&quot;none\&quot;,\&quot;parameter\&quot;:[],\&quot;raw\&quot;:\&quot;\&quot;,\&quot;raw_para\&quot;:[]},\&quot;responseBody\&quot;:\&quot;{\\\&quot;code\\\&quot;:200,\\\&quot;message\\\&quot;:\\\&quot;消息发送成功\\\&quot;,\\\&quot;data\\\&quot;:{\\\&quot;available\\\&quot;:true,\\\&quot;message\\\&quot;:\\\&quot;你好！有什么我可以帮助你的吗？\\\&quot;,\\\&quot;userId\\\&quot;:null,\\\&quot;timestamp\\\&quot;:1753792911625},\\\&quot;success\\\&quot;:true,\\\&quot;timestamp\\\&quot;:1753792911626}\&quot;,\&quot;responseHeader\&quot;:{\&quot;null\&quot;:[\&quot;HTTP/1.1 200\&quot;],\&quot;Transfer-Encoding\&quot;:[\&quot;chunked\&quot;],\&quot;Keep-Alive\&quot;:[\&quot;timeout\\u003d60\&quot;],\&quot;Connection\&quot;:[\&quot;keep-alive\&quot;],\&quot;Vary\&quot;:[\&quot;Origin\&quot;,\&quot;Access-Control-Request-Method\&quot;,\&quot;Access-Control-Request-Headers\&quot;],\&quot;Date\&quot;:[\&quot;Tue, 29 Jul 2025 12:41:51 GMT\&quot;],\&quot;Content-Type\&quot;:[\&quot;application/json;charset\\u003dUTF-8\&quot;]},\&quot;responseCookieList\&quot;:[],\&quot;selectedItem\&quot;:\&quot;POST\&quot;,\&quot;time\&quot;:{\&quot;date\&quot;:{\&quot;year\&quot;:2025.0,\&quot;month\&quot;:7.0,\&quot;day\&quot;:29.0},\&quot;time\&quot;:{\&quot;hour\&quot;:20.0,\&quot;minute\&quot;:41.0,\&quot;second\&quot;:51.0,\&quot;nano\&quot;:7.352753E8}}},{\&quot;url\&quot;:\&quot;localhost:8082/api/chat/send\&quot;,\&quot;header\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;},{\&quot;key\&quot;:\&quot;userId\&quot;,\&quot;value\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;}],\&quot;query\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你好\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;String\&quot;}],\&quot;rest\&quot;:[],\&quot;cookie\&quot;:[],\&quot;body\&quot;:{\&quot;mode\&quot;:\&quot;none\&quot;,\&quot;parameter\&quot;:[],\&quot;raw\&quot;:\&quot;\&quot;,\&quot;raw_para\&quot;:[]},\&quot;responseBody\&quot;:\&quot;{\\\&quot;code\\\&quot;:200,\\\&quot;message\\\&quot;:\\\&quot;消息发送成功\\\&quot;,\\\&quot;data\\\&quot;:{\\\&quot;available\\\&quot;:true,\\\&quot;message\\\&quot;:\\\&quot;你好！有什么我可以帮助你的吗？\\\&quot;,\\\&quot;userId\\\&quot;:null,\\\&quot;timestamp\\\&quot;:1753793172145},\\\&quot;success\\\&quot;:true,\\\&quot;timestamp\\\&quot;:1753793172145}\&quot;,\&quot;responseHeader\&quot;:{\&quot;null\&quot;:[\&quot;HTTP/1.1 200\&quot;],\&quot;Transfer-Encoding\&quot;:[\&quot;chunked\&quot;],\&quot;Keep-Alive\&quot;:[\&quot;timeout\\u003d60\&quot;],\&quot;Connection\&quot;:[\&quot;keep-alive\&quot;],\&quot;Vary\&quot;:[\&quot;Origin\&quot;,\&quot;Access-Control-Request-Method\&quot;,\&quot;Access-Control-Request-Headers\&quot;],\&quot;Date\&quot;:[\&quot;Tue, 29 Jul 2025 12:46:12 GMT\&quot;],\&quot;Content-Type\&quot;:[\&quot;application/json;charset\\u003dUTF-8\&quot;]},\&quot;responseCookieList\&quot;:[],\&quot;selectedItem\&quot;:\&quot;POST\&quot;,\&quot;time\&quot;:{\&quot;date\&quot;:{\&quot;year\&quot;:2025.0,\&quot;month\&quot;:7.0,\&quot;day\&quot;:29.0},\&quot;time\&quot;:{\&quot;hour\&quot;:20.0,\&quot;minute\&quot;:46.0,\&quot;second\&quot;:12.0,\&quot;nano\&quot;:2.024836E8}}},{\&quot;url\&quot;:\&quot;localhost:8082/api/chat/send\&quot;,\&quot;header\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;},{\&quot;key\&quot;:\&quot;userId\&quot;,\&quot;value\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;}],\&quot;query\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你好\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;String\&quot;}],\&quot;rest\&quot;:[],\&quot;cookie\&quot;:[],\&quot;body\&quot;:{\&quot;mode\&quot;:\&quot;none\&quot;,\&quot;parameter\&quot;:[],\&quot;raw\&quot;:\&quot;\&quot;,\&quot;raw_para\&quot;:[]},\&quot;responseBody\&quot;:\&quot;{\\\&quot;code\\\&quot;:200,\\\&quot;message\\\&quot;:\\\&quot;消息发送成功\\\&quot;,\\\&quot;data\\\&quot;:{\\\&quot;available\\\&quot;:true,\\\&quot;message\\\&quot;:\\\&quot;你好！有什么可以帮助你的吗？\\\&quot;,\\\&quot;userId\\\&quot;:null,\\\&quot;timestamp\\\&quot;:1753803202697},\\\&quot;success\\\&quot;:true,\\\&quot;timestamp\\\&quot;:1753803202697}\&quot;,\&quot;responseHeader\&quot;:{\&quot;null\&quot;:[\&quot;HTTP/1.1 200\&quot;],\&quot;Transfer-Encoding\&quot;:[\&quot;chunked\&quot;],\&quot;Keep-Alive\&quot;:[\&quot;timeout\\u003d60\&quot;],\&quot;Connection\&quot;:[\&quot;keep-alive\&quot;],\&quot;Vary\&quot;:[\&quot;Origin\&quot;,\&quot;Access-Control-Request-Method\&quot;,\&quot;Access-Control-Request-Headers\&quot;],\&quot;Date\&quot;:[\&quot;Tue, 29 Jul 2025 15:33:22 GMT\&quot;],\&quot;Content-Type\&quot;:[\&quot;application/json;charset\\u003dUTF-8\&quot;]},\&quot;responseCookieList\&quot;:[],\&quot;selectedItem\&quot;:\&quot;POST\&quot;,\&quot;time\&quot;:{\&quot;date\&quot;:{\&quot;year\&quot;:2025.0,\&quot;month\&quot;:7.0,\&quot;day\&quot;:29.0},\&quot;time\&quot;:{\&quot;hour\&quot;:23.0,\&quot;minute\&quot;:33.0,\&quot;second\&quot;:22.0,\&quot;nano\&quot;:7.557889E8}}},{\&quot;url\&quot;:\&quot;localhost:8082/api/chat/stream\&quot;,\&quot;header\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;},{\&quot;key\&quot;:\&quot;userId\&quot;,\&quot;value\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;}],\&quot;query\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你好\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1.0,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;String\&quot;}],\&quot;rest\&quot;:[],\&quot;cookie\&quot;:[],\&quot;body\&quot;:{\&quot;mode\&quot;:\&quot;none\&quot;,\&quot;parameter\&quot;:[],\&quot;raw\&quot;:\&quot;\&quot;,\&quot;raw_para\&quot;:[]},\&quot;responseBody\&quot;:\&quot;你好！有什么我可以帮助你的吗？\&quot;,\&quot;responseHeader\&quot;:{\&quot;null\&quot;:[\&quot;HTTP/1.1 200\&quot;],\&quot;Transfer-Encoding\&quot;:[\&quot;chunked\&quot;],\&quot;Keep-Alive\&quot;:[\&quot;timeout\\u003d60\&quot;],\&quot;Connection\&quot;:[\&quot;keep-alive\&quot;],\&quot;Vary\&quot;:[\&quot;Origin\&quot;,\&quot;Access-Control-Request-Method\&quot;,\&quot;Access-Control-Request-Headers\&quot;],\&quot;Date\&quot;:[\&quot;Tue, 29 Jul 2025 15:33:30 GMT\&quot;],\&quot;Content-Type\&quot;:[\&quot;text/plain;charset\\u003dUTF-8\&quot;]},\&quot;responseCookieList\&quot;:[],\&quot;selectedItem\&quot;:\&quot;POST\&quot;,\&quot;time\&quot;:{\&quot;date\&quot;:{\&quot;year\&quot;:2025.0,\&quot;month\&quot;:7.0,\&quot;day\&quot;:29.0},\&quot;time\&quot;:{\&quot;hour\&quot;:23.0,\&quot;minute\&quot;:33.0,\&quot;second\&quot;:31.0,\&quot;nano\&quot;:4.30529E7}}},{\&quot;url\&quot;:\&quot;localhost:8082/api/chat/stream\&quot;,\&quot;header\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你是谁？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;},{\&quot;key\&quot;:\&quot;userId\&quot;,\&quot;value\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;string\&quot;}],\&quot;query\&quot;:[{\&quot;key\&quot;:\&quot;message\&quot;,\&quot;value\&quot;:\&quot;你好，你支持Function calling吗？\&quot;,\&quot;type\&quot;:\&quot;Text\&quot;,\&quot;is_checked\&quot;:1,\&quot;not_null\&quot;:\&quot;1\&quot;,\&quot;field_type\&quot;:\&quot;String\&quot;}],\&quot;rest\&quot;:[],\&quot;cookie\&quot;:[],\&quot;body\&quot;:{\&quot;mode\&quot;:\&quot;none\&quot;,\&quot;parameter\&quot;:[],\&quot;raw\&quot;:\&quot;\&quot;,\&quot;raw_para\&quot;:[]},\&quot;responseBody\&quot;:\&quot;你好！是的，我支持函数调用（Function calling）。通过这种机制，我可以根据需要调用外部定义的函数来执行特定的任务或获取信息，从而提供更丰富、更准确的服务。如果你有具体的需求或场景想要了解，请告诉我更多细节，我很乐意帮助你进一步探索这个功能的应用方式。\&quot;,\&quot;responseHeader\&quot;:{\&quot;null\&quot;:[\&quot;HTTP/1.1 200\&quot;],\&quot;Transfer-Encoding\&quot;:[\&quot;chunked\&quot;],\&quot;Keep-Alive\&quot;:[\&quot;timeout\\u003d60\&quot;],\&quot;Connection\&quot;:[\&quot;keep-alive\&quot;],\&quot;Vary\&quot;:[\&quot;Origin\&quot;,\&quot;Access-Control-Request-Method\&quot;,\&quot;Access-Control-Request-Headers\&quot;],\&quot;Date\&quot;:[\&quot;Tue, 29 Jul 2025 15:33:48 GMT\&quot;],\&quot;Content-Type\&quot;:[\&quot;text/plain;charset\\u003dUTF-8\&quot;]},\&quot;responseCookieList\&quot;:[],\&quot;selectedItem\&quot;:\&quot;POST\&quot;,\&quot;time\&quot;:{\&quot;date\&quot;:{\&quot;year\&quot;:2025,\&quot;month\&quot;:7,\&quot;day\&quot;:29},\&quot;time\&quot;:{\&quot;hour\&quot;:23,\&quot;minute\&quot;:33,\&quot;second\&quot;:53,\&quot;nano\&quot;:297960300}}}]}&quot;,
+    &quot;Docker.docker.mysql: Compose 部署.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.lore-master [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.lore-master [install].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.lore-master-server [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.lore-master-server [install].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.lore-master-service [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.lore-master-service [install].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Shell Script.ollama-pull.sh.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.WebAdminApplication (1).executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.WebAdminApplication.executor&quot;: &quot;Debug&quot;,
+    &quot;Spring Boot.WebBusinessApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.WebConsumerApplication.executor&quot;: &quot;Debug&quot;,
+    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary&quot;: &quot;JUnit4&quot;,
+    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit4&quot;: &quot;&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/Workspace/code/lore-master/lore-master-app/miniapp/miniapp/src&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;项目&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;run.configurations.included.in.services&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;D:\\Workspace\\code\\lore-master\\lore-master-app\\miniapp\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;,
+    &quot;应用程序.LangChain4jConfig.executor&quot;: &quot;Run&quot;,
+    &quot;数据库脚本.lore_admin.sql.executor&quot;: &quot;Run&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;RunConfigurationTargetLRU&quot;: [
+      &quot;65164bdd-8d6e-4323-b732-01629b3bc71b&quot;
+    ]
+  }
+}</component>
+  <component name="ReactorSettings">
+    <option name="notificationShown" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Workspace\code\lore-master\lore-master-app\miniapp\miniapp\src" />
+      <recent name="D:\Workspace\code\lore-master\lore-master-app\miniapp\miniapp\components" />
+      <recent name="D:\Workspace\code\lore-master\lore-master-commands\sql\mysql\consumer" />
+      <recent name="D:\Workspace\code\lore-master\lore-master-commands\sql\mysql\admin" />
+      <recent name="D:\Workspace\code\lore-master\lore-master-server\lore-master-common\src\main\java\com\lore\master\common\config" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Workspace\code\lore-master\lore-master-commands\sql\mysql\consumer" />
+      <recent name="D:\Workspace\code\lore-master\lore-master-commands\sql\mysql" />
+      <recent name="D:\Workspace\code\lore-master\lore-master-commands\sql\mysql\admin" />
+      <recent name="D:\Workspace\code\lore-master\lore-master-commands\sql\mysql\middleware" />
+      <recent name="D:\Workspace\code\lore-master\lore-master-server" />
+    </key>
+    <key name="CreateTestDialog.Recents.Supers">
+      <recent name="" />
+    </key>
+    <key name="CreateTestDialog.RecentsKey">
+      <recent name="com.lore.master.common.config" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.lore.master.web.consumer.controller" />
+      <recent name="com.lore.master.data.config" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="configurationTypes">
+      <set>
+        <option value="KtorApplicationConfigurationType" />
+        <option value="MicronautRunConfigurationType" />
+        <option value="QuarkusRunConfigurationType" />
+        <option value="SpringBootApplicationConfigurationType" />
+      </set>
+    </option>
+  </component>
+  <component name="RunManager" selected="Spring Boot.WebConsumerApplication">
+    <configuration default="true" type="docker-deploy" factoryName="docker-compose.yml" temporary="true">
+      <deployment type="docker-compose.yml">
+        <settings />
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration name="LangChain4jConfig" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.lore.master.service.ai.LangChain4jConfig" />
+      <module name="lore-master-service" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.lore.master.service.ai.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="LangChain4jConfig" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.lore.master.service.ai.LangChain4jConfig" />
+      <module name="lore-master-service" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.lore.master.service.ai.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="lore_admin.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/lore-master-commands/sql/mysql/lore_admin.sql" />
+      <script-mode>FILE</script-mode>
+      <data-source id="65164bdd-8d6e-4323-b732-01629b3bc71b" />
+      <method v="2" />
+    </configuration>
+    <configuration name="lore_admin.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/lore-master-commands/sql/mysql/lore_admin.sql" />
+      <script-mode>FILE</script-mode>
+      <data-source id="65164bdd-8d6e-4323-b732-01629b3bc71b" />
+      <method v="2" />
+    </configuration>
+    <configuration name="ollama-pull.sh" type="ShConfigurationType" temporary="true">
+      <option name="SCRIPT_TEXT" value="" />
+      <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
+      <option name="SCRIPT_PATH" value="$PROJECT_DIR$/lore-master-commands/docker/ollama-pull.sh" />
+      <option name="SCRIPT_OPTIONS" value="" />
+      <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+      <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$/lore-master-commands/docker" />
+      <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
+      <option name="INTERPRETER_PATH" value="powershell.exe" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="EXECUTE_IN_TERMINAL" value="true" />
+      <option name="EXECUTE_SCRIPT_FILE" value="true" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="ollama-pull.sh" type="ShConfigurationType" temporary="true">
+      <option name="SCRIPT_TEXT" value="" />
+      <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
+      <option name="SCRIPT_PATH" value="$PROJECT_DIR$/lore-master-commands/docker/ollama-pull.sh" />
+      <option name="SCRIPT_OPTIONS" value="" />
+      <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+      <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$/lore-master-commands/docker" />
+      <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
+      <option name="INTERPRETER_PATH" value="powershell.exe" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="EXECUTE_IN_TERMINAL" value="true" />
+      <option name="EXECUTE_SCRIPT_FILE" value="true" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="WebAdminApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="lore-master-web-admin" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.lore.master.web.admin.WebAdminApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="WebAdminApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="lore-master-web-admin" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.lore.master.web.admin.WebAdminApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="WebConsumerApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <module name="lore-master-web-consumer" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.lore.master.web.consumer.WebConsumerApplication" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.lore.master.web.consumer.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="WebConsumerApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <module name="lore-master-web-consumer" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.lore.master.web.consumer.WebConsumerApplication" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.lore.master.web.consumer.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="docker-deploy" factoryName="docker-compose.yml" temporary="true">
+      <deployment type="docker-compose.yml">
+        <settings />
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration name="docker.mysql: Compose 部署" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
+      <deployment type="docker-compose.yml">
+        <settings>
+          <option name="services">
+            <list>
+              <option value="mysql" />
+            </list>
+          </option>
+          <option name="sourceFilePath" value="lore-master-commands/docker/docker-compose.yml" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration name="docker.mysql: Compose 部署" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
+      <deployment type="docker-compose.yml">
+        <settings>
+          <option name="services">
+            <list>
+              <option value="mysql" />
+            </list>
+          </option>
+          <option name="sourceFilePath" value="lore-master-commands/docker/docker-compose.yml" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Docker.docker.mysql: Compose 部署" />
+      <item itemvalue="Shell Script.ollama-pull.sh" />
+      <item itemvalue="Spring Boot.WebAdminApplication" />
+      <item itemvalue="Spring Boot.WebConsumerApplication" />
+      <item itemvalue="应用程序.LangChain4jConfig" />
+      <item itemvalue="数据库脚本.lore_admin.sql" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Spring Boot.WebConsumerApplication" />
+        <item itemvalue="Shell Script.ollama-pull.sh" />
+        <item itemvalue="Docker.docker.mysql: Compose 部署" />
+        <item itemvalue="应用程序.LangChain4jConfig" />
+        <item itemvalue="数据库脚本.lore_admin.sql" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.26927.53" />
+        <option value="bundled-js-predefined-d6986cc7102b-09060db00ec0-JavaScript-IU-251.26927.53" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="78885a38-2024-4f5e-8be7-a1e7ea070994" name="更改" comment="" />
+      <created>1753450673198</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1753450673198</updated>
+      <workItem from="1753450674488" duration="14690000" />
+      <workItem from="1753470037283" duration="26468000" />
+      <workItem from="1753518843537" duration="32731000" />
+      <workItem from="1753610628020" duration="15464000" />
+      <workItem from="1753626134498" duration="9284000" />
+      <workItem from="1753636201745" duration="345000" />
+      <workItem from="1753637015091" duration="644000" />
+      <workItem from="1753703334396" duration="674000" />
+      <workItem from="1753704056480" duration="10145000" />
+      <workItem from="1753719656433" duration="10173000" />
+      <workItem from="1753803096639" duration="5229000" />
+      <workItem from="1753877837373" duration="10137000" />
+      <workItem from="1753965773944" duration="40000" />
+      <workItem from="1753965871875" duration="9617000" />
+      <workItem from="1754064853532" duration="423000" />
+      <workItem from="1754065297129" duration="20903000" />
+      <workItem from="1754216935964" duration="23625000" />
+      <workItem from="1754501413275" duration="3006000" />
+      <workItem from="1754581804547" duration="8882000" />
+      <workItem from="1754676616900" duration="5692000" />
+      <workItem from="1754733381697" duration="9940000" />
+      <workItem from="1755175869802" duration="18707000" />
+      <workItem from="1755425990554" duration="42716000" />
+      <workItem from="1756022321838" duration="2287000" />
+      <workItem from="1756051649344" duration="579000" />
+      <workItem from="1756052681154" duration="17822000" />
+      <workItem from="1756650434536" duration="40892000" />
+      <workItem from="1757348266935" duration="1376000" />
+      <workItem from="1757381386075" duration="5258000" />
+      <workItem from="1760098758773" duration="4107000" />
+      <workItem from="1760279094383" duration="676000" />
+      <workItem from="1761145863384" duration="3225000" />
+      <workItem from="1761654596280" duration="2430000" />
+      <workItem from="1761672378594" duration="3106000" />
+      <workItem from="1761757365338" duration="907000" />
+      <workItem from="1761758631703" duration="1494000" />
+      <workItem from="1762001722665" duration="1651000" />
+      <workItem from="1762359459345" duration="25000" />
+      <workItem from="1763640759315" duration="7728000" />
+      <workItem from="1764158909532" duration="347000" />
+      <workItem from="1765009271782" duration="151000" />
+      <workItem from="1767888259382" duration="616000" />
+      <workItem from="1774789428259" duration="44000" />
+    </task>
+    <task id="LOCAL-00036" summary="小程序登录">
+      <option name="closed" value="true" />
+      <created>1754216852301</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1754216852301</updated>
+    </task>
+    <task id="LOCAL-00037" summary="小程序登录">
+      <option name="closed" value="true" />
+      <created>1754216853077</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1754216853077</updated>
+    </task>
+    <task id="LOCAL-00038" summary="小程序登录">
+      <option name="closed" value="true" />
+      <created>1754216853952</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1754216853952</updated>
+    </task>
+    <task id="LOCAL-00039" summary="微信小程序">
+      <option name="closed" value="true" />
+      <created>1754216864267</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1754216864267</updated>
+    </task>
+    <task id="LOCAL-00040" summary="微信小程序">
+      <option name="closed" value="true" />
+      <created>1754216865725</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1754216865725</updated>
+    </task>
+    <task id="LOCAL-00041" summary="微信小程序">
+      <option name="closed" value="true" />
+      <created>1754216866708</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1754216866708</updated>
+    </task>
+    <task id="LOCAL-00042" summary="微信小程序">
+      <option name="closed" value="true" />
+      <created>1754216867465</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1754216867465</updated>
+    </task>
+    <task id="LOCAL-00043" summary="微信小程序">
+      <option name="closed" value="true" />
+      <created>1754216867989</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1754216867989</updated>
+    </task>
+    <task id="LOCAL-00044" summary="微信小程序">
+      <option name="closed" value="true" />
+      <created>1754216868243</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1754216868243</updated>
+    </task>
+    <task id="LOCAL-00045" summary="微信小程序">
+      <option name="closed" value="true" />
+      <created>1754216868566</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1754216868566</updated>
+    </task>
+    <task id="LOCAL-00046" summary="微信小程序">
+      <option name="closed" value="true" />
+      <created>1754216872098</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1754216872098</updated>
+    </task>
+    <task id="LOCAL-00047" summary="微信小程序">
+      <option name="closed" value="true" />
+      <created>1754216873145</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1754216873145</updated>
+    </task>
+    <task id="LOCAL-00048" summary="微信小程序">
+      <option name="closed" value="true" />
+      <created>1754216882451</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1754216882451</updated>
+    </task>
+    <task id="LOCAL-00049" summary="微信小程序">
+      <option name="closed" value="true" />
+      <created>1754216891112</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1754216891112</updated>
+    </task>
+    <task id="LOCAL-00050" summary="微信小程序">
+      <option name="closed" value="true" />
+      <created>1754216897992</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1754216897993</updated>
+    </task>
+    <task id="LOCAL-00051" summary="微信小程序">
+      <option name="closed" value="true" />
+      <created>1754216898915</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1754216898915</updated>
+    </task>
+    <task id="LOCAL-00052" summary="微信小程序">
+      <option name="closed" value="true" />
+      <created>1754216899533</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1754216899534</updated>
+    </task>
+    <task id="LOCAL-00053" summary="微信小程序">
+      <option name="closed" value="true" />
+      <created>1754216899741</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1754216899741</updated>
+    </task>
+    <task id="LOCAL-00054" summary="微信小程序">
+      <option name="closed" value="true" />
+      <created>1754217195345</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1754217195345</updated>
+    </task>
+    <task id="LOCAL-00055" summary="微信小程序">
+      <option name="closed" value="true" />
+      <created>1754238205458</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1754238205458</updated>
+    </task>
+    <task id="LOCAL-00056" summary="微信小程序">
+      <option name="closed" value="true" />
+      <created>1754242916934</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1754242916935</updated>
+    </task>
+    <task id="LOCAL-00057" summary="微信小程序">
+      <option name="closed" value="true" />
+      <created>1754414754910</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1754414754911</updated>
+    </task>
+    <task id="LOCAL-00058" summary="思维导图">
+      <option name="closed" value="true" />
+      <created>1754589352058</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1754589352059</updated>
+    </task>
+    <task id="LOCAL-00059" summary="思维导图">
+      <option name="closed" value="true" />
+      <created>1754723800433</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1754723800433</updated>
+    </task>
+    <task id="LOCAL-00060" summary="小程序学习页">
+      <option name="closed" value="true" />
+      <created>1754743234481</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1754743234482</updated>
+    </task>
+    <task id="LOCAL-00061" summary="chatMemory">
+      <option name="closed" value="true" />
+      <created>1755190076609</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1755190076610</updated>
+    </task>
+    <task id="LOCAL-00062" summary="chatMemory">
+      <option name="closed" value="true" />
+      <created>1755191629126</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1755191629126</updated>
+    </task>
+    <task id="LOCAL-00063" summary="chatMemory">
+      <option name="closed" value="true" />
+      <created>1755345137769</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1755345137769</updated>
+    </task>
+    <task id="LOCAL-00064" summary="chat历史">
+      <option name="closed" value="true" />
+      <created>1755356872691</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1755356872691</updated>
+    </task>
+    <task id="LOCAL-00065" summary="登录页面跳转">
+      <option name="closed" value="true" />
+      <created>1755428615923</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1755428615925</updated>
+    </task>
+    <task id="LOCAL-00066" summary="登录页面跳转">
+      <option name="closed" value="true" />
+      <created>1755454669731</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1755454669731</updated>
+    </task>
+    <task id="LOCAL-00067" summary="课程详情">
+      <option name="closed" value="true" />
+      <created>1755540977311</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1755540977311</updated>
+    </task>
+    <task id="LOCAL-00068" summary="课程详情">
+      <option name="closed" value="true" />
+      <created>1755695571026</created>
+      <option name="number" value="00068" />
+      <option name="presentableId" value="LOCAL-00068" />
+      <option name="project" value="LOCAL" />
+      <updated>1755695571026</updated>
+    </task>
+    <task id="LOCAL-00069" summary="课程详情">
+      <option name="closed" value="true" />
+      <created>1755951759761</created>
+      <option name="number" value="00069" />
+      <option name="presentableId" value="LOCAL-00069" />
+      <option name="project" value="LOCAL" />
+      <updated>1755951759762</updated>
+    </task>
+    <task id="LOCAL-00070" summary="学习记录">
+      <option name="closed" value="true" />
+      <created>1755971784881</created>
+      <option name="number" value="00070" />
+      <option name="presentableId" value="LOCAL-00070" />
+      <option name="project" value="LOCAL" />
+      <updated>1755971784881</updated>
+    </task>
+    <task id="LOCAL-00071" summary="学习记录">
+      <option name="closed" value="true" />
+      <created>1755972533459</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1755972533459</updated>
+    </task>
+    <task id="LOCAL-00072" summary="一键切换">
+      <option name="closed" value="true" />
+      <created>1756624010208</created>
+      <option name="number" value="00072" />
+      <option name="presentableId" value="LOCAL-00072" />
+      <option name="project" value="LOCAL" />
+      <updated>1756624010209</updated>
+    </task>
+    <task id="LOCAL-00073" summary="一键切换env">
+      <option name="closed" value="true" />
+      <created>1756633062311</created>
+      <option name="number" value="00073" />
+      <option name="presentableId" value="LOCAL-00073" />
+      <option name="project" value="LOCAL" />
+      <updated>1756633062312</updated>
+    </task>
+    <task id="LOCAL-00074" summary="markdown渲染">
+      <option name="closed" value="true" />
+      <created>1756656774088</created>
+      <option name="number" value="00074" />
+      <option name="presentableId" value="LOCAL-00074" />
+      <option name="project" value="LOCAL" />
+      <updated>1756656774089</updated>
+    </task>
+    <task id="LOCAL-00075" summary="markdown渲染">
+      <option name="closed" value="true" />
+      <created>1756659377973</created>
+      <option name="number" value="00075" />
+      <option name="presentableId" value="LOCAL-00075" />
+      <option name="project" value="LOCAL" />
+      <updated>1756659377973</updated>
+    </task>
+    <task id="LOCAL-00076" summary="markdown渲染">
+      <option name="closed" value="true" />
+      <created>1756660317658</created>
+      <option name="number" value="00076" />
+      <option name="presentableId" value="LOCAL-00076" />
+      <option name="project" value="LOCAL" />
+      <updated>1756660317658</updated>
+    </task>
+    <task id="LOCAL-00077" summary="轮播图管理">
+      <option name="closed" value="true" />
+      <created>1756745728459</created>
+      <option name="number" value="00077" />
+      <option name="presentableId" value="LOCAL-00077" />
+      <option name="project" value="LOCAL" />
+      <updated>1756745728460</updated>
+    </task>
+    <task id="LOCAL-00078" summary="轮播图管理">
+      <option name="closed" value="true" />
+      <created>1756832359497</created>
+      <option name="number" value="00078" />
+      <option name="presentableId" value="LOCAL-00078" />
+      <option name="project" value="LOCAL" />
+      <updated>1756832359497</updated>
+    </task>
+    <task id="LOCAL-00079" summary="合集管理">
+      <option name="closed" value="true" />
+      <created>1757003581106</created>
+      <option name="number" value="00079" />
+      <option name="presentableId" value="LOCAL-00079" />
+      <option name="project" value="LOCAL" />
+      <updated>1757003581106</updated>
+    </task>
+    <task id="LOCAL-00080" summary="合集管理">
+      <option name="closed" value="true" />
+      <created>1757239747017</created>
+      <option name="number" value="00080" />
+      <option name="presentableId" value="LOCAL-00080" />
+      <option name="project" value="LOCAL" />
+      <updated>1757239747017</updated>
+    </task>
+    <task id="LOCAL-00081" summary="语音聊天">
+      <option name="closed" value="true" />
+      <created>1757257505922</created>
+      <option name="number" value="00081" />
+      <option name="presentableId" value="LOCAL-00081" />
+      <option name="project" value="LOCAL" />
+      <updated>1757257505922</updated>
+    </task>
+    <task id="LOCAL-00082" summary="语音聊天">
+      <option name="closed" value="true" />
+      <created>1757262388166</created>
+      <option name="number" value="00082" />
+      <option name="presentableId" value="LOCAL-00082" />
+      <option name="project" value="LOCAL" />
+      <updated>1757262388166</updated>
+    </task>
+    <task id="LOCAL-00083" summary="语音聊天">
+      <option name="closed" value="true" />
+      <created>1757436198414</created>
+      <option name="number" value="00083" />
+      <option name="presentableId" value="LOCAL-00083" />
+      <option name="project" value="LOCAL" />
+      <updated>1757436198415</updated>
+    </task>
+    <task id="LOCAL-00084" summary="语音聊天">
+      <option name="closed" value="true" />
+      <created>1760115132373</created>
+      <option name="number" value="00084" />
+      <option name="presentableId" value="LOCAL-00084" />
+      <option name="project" value="LOCAL" />
+      <updated>1760115132373</updated>
+    </task>
+    <option name="localTasksCounter" value="85" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <option name="CHECK_NEW_TODO" value="false" />
+    <ignored-roots>
+      <path value="$PROJECT_DIR$/lore-master-app/miniapp/wechat" />
+      <path value="$PROJECT_DIR$/lore-master-app/miniapp/wechat/wechat-miniapp" />
+    </ignored-roots>
+    <MESSAGE value="管理端页面" />
+    <MESSAGE value="用户端注册" />
+    <MESSAGE value="C端注册" />
+    <MESSAGE value="头像上传" />
+    <MESSAGE value="llm测试" />
+    <MESSAGE value="langchain继承ollama" />
+    <MESSAGE value="用户配置目标" />
+    <MESSAGE value="微信小程序登录" />
+    <MESSAGE value="登录" />
+    <MESSAGE value="小程序登录" />
+    <MESSAGE value="微信小程序" />
+    <MESSAGE value="思维导图" />
+    <MESSAGE value="小程序学习页" />
+    <MESSAGE value="chatMemory" />
+    <MESSAGE value="chat历史" />
+    <MESSAGE value="登录页面跳转" />
+    <MESSAGE value="课程详情" />
+    <MESSAGE value="学习记录" />
+    <MESSAGE value="一键切换" />
+    <MESSAGE value="一键切换env" />
+    <MESSAGE value="markdown渲染" />
+    <MESSAGE value="轮播图管理" />
+    <MESSAGE value="合集管理" />
+    <MESSAGE value="语音聊天" />
+    <MESSAGE value="重命名" />
+    <option name="LAST_COMMIT_MESSAGE" value="重命名" />
+    <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/lore-master-server/lore-master-service/src/main/java/com/lore/master/service/admin/impl/AdminUserServiceImpl.java</url>
+          <line>47</line>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-method">
+          <url>file://$PROJECT_DIR$/lore-master-server/lore-master-web-consumer/src/main/java/com/lore/master/web/consumer/controller/WebSocketTestController.java</url>
+          <line>28</line>
+          <properties class="com.lore.master.web.consumer.controller.WebSocketTestController" method="getWebSocketStatus">
+            <option name="EMULATED" value="true" />
+            <option name="WATCH_EXIT" value="false" />
+          </properties>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="SpringBootApplicationConfigurationType">
+        <watch expression="/**&#10;     * 节点名称&#10;     */&#10;    private String nodeName;" />
+      </configuration>
+    </watches-manager>
+  </component>
+</project>

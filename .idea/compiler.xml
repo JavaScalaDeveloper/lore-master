@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel>
+      <module name="lore-master-common" target="17" />
+      <module name="lore-master-data" target="17" />
+      <module name="lore-master-server" target="1.5" />
+      <module name="lore-master-service" target="17" />
+      <module name="lore-master-web-admin" target="17" />
+      <module name="lore-master-web-business" target="17" />
+      <module name="lore-master-web-consumer" target="17" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
